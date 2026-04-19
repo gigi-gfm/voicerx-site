@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceRx — AI Medical Dictation for DPC Physicians</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Calendly popup widget -->
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+<style>
+  :root {
+    --navy:   #0b1628;
+    --navy2:  #0f2040;
+    --orange: #f97316;
+    --orange2:#fb923c;
+    --orange3:#fed7aa;
+    --orange-glow: rgba(249,115,22,0.18);
+    --blue:   #1d4ed8;
+    --blue2:  #0ea5e9;
+    --white:  #ffffff;
+    --muted:  rgba(255,255,255,0.55);
+    --card:   rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.09);
+    --border-orange: rgba(249,115,22,0.35);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  a { text-decoration: none; color: inherit; }
+  .serif { font-family: 'Playfair Display', serif; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(11,22,40,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-orange);
+  }
+  .nav-brand { display: flex; align-items: center; gap: 12px; }
+  .nav-badge {
+    font-size: 12px; color: var(--orange2);
+    background: rgba(249,115,22,0.1);
+    border: 1px solid var(--border-orange);
+    padding: 6px 16px; border-radius: 20px; font-weight: 500;
+  }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--orange), var(--orange2));
+    color: white; font-size: 13px; font-weight: 600;
+    padding: 10px 22px; border-radius: 8px;
+    transition: opacity 0.2s; letter-spacing: 0.02em;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+  @media(max-width:768px) { nav { padding: 16px 20px; } .nav-badge { display: none; } }
+
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(249,115,22,0.14) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(29,78,216,0.12) 0%, transparent 60%),
+                var(--navy);
+  }
+  .hero-grid {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid var(--border-orange);
+    color: var(--orange2); font-size: 12px; font-weight: 600;
+    padding: 8px 18px; border-radius: 30px; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 28px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--orange); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+  .hero h1 {
+    font-family: 'Playfair Display', serif; font-size: clamp(40px, 5vw, 68px);
+    line-height: 1.1; font-weight: 800; letter-spacing: -1.5px;
+    margin-bottom: 24px;
+  }
+  .hero h1 em { font-style: italic; color: var(--orange); }
+  .hero-sub {
+    font-size: 18px; color: var(--muted); line-height: 1.75;
+    margin-bottom: 40px; font-weight: 300; max-width: 480px;
+  }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--orange), var(--orange2));
+    color: white; font-weight: 700; font-size: 15px;
+    padding: 16px 32px; border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(249,115,22,0.4);
+    transition: all 0.25s; letter-spacing: 0.01em;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(249,115,22,0.5); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 15px; font-weight: 500;
+    padding: 16px 24px; border: 1px solid var(--border);
+    border-radius: 10px; transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--border-orange); color: var(--orange2); }
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 52px;
+    padding-top: 40px; border-top: 1px solid var(--border-orange);
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 700; color: var(--orange);
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .hero-demo {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-orange);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 60px rgba(249,115,22,0.08);
+  }
+  .demo-header {
+    background: rgba(249,115,22,0.08);
+    border-bottom: 1px solid var(--border-orange);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .demo-title { font-size: 12px; color: var(--orange2); font-weight: 600; letter-spacing: 0.05em; margin-left: auto; text-transform: uppercase; }
+  .demo-body { padding: 24px; }
+  .demo-input {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; font-size: 13px;
+    color: var(--muted); line-height: 1.7; min-height: 100px;
+    margin-bottom: 16px; font-family: 'Poppins', sans-serif;
+  }
+  .demo-arrow {
+    text-align: center; color: var(--orange); font-size: 20px;
+    margin: 8px 0; animation: bounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+  .demo-output { background: rgba(249,115,22,0.06); border: 1px solid var(--border-orange); border-radius: 10px; padding: 16px; }
+  .demo-output-label { font-size: 10px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 12px; }
+  .demo-soap { font-size: 12px; color: rgba(255,255,255,0.75); line-height: 1.9; }
+  .demo-soap strong { color: var(--orange2); }
+  .waveform-row {
+    display: flex; align-items: center; gap: 3px;
+    height: 40px; padding: 0 20px 16px; justify-content: center;
+  }
+  .wave-bar {
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to top, var(--orange), var(--orange2));
+    animation: wave 1.4s ease-in-out infinite;
+    opacity: 0.7;
+  }
+  @keyframes wave { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
+
+  .trust {
+    background: rgba(249,115,22,0.06);
+    border-top: 1px solid var(--border-orange);
+    border-bottom: 1px solid var(--border-orange);
+    padding: 20px 48px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px; flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--muted); font-weight: 500;
+  }
+  .trust-icon { color: var(--orange); font-size: 16px; }
+
+  section { padding: 100px 48px; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 16px;
+  }
+  .section-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--orange); border-radius: 2px; }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 50px);
+    font-weight: 800; line-height: 1.15;
+    letter-spacing: -0.8px; margin-bottom: 20px;
+  }
+  h2 em { font-style: italic; color: var(--orange); }
+  .section-sub { font-size: 17px; color: var(--muted); max-width: 580px; line-height: 1.75; margin-bottom: 60px; }
+
+  .problem { background: var(--navy2); }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .problem-cards { display: grid; gap: 16px; }
+  .problem-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 12px; padding: 22px 24px;
+    transition: border-color 0.2s;
+  }
+  .problem-card:hover { border-color: var(--orange); border-left-color: var(--orange2); }
+  .problem-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: white; }
+  .problem-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .problem-quote {
+    background: rgba(249,115,22,0.07);
+    border: 1px solid var(--border-orange);
+    border-radius: 16px; padding: 36px;
+  }
+  .problem-quote blockquote {
+    font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic;
+    line-height: 1.6; color: white; margin-bottom: 20px;
+  }
+  .quote-source { font-size: 13px; color: var(--orange2); font-weight: 500; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; margin-top: 20px; }
+  .steps::before {
+    content: ''; position: absolute;
+    top: 36px; left: 15%; right: 15%; height: 2px;
+    background: linear-gradient(to right, var(--orange), var(--orange2), var(--orange));
+    opacity: 0.3;
+  }
+  .step { text-align: center; padding: 40px 24px; }
+  .step-num {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), var(--orange2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-weight: 800; font-size: 26px;
+    color: white; margin: 0 auto 24px;
+    box-shadow: 0 8px 30px rgba(249,115,22,0.4);
+  }
+  .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .step p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .features-section { background: var(--navy2); }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 28px;
+    transition: all 0.25s;
+  }
+  .feat-card:hover {
+    border-color: var(--border-orange);
+    background: rgba(249,115,22,0.06);
+    transform: translateY(-4px);
+  }
+  .feat-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid var(--border-orange);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .feat-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+  .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .feat-tag {
+    display: inline-block; margin-top: 14px;
+    font-size: 11px; color: var(--orange); font-weight: 600;
+    background: rgba(249,115,22,0.1); padding: 4px 12px; border-radius: 20px;
+  }
+
+  .notes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .note-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    text-align: center; transition: all 0.2s;
+  }
+  .note-chip:hover {
+    border-color: var(--border-orange);
+    background: rgba(249,115,22,0.07);
+  }
+  .note-chip .icon { font-size: 24px; margin-bottom: 10px; }
+  .note-chip .name { font-size: 13px; font-weight: 600; }
+  .note-chip .desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .pricing-section { background: var(--navy2); }
+  .pricing-subtitle {
+    display: inline-block;
+    background: rgba(249,115,22,0.1); border: 1px solid var(--border-orange);
+    color: var(--orange2); font-size: 13px; font-weight: 500;
+    padding: 8px 20px; border-radius: 30px; margin-bottom: 48px;
+  }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .price-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px 32px;
+    position: relative; transition: all 0.25s;
+  }
+  .price-card:hover { border-color: var(--border-orange); transform: translateY(-4px); }
+  .price-card.featured {
+    border: 2px solid var(--orange);
+    background: rgba(249,115,22,0.07);
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(249,115,22,0.2);
+  }
+  .featured-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--orange), var(--orange2));
+    color: white; font-size: 11px; font-weight: 700;
+    padding: 6px 18px; border-radius: 20px; letter-spacing: 0.08em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .price-tier { font-size: 14px; font-weight: 700; color: var(--orange); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .price-amount { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 800; line-height: 1; }
+  .price-amount span { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 400; color: var(--muted); }
+  .price-setup { font-size: 13px; color: var(--muted); margin-top: 6px; margin-bottom: 24px; }
+  .price-setup strong { color: var(--orange2); }
+  .price-divider { height: 1px; background: var(--border-orange); margin: 24px 0; }
+  .price-feature { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.75); }
+  .price-check { color: var(--orange); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .price-btn {
+    display: block; text-align: center; margin-top: 32px;
+    padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px;
+    background: linear-gradient(135deg, var(--orange), var(--orange2));
+    color: white; box-shadow: 0 6px 24px rgba(249,115,22,0.3);
+    transition: all 0.2s;
+  }
+  .price-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .price-btn.ghost {
+    background: transparent;
+    border: 1px solid var(--border-orange); color: var(--orange2);
+    box-shadow: none;
+  }
+  .price-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; }
+  .pricing-footer {
+    text-align: center; margin-top: 48px;
+    font-size: 14px; color: var(--muted);
+  }
+  .pricing-footer strong { color: var(--orange2); }
+
+  .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+  .eco-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; display: flex; gap: 16px; align-items: flex-start;
+    transition: all 0.2s;
+  }
+  .eco-card:hover { border-color: var(--border-orange); }
+  .eco-card.active {
+    border: 2px solid var(--orange);
+    background: rgba(249,115,22,0.07);
+    box-shadow: 0 8px 30px rgba(249,115,22,0.15);
+  }
+  .eco-icon { font-size: 26px; flex-shrink: 0; }
+  .eco-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .eco-name span { color: var(--orange); }
+  .eco-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .eco-badge {
+    display: inline-block; margin-top: 8px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 3px 10px; border-radius: 10px;
+  }
+  .eco-badge.live { background: rgba(249,115,22,0.2); color: var(--orange); }
+  .eco-badge.soon { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+  .mission-section {
+    background: linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(29,78,216,0.08) 100%);
+    border-top: 1px solid var(--border-orange);
+    border-bottom: 1px solid var(--border-orange);
+    text-align: center;
+  }
+  .mission-section blockquote {
+    font-family: 'Playfair Display', serif; font-size: clamp(20px, 3vw, 30px);
+    font-style: italic; line-height: 1.55; max-width: 800px; margin: 0 auto 24px;
+  }
+  .mission-section blockquote em { color: var(--orange); font-style: normal; }
+  .mission-source { font-size: 14px; color: var(--muted); }
+  .mission-source strong { color: var(--orange2); }
+  .mission-stats { display: flex; justify-content: center; gap: 60px; margin-top: 52px; flex-wrap: wrap; }
+  .mstat-num { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 800; color: var(--orange); }
+  .mstat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .cta-section { text-align: center; padding: 120px 48px; }
+  .cta-section h2 { margin-bottom: 16px; }
+  .cta-section p { font-size: 17px; color: var(--muted); max-width: 560px; margin: 0 auto 40px; line-height: 1.75; }
+  .cta-chips { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+  .cta-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(249,115,22,0.08);
+    border: 1px solid var(--border-orange);
+    color: var(--orange3); font-size: 13px;
+    padding: 10px 20px; border-radius: 30px;
+  }
+
+  footer {
+    background: var(--navy2);
+    border-top: 1px solid var(--border-orange);
+    padding: 48px; text-align: center;
+  }
+  .footer-brand { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 10px; }
+  .footer-brand span { color: var(--orange); }
+  .footer-sub { font-size: 12px; color: var(--muted); line-height: 2.2; }
+  .footer-sub a { color: var(--orange2); }
+
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media(max-width: 900px) {
+    section { padding: 70px 24px; }
+    nav { padding: 16px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-demo { display: none; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .steps::before { display: none; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .notes-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .price-card.featured { transform: none; }
+    .eco-grid { grid-template-columns: 1fr 1fr; }
+    .trust { gap: 24px; padding: 16px 24px; }
+  }
+  @media(max-width: 600px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .eco-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-direction: column; gap: 20px; }
+    .mission-stats { gap: 32px; }
+  }
+
+  .vrx-scorecard-trigger {
+    display:inline-flex;align-items:center;gap:10px;
+    background:rgba(249,115,22,0.10);
+    border:1.5px solid var(--border-orange);
+    color:var(--orange2);font-size:14px;font-weight:600;
+    padding:13px 24px;border-radius:10px;cursor:pointer;
+    letter-spacing:0.02em;transition:all 0.2s;
+    font-family:'Poppins',sans-serif;
+  }
+  .vrx-scorecard-trigger:hover{background:rgba(249,115,22,0.18);transform:translateY(-1px);}
+  .vrx-sc-pulse{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--orange);
+    animation:pulse 2s infinite;
+  }
+
+  #vrx-sc-overlay {
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(5,12,25,0.88);backdrop-filter:blur(8px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  #vrx-sc-overlay.open{display:flex;}
+
+  .vrx-sc-modal {
+    background:var(--navy);
+    border:1px solid var(--border-orange);
+    border-radius:24px;
+    width:100%;max-width:600px;max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 80px rgba(249,115,22,0.08);
+    position:relative;
+    animation:vrx-sc-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes vrx-sc-in{from{opacity:0;transform:scale(0.88) translateY(20px)}to{opacity:1;transform:none}}
+  .vrx-sc-close {
+    position:absolute;top:20px;right:20px;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,0.07);border:1px solid var(--border);
+    color:var(--muted);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.2s;z-index:10;
+  }
+  .vrx-sc-close:hover{background:rgba(249,115,22,0.15);color:var(--orange);}
+  .vrx-sc-header {
+    padding:36px 36px 28px;
+    background:linear-gradient(180deg,rgba(249,115,22,0.08) 0%,transparent 100%);
+    border-bottom:1px solid var(--border-orange);
+  }
+  .vrx-sc-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .vrx-sc-badge{
+    margin-left:auto;font-size:11px;color:var(--orange2);
+    background:rgba(249,115,22,0.1);border:1px solid var(--border-orange);
+    padding:4px 12px;border-radius:20px;font-weight:600;
+  }
+  .vrx-sc-headline{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(22px,4vw,28px);font-weight:800;
+    line-height:1.2;color:#fff;margin-bottom:10px;
+  }
+  .vrx-sc-subline{font-size:14px;color:var(--muted);line-height:1.65;}
+  .vrx-sc-prog-wrap{padding:24px 36px 0;}
+  .vrx-sc-prog-labels{
+    display:flex;justify-content:space-between;
+    font-size:11px;color:var(--muted);font-weight:500;
+    margin-bottom:8px;
+  }
+  .vrx-sc-prog-bar{
+    height:4px;background:rgba(255,255,255,0.08);
+    border-radius:4px;overflow:hidden;
+  }
+  .vrx-sc-prog-fill{
+    height:100%;border-radius:4px;
+    background:linear-gradient(90deg,var(--orange),var(--orange2));
+    transition:width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width:0%;
+  }
+  .vrx-sc-body{padding:28px 36px 36px;}
+  .vrx-sc-step{display:none;}
+  .vrx-sc-step.active{display:block;animation:vrx-sc-step-in 0.35s ease;}
+  @keyframes vrx-sc-step-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+  .vrx-sc-qnum{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange);margin-bottom:8px;}
+  .vrx-sc-qtext{font-family:'Playfair Display',serif;font-size:clamp(17px,3vw,21px);font-weight:700;color:#fff;line-height:1.35;margin-bottom:24px;}
+  .vrx-sc-opts{display:grid;gap:10px;}
+  .vrx-sc-opts.two{grid-template-columns:1fr 1fr;}
+  .vrx-sc-opt {
+    display:flex;align-items:center;gap:14px;
+    background:rgba(255,255,255,0.04);
+    border:1.5px solid rgba(255,255,255,0.09);
+    border-radius:12px;padding:15px 18px;
+    cursor:pointer;transition:all 0.2s;
+    font-size:14px;color:rgba(255,255,255,0.82);font-weight:500;
+  }
+  .vrx-sc-opt:hover{border-color:var(--border-orange);background:rgba(249,115,22,0.06);}
+  .vrx-sc-opt.sel{border-color:var(--orange);background:rgba(249,115,22,0.1);color:#fff;}
+  .vrx-sc-oi{font-size:20px;flex-shrink:0;width:28px;text-align:center;}
+  .vrx-sc-ol{flex:1;}
+  .vrx-sc-oc{
+    width:20px;height:20px;border-radius:50%;
+    border:2px solid rgba(255,255,255,0.2);
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    transition:all 0.2s;font-size:12px;
+  }
+  .vrx-sc-opt.sel .vrx-sc-oc{background:var(--orange);border-color:var(--orange);}
+  .vrx-sc-opt.sel .vrx-sc-oc::after{content:'✓';color:#fff;}
+  .vrx-sc-fwrap{display:grid;gap:16px;margin-bottom:8px;}
+  .vrx-sc-field input{
+    width:100%;background:rgba(255,255,255,0.05);
+    border:1.5px solid rgba(255,255,255,0.09);border-radius:10px;
+    padding:14px 18px;font-size:14px;font-family:'Poppins',sans-serif;
+    color:#fff;outline:none;transition:border-color 0.2s;
+  }
+  .vrx-sc-field input::placeholder{color:var(--muted);}
+  .vrx-sc-field input:focus{border-color:var(--border-orange);}
+  .vrx-sc-field label{display:block;font-size:12px;font-weight:600;color:var(--orange2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+  .vrx-sc-privacy{font-size:11px;color:var(--muted);margin-top:12px;text-align:center;}
+  .vrx-sc-nav{display:flex;gap:12px;margin-top:28px;}
+  .vrx-sc-back{
+    flex:0 0 auto;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);
+    color:var(--muted);font-size:13px;font-weight:600;
+    padding:14px 22px;border-radius:10px;cursor:pointer;
+    transition:all 0.2s;font-family:'Poppins',sans-serif;
+  }
+  .vrx-sc-back:hover{color:#fff;}
+  .vrx-sc-next{
+    flex:1;background:linear-gradient(135deg,var(--orange),var(--orange2));
+    color:#fff;font-size:14px;font-weight:700;
+    padding:14px 28px;border-radius:10px;cursor:pointer;
+    border:none;transition:all 0.2s;font-family:'Poppins',sans-serif;
+    box-shadow:0 6px 24px rgba(249,115,22,0.3);letter-spacing:0.01em;
+  }
+  .vrx-sc-next:hover{opacity:0.9;transform:translateY(-1px);}
+  .vrx-sc-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  #vrx-sc-result{display:none;padding:36px;}
+  #vrx-sc-result.active{display:block;animation:vrx-sc-step-in 0.4s ease;}
+  .vrx-sc-ring-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:32px;}
+  .vrx-sc-ring{position:relative;width:140px;height:140px;margin-bottom:16px;}
+  .vrx-sc-ring svg{transform:rotate(-90deg);}
+  .vrx-sc-ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .vrx-sc-snum{font-family:'Playfair Display',serif;font-size:42px;font-weight:800;color:var(--orange);line-height:1;}
+  .vrx-sc-slbl{font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;}
+  .vrx-sc-tier{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:6px;}
+  .vrx-sc-desc{font-size:14px;color:var(--muted);text-align:center;line-height:1.7;max-width:440px;margin:0 auto 28px;}
+  .vrx-sc-bkdn{display:grid;gap:10px;margin-bottom:28px;}
+  .vrx-sc-bitem{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 18px;}
+  .vrx-sc-blbl{flex:1;font-size:13px;color:rgba(255,255,255,0.75);}
+  .vrx-sc-bbar-w{flex:0 0 120px;background:rgba(255,255,255,0.07);border-radius:4px;height:6px;}
+  .vrx-sc-bbar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--orange2));transition:width 1s ease;}
+  .vrx-sc-cta{text-align:center;}
+  .vrx-sc-cta-h{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;}
+  .vrx-sc-cta-s{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+  .vrx-sc-cta-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));
+    color:#fff;font-size:15px;font-weight:700;
+    padding:16px 36px;border-radius:10px;cursor:pointer;
+    border:none;transition:all 0.2s;font-family:'Poppins',sans-serif;
+    box-shadow:0 8px 32px rgba(249,115,22,0.4);text-decoration:none;
+  }
+  .vrx-sc-cta-btn:hover{opacity:0.9;transform:translateY(-2px);}
+  .vrx-sc-cta-note{font-size:11px;color:var(--muted);margin-top:12px;}
+  .vrx-sc-restart{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'Poppins',sans-serif;}
+  .vrx-sc-restart:hover{color:var(--orange);}
+  .vrx-sc-modal::-webkit-scrollbar{width:4px;}
+  .vrx-sc-modal::-webkit-scrollbar-track{background:transparent;}
+  .vrx-sc-modal::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.3);border-radius:4px;}
+  @media(max-width:480px){
+    .vrx-sc-header{padding:28px 24px 22px;}
+    .vrx-sc-body,.vrx-sc-prog-wrap{padding-left:24px;padding-right:24px;}
+    #vrx-sc-result{padding:24px;}
+    .vrx-sc-opts.two{grid-template-columns:1fr;}
+  }
+
+
+  /* ── SCARCITY BANNER (v7) ── */
+  .vrx-scarcity {
+    position:fixed; top:0; left:0; right:0; z-index:101;
+    background:linear-gradient(90deg,#f97316 0%,#fb923c 50%,#f97316 100%);
+    background-size:200% 100%;
+    animation:vrx-scarcity-shimmer 6s ease-in-out infinite;
+    color:#fff; font-size:13.5px; font-weight:500;
+    text-align:center; padding:9px 16px; letter-spacing:0.01em;
+    font-family:'Poppins',sans-serif;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  }
+  .vrx-scarcity strong{font-weight:700}
+  .vrx-scarcity .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#fff;margin:0 10px;vertical-align:middle;opacity:0.7}
+  @keyframes vrx-scarcity-shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  @media(max-width:600px){.vrx-scarcity{font-size:12px;padding:8px 12px}.vrx-scarcity .dot{margin:0 6px}}
+  /* Push nav down to accommodate banner */
+  nav { top: 37px !important; }
+  @media(max-width:600px){ nav { top: 34px !important; } }
+  /* Push hero padding down */
+  .hero { padding-top: 160px !important; }
+  @media(max-width:900px){ .hero { padding-top: 140px !important; } }
+
+  /* ── DR. TESS TESTIMONIAL (v7) ── */
+  .vrx-testimonial{
+    background:linear-gradient(180deg,var(--navy2) 0%,#0a1a33 100%);
+    padding:80px 48px; position:relative;
+  }
+  .vrx-testimonial::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent 10%,var(--orange) 50%,transparent 90%);
+    opacity:0.5;
+  }
+  .vrx-quote-wrap{max-width:860px;margin:0 auto;position:relative}
+  .vrx-quote-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(249,115,22,0.12);border:1px solid var(--border-orange);
+    color:var(--orange2);font-size:11px;font-weight:700;letter-spacing:0.14em;
+    text-transform:uppercase;padding:7px 16px;border-radius:30px;
+    margin-bottom:24px;
+  }
+  .vrx-quote-card{
+    background:rgba(255,255,255,0.03);border:1px solid var(--border-orange);
+    border-radius:20px;padding:48px 44px;position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  }
+  .vrx-quote-mark{
+    position:absolute;top:-28px;left:40px;
+    width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:#fff;
+    line-height:1;padding-bottom:10px;
+    box-shadow:0 10px 24px rgba(249,115,22,0.4);
+  }
+  .vrx-quote-body{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(19px,2.4vw,26px);font-weight:500;line-height:1.5;
+    color:#fff;font-style:italic;margin:14px 0 28px;
+  }
+  .vrx-quote-body .hl{
+    background:linear-gradient(180deg,transparent 60%,rgba(249,115,22,0.35) 60%);
+    padding:0 3px;color:#fff;
+  }
+  .vrx-quote-body .pop{color:var(--orange);font-style:normal;font-weight:600}
+  .vrx-attr{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .vrx-avatar{
+    width:58px;height:58px;border-radius:50%;
+    background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#fff;
+    box-shadow:0 8px 20px rgba(29,78,216,0.35);flex-shrink:0;
+  }
+  .vrx-attr-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff;margin:0}
+  .vrx-attr-title{font-size:13px;color:var(--muted);margin:2px 0 0}
+  .vrx-attr-loc{font-size:11px;color:rgba(255,255,255,0.38);margin:2px 0 0;font-family:'Poppins',sans-serif;letter-spacing:0.06em;text-transform:uppercase}
+  @media(max-width:600px){.vrx-testimonial{padding:60px 24px}.vrx-quote-card{padding:40px 26px}.vrx-quote-mark{left:22px;width:50px;height:50px;font-size:38px}}
+
+  /* ── PHYSICIAN MENTAL HEALTH SUPPORT (v7) ── */
+  .vrx-support{
+    background:linear-gradient(180deg,#0a1a33 0%,var(--navy) 100%);
+    padding:90px 48px;position:relative;
+    border-top:1px solid rgba(14,165,233,0.18);
+  }
+  .vrx-support::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent 15%,#0ea5e9 50%,transparent 85%);
+    opacity:0.55;
+  }
+  .vrx-support-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:48px;align-items:start}
+  @media(min-width:900px){.vrx-support-grid{grid-template-columns:1.1fr 0.9fr;gap:56px}}
+  .vrx-support h2{
+    font-family:'Playfair Display',serif;font-size:clamp(26px,3.4vw,40px);
+    font-weight:800;color:#fff;line-height:1.18;letter-spacing:-0.5px;
+    margin:14px 0 22px;
+  }
+  .vrx-support .vrx-s-lead{
+    font-size:16px;line-height:1.75;color:rgba(255,255,255,0.72);margin:0 0 18px;
+  }
+  .vrx-support .vrx-s-lead cite{font-style:italic;color:rgba(255,255,255,0.55)}
+  .vrx-support p{font-size:15px;line-height:1.75;color:rgba(255,255,255,0.72);margin:0 0 18px}
+  .vrx-s-pull{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:18px;
+    color:#fff;border-left:3px solid #0ea5e9;padding-left:18px;
+    margin:26px 0 0;line-height:1.55;
+  }
+  .vrx-s-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.30);
+    color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:0.14em;
+    text-transform:uppercase;padding:7px 16px;border-radius:30px;
+  }
+  .vrx-s-resources{
+    background:rgba(255,255,255,0.04);border:1px solid rgba(14,165,233,0.22);
+    border-radius:18px;padding:32px 28px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.2);
+    position:relative;overflow:hidden;
+  }
+  .vrx-s-resources::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,#0ea5e9 0%,#38bdf8 100%);
+  }
+  .vrx-s-rhead{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(14,165,233,0.14);border:1px solid rgba(14,165,233,0.28);
+    color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:0.12em;
+    text-transform:uppercase;padding:6px 14px;border-radius:30px;
+    margin-bottom:20px;
+  }
+  .vrx-rcard{padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .vrx-rcard:last-of-type{border-bottom:0;padding-bottom:8px}
+  .vrx-rcard-name{
+    font-family:'Playfair Display',serif;font-size:16px;font-weight:700;
+    color:#fff;margin:0 0 4px;
+  }
+  .vrx-rcard-phone{
+    display:block;font-family:'Poppins',sans-serif;font-size:20px;
+    font-weight:600;color:#38bdf8;letter-spacing:0.02em;
+    margin:4px 0 8px;text-decoration:none;transition:color 0.15s;
+  }
+  .vrx-rcard-phone:hover{color:#7dd3fc}
+  .vrx-rcard-phone strong{font-size:24px;font-weight:700;letter-spacing:0.08em}
+  .vrx-rcard-desc{
+    font-size:13px;line-height:1.6;color:rgba(255,255,255,0.64);margin:0 0 6px;
+  }
+  .vrx-rcard-link{
+    font-size:12px;color:var(--orange2);font-weight:500;text-decoration:none;
+    border-bottom:1px dotted rgba(251,146,60,0.38);padding-bottom:1px;
+  }
+  .vrx-rcard-link:hover{color:var(--orange);border-bottom-color:var(--orange)}
+  .vrx-s-note{
+    margin:20px 0 0;padding:14px 16px;
+    background:rgba(249,115,22,0.08);border-left:3px solid var(--orange);
+    border-radius:0 8px 8px 0;
+    font-size:12.5px;line-height:1.55;color:rgba(255,255,255,0.62);
+  }
+  @media(max-width:600px){
+    .vrx-support{padding:60px 24px}
+    .vrx-s-resources{padding:28px 22px}
+    .vrx-rcard-phone{font-size:18px}
+    .vrx-rcard-phone strong{font-size:22px}
+  }
+
+</style>
+</head>
+<body>
+
+<!-- SCARCITY BANNER (v7) -->
+<div class="vrx-scarcity" role="banner" aria-label="Launch offer">
+  <strong>First 10 DPCs — No Setup Fee</strong>
+  <span class="dot" aria-hidden="true"></span>
+  Save $500 when you pilot with us
+  <span class="dot" aria-hidden="true"></span>
+  <strong><span id="vrxSlotsLeft">7</span> seats remaining</strong>
+</div>
+
+<nav>
+  <div class="nav-brand">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="200" height="80">
+      <defs><linearGradient id="bg-nav" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0b1f3a"/><stop offset="100%" stop-color="#0d2d4a"/></linearGradient></defs>
+      <rect width="400" height="160" rx="20" fill="url(#bg-nav)"/>
+      <rect x="36" y="44" width="28" height="42" rx="14" fill="none" stroke="#f97316" stroke-width="3.5"/>
+      <path d="M24 82c0 16 28 26 28 26s28-10 28-26" fill="none" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="52" y1="108" x2="52" y2="118" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="40" y1="118" x2="64" y2="118" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="92" cy="72" r="3.5" fill="#f97316" opacity="0.5"/>
+      <circle cx="92" cy="85" r="3.5" fill="#f97316" opacity="0.7"/>
+      <circle cx="92" cy="98" r="3.5" fill="#f97316" opacity="0.5"/>
+      <text x="108" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" fill="#ffffff" letter-spacing="-1">Voice</text>
+      <text x="280" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" fill="#f97316" letter-spacing="-1">Rx</text>
+      <text x="108" y="124" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="rgba(255,255,255,0.45)" letter-spacing="0.5">CLINICAL DICTATION · GEG VENTURES</text>
+    </svg>
+  </div>
+  <div class="nav-badge">🎙️ AI Dictation — Built for DPC</div>
+  <a href="#" onclick="Calendly.initPopupWidget({url:'https://calendly.com/gigi-voicerx-demo/new-meeting'});return false;" class="nav-cta">Book a Free Demo →</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">Now Available — DPC Physicians Only</div>
+      <h1 class="serif">The AI scribe that<br><em>never invents</em> what you didn’t say.</h1>
+      <p class="hero-sub">VoiceRx transcribes your patient encounter in your own voice, in your own words, in the format you’ve chosen — <strong style="color:#fff;font-weight:500">no hallucinated symptoms, no fabricated findings, no phantom assessments.</strong> Just clean documentation you can trust with your license.</p>
+      <div class="hero-ctas">
+        <a href="#pricing" class="btn-primary">See Pricing & Plans →</a>
+        <a href="#how" class="btn-ghost">How It Works ↓</a>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="vrx-scorecard-trigger" onclick="vrxScorecardOpen()">
+          <span class="vrx-sc-pulse"></span>
+          📋 Get My Documentation Burnout Score →
+        </button>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:0.03em;">Takes 90 seconds · Free · Instant results</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">Avg. note time</div></div>
+        <div class="stat"><div class="stat-num">7+</div><div class="stat-label">Note types supported</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-label">DPC-built</div></div>
+      </div>
+    </div>
+
+    <div class="hero-demo">
+      <div class="demo-header">
+        <div class="demo-dot" style="background:#ff5f57"></div>
+        <div class="demo-dot" style="background:#febc2e"></div>
+        <div class="demo-dot" style="background:#28c840"></div>
+        <div class="demo-title">VoiceRx Live</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-input">"Patient is a 52-year-old female with Type 2 diabetes presenting today for follow-up. A1C came back at 7.8, up from 7.2 last quarter. She reports she's been less consistent with diet since the holidays. No new complaints, vitals stable…"</div>
+        <div class="demo-arrow">⬇</div>
+        <div class="demo-output">
+          <div class="demo-output-label">✦ SOAP Note Generated</div>
+          <div class="demo-soap"><strong>S:</strong> 52F w/ T2DM presenting for follow-up. Reports dietary inconsistency since holidays. Denies new complaints.<br><br><strong>O:</strong> Vitals stable. A1C 7.8 (↑ from 7.2).<br><br><strong>A:</strong> T2DM — suboptimal glycemic control.<br><br><strong>P:</strong> Diet counseling reinforced. Re-check A1C in 90 days.</div>
+        </div>
+      </div>
+      <div class="waveform-row" id="waveform"></div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="trust-item"><span class="trust-icon">🔒</span> HIPAA-Compliant</div>
+  <div class="trust-item"><span class="trust-icon">📄</span> BAA Available</div>
+  <div class="trust-item"><span class="trust-icon">📱</span> Any Device</div>
+  <div class="trust-item"><span class="trust-icon">🏥</span> No EHR Required</div>
+  <div class="trust-item"><span class="trust-icon">🧡</span> 10% to gigiSafeHOUSE</div>
+  <div class="trust-item"><span class="trust-icon">⚡</span> No Long-Term Contract</div>
+</div>
+
+
+<!-- DR. TESS TESTIMONIAL (v7) -->
+<section class="vrx-testimonial" aria-label="Physician testimonial">
+  <div class="vrx-quote-wrap">
+    <div style="text-align:center;margin-bottom:32px">
+      <span class="vrx-quote-eyebrow">Physician Review</span>
+      <h2 class="serif" style="color:#fff;font-size:clamp(26px,3.4vw,38px);margin:0">From the doctor who uses it every day.</h2>
+    </div>
+    <div class="vrx-quote-card">
+      <div class="vrx-quote-mark" aria-hidden="true">&ldquo;</div>
+      <p class="vrx-quote-body">
+        I&rsquo;ve tried AI scribes that <span class="hl">hallucinate</span> &mdash; they invent symptoms, summarize things I never said, put words in my mouth. VoiceRx doesn&rsquo;t. I speak to my patient the way I always have, and the note that comes out is <span class="hl">mine</span>: my words, my reasoning, my care plan. Nothing I didn&rsquo;t say. <span class="pop">It gave me my evenings back.</span>
+      </p>
+      <div class="vrx-attr">
+        <div class="vrx-avatar" aria-hidden="true">TG</div>
+        <div>
+          <p class="vrx-attr-name">Theresa &ldquo;Tess&rdquo; Garcia, MD, FAAFP, DABOM</p>
+          <p class="vrx-attr-title">Founding Physician, Garcia Family Medicine DPC</p>
+          <p class="vrx-attr-loc">Blue Springs, Missouri</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="section-inner">
+    <div class="problem-grid">
+      <div>
+        <div class="section-eyebrow reveal">The Problem</div>
+        <h2 class="reveal">DPC doctors are <em>burning out</em> at the keyboard.</h2>
+        <p class="section-sub reveal">You chose DPC for freedom. But documentation still steals 2+ hours every single day.</p>
+        <div class="problem-cards">
+          <div class="problem-card reveal"><h4>⏰ 2–3 Hours of After-Hours Charting</h4><p>The average DPC physician spends evenings finishing notes that should have been done during the visit.</p></div>
+          <div class="problem-card reveal"><h4>🧠 Mental Load After Long Days</h4><p>Trying to remember what happened in visit #14 while documenting visit #18 is a recipe for burnout.</p></div>
+          <div class="problem-card reveal"><h4>💸 Dragon is Expensive & Rigid</h4><p>Dragon Medical One costs $67–$125/month per physician with no DPC-specific intelligence built in.</p></div>
+          <div class="problem-card reveal"><h4>📋 Generic AI Doesn't Understand DPC</h4><p>Most dictation tools don't know the difference between a DPC SOAP note and a hospital billing note.</p></div>
+        </div>
+      </div>
+      <div class="problem-quote reveal">
+        <blockquote>"I became a DPC doctor so I'd have time to actually know my patients — not spend my evenings at a keyboard."</blockquote>
+        <div class="quote-source">— Dr. Theresa Garcia, MD, FAAFP, DABOM<br><span style="font-size:12px;color:var(--muted)">Garcia Family Medicine · Blue Springs, Missouri</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">How It Works</div>
+    <h2 class="reveal">Three steps.<br><em>One less burden.</em></h2>
+    <p class="section-sub reveal">VoiceRx is so simple your front desk could set it up in 20 minutes.</p>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">1</div><h3>Record Your Visit</h3><p>AI creates a note based on your interaction with the patient. Engage with them during the entire visit in natural language — just talk the way you think.</p></div>
+      <div class="step reveal"><div class="step-num">2</div><h3>AI Format</h3><p>VoiceRx instantly organizes your conversation with the patient into the correct SOAP, progress, or custom note format.</p></div>
+      <div class="step reveal"><div class="step-num">3</div><h3>Review & Copy</h3><p>Scan the output, make any micro-edits, and copy it into your EHR (AtlasMD, Elation, etc.) in one click.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Features</div>
+    <h2 class="reveal">Everything a DPC doctor <em>actually needs.</em></h2>
+    <div class="features-grid">
+      <div class="feat-card reveal"><div class="feat-icon">🎙️</div><h3>Voice Transcription</h3><p>Real-time, high-accuracy transcription. Works on desktop, tablet, and mobile — no download required.</p><span class="feat-tag">Live Now</span></div>
+      <div class="feat-card reveal"><div class="feat-icon">🧠</div><h3>AI Clinical Intelligence</h3><p>Understands medical terminology, context, and the difference between an H&P, a SOAP, or a progress note. It thinks the way clinicians think.</p><span class="feat-tag">Live Now</span></div>
+      <div class="feat-card reveal"><div class="feat-icon">🌐</div><h3>Bilingual &amp; Multilingual</h3><p>Dictate in English and translate to Spanish — or carry on the entire visit in Spanish and it translates to English, or any other language. Critical for DPC practices serving diverse communities.</p><span class="feat-tag">Live Now</span></div>
+      <div class="feat-card reveal"><div class="feat-icon">📋</div><h3>Custom Note Formatting</h3><p>Create your own note types beyond SOAP — wellness visits, IME narratives, weight management, anything. Your custom formatting always stays exactly the same.</p><span class="feat-tag">Live Now</span></div>
+      <div class="feat-card reveal"><div class="feat-icon">🔒</div><h3>HIPAA-Compliant</h3><p>Business Associate Agreement (BAA) available. No patient data stored after you finalize the note and copy it into your EMR. Built to meet the standards DPC practices need.</p><span class="feat-tag">Compliant</span>
+        <div style="margin-top:16px;"><a href="/VoiceRx_BAA.pdf" download="VoiceRx_BAA.pdf" id="vrxBaaDownload" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:rgba(249,115,22,0.12);border:1px solid var(--border-orange);color:var(--orange2);font-size:12px;font-weight:600;padding:9px 16px;border-radius:8px;text-decoration:none;letter-spacing:0.02em;transition:all 0.2s;">📄 Download BAA →</a></div>
+      </div>
+      <div class="feat-card reveal"><div class="feat-icon">⚡</div><h3>EHR-Agnostic</h3><p>Works with AtlasMD, Elation, Hint, any EHR. Just copy and paste — no integrations needed to get started.</p><span class="feat-tag">Universal</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Note Types</div>
+    <h2 class="reveal">Every note you write, <em>handled.</em></h2>
+    <p class="section-sub reveal">VoiceRx comes pre-loaded with the note types DPC physicians use most — plus the ability to create your own.</p>
+    <div class="notes-grid">
+      <div class="note-chip reveal"><div class="icon">📝</div><div class="name">SOAP Note</div><div class="desc">Standard visit format</div></div>
+      <div class="note-chip reveal"><div class="icon">📈</div><div class="name">Progress Note</div><div class="desc">Chronic disease follow-up</div></div>
+      <div class="note-chip reveal"><div class="icon">⚖️</div><div class="name">IME Narrative</div><div class="desc">Workers' comp / legal</div></div>
+      <div class="note-chip reveal"><div class="icon">🌿</div><div class="name">Wellness Visit</div><div class="desc">Annual / preventive</div></div>
+      <div class="note-chip reveal"><div class="icon">🏋️</div><div class="name">Weight Management</div><div class="desc">Medical weight loss</div></div>
+      <div class="note-chip reveal"><div class="icon">🔁</div><div class="name">Chronic Care</div><div class="desc">Ongoing management</div></div>
+      <div class="note-chip reveal"><div class="icon">🚨</div><div class="name">Urgent Visit</div><div class="desc">Acute / same-day</div></div>
+      <div class="note-chip reveal"><div class="icon">✨</div><div class="name">Custom Types</div><div class="desc">Your own templates</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-section" id="pricing">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Pricing</div>
+    <h2 class="reveal">Simple pricing.<br><em>No surprises.</em></h2>
+    <div class="pricing-subtitle reveal">Per-provider. No long-term contract. BAA included. Setup fee is one-time.</div>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="price-tier">Solo Practice</div>
+        <div class="price-amount">$99<span>/mo per provider</span></div>
+        <div class="price-setup">+ <strong>$500 one-time setup</strong> per provider</div>
+        <div class="price-divider"></div>
+        <div class="price-feature"><span class="price-check">✦</span> 1–2 providers</div>
+        <div class="price-feature"><span class="price-check">✦</span> All 7+ note types</div>
+        <div class="price-feature"><span class="price-check">✦</span> Bilingual EN/ES</div>
+        <div class="price-feature"><span class="price-check">✦</span> HIPAA-compliant + BAA</div>
+        <div class="price-feature"><span class="price-check">✦</span> Personal onboarding call</div>
+        <a href="#" onclick="Calendly.initPopupWidget({url:'https://calendly.com/gigi-voicerx-demo/new-meeting'});return false;" class="price-btn ghost">Book a Call to Enroll →</a>
+        <div class="price-note">Beats Dragon Medical at a fraction of the cost.</div>
+      </div>
+      <div class="price-card featured reveal">
+        <div class="featured-badge">🔥 Most Popular</div>
+        <div class="price-tier">Group Practice</div>
+        <div class="price-amount">$79<span>/mo per provider</span></div>
+        <div class="price-setup">+ <strong>$500 one-time setup</strong> per provider</div>
+        <div class="price-divider"></div>
+        <div class="price-feature"><span class="price-check">✦</span> 3–5 providers</div>
+        <div class="price-feature"><span class="price-check">✦</span> Everything in Solo</div>
+        <div class="price-feature"><span class="price-check">✦</span> Custom note templates</div>
+        <div class="price-feature"><span class="price-check">✦</span> Priority support</div>
+        <div class="price-feature"><span class="price-check">✦</span> Full team setup + training</div>
+        <a href="#" onclick="Calendly.initPopupWidget({url:'https://calendly.com/gigi-voicerx-demo/new-meeting'});return false;" class="price-btn">Book a Call to Enroll →</a>
+        <div class="price-note">Best value for growing DPC practices.</div>
+      </div>
+      <div class="price-card reveal">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-amount">$59<span>/mo per provider</span></div>
+        <div class="price-setup">+ <strong>$500 one-time setup</strong> per provider</div>
+        <div class="price-divider"></div>
+        <div class="price-feature"><span class="price-check">✦</span> 6–8+ providers</div>
+        <div class="price-feature"><span class="price-check">✦</span> Everything in Group</div>
+        <div class="price-feature"><span class="price-check">✦</span> Dedicated account manager</div>
+        <div class="price-feature"><span class="price-check">✦</span> Priority onboarding + training</div>
+        <div class="price-feature"><span class="price-check">✦</span> Custom workflow configuration</div>
+        <a href="https://buy.stripe.com/fZu5kwgab7Z6bV01hF18c01" target="_blank" class="price-btn ghost">Get Started →</a>
+        <div class="price-note">Perfect for DPC networks and MSOs.</div>
+      </div>
+    </div>
+    <div class="pricing-footer reveal">All subscriptions are <strong>month-to-month</strong> · Cancel anytime · <strong>10% of every subscription</strong> supports <a href="https://gigisafehouse.com" style="color:var(--orange)">gigiSafeHOUSE</a> — removing financial barriers to healthcare access.</div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">The PracticeRx Suite</div>
+    <h2 class="reveal">VoiceRx is just the beginning.<br><em>Meet the full platform.</em></h2>
+    <p class="section-sub reveal">PracticeRx by GEG Ventures is a complete intelligence suite built exclusively for Direct Primary Care practices.</p>
+    <div class="eco-grid">
+      <div class="eco-card active reveal"><div class="eco-icon">🎙️</div><div><div class="eco-name"><span>Voice</span>Rx</div><div class="eco-desc">AI medical dictation. Speak freely, get polished SOAP notes in seconds.</div><span class="eco-badge live">✦ Live Now</span></div></div>
+      <div class="eco-card reveal"><div class="eco-icon">💚</div><div><div class="eco-name"><span>Care</span>Rx</div><div class="eco-desc">Patient care coordination and chronic disease management automation.</div><span class="eco-badge soon">Coming Soon</span></div></div>
+      <div class="eco-card reveal"><div class="eco-icon">🧡</div><div><div class="eco-name"><span>Well</span>Rx</div><div class="eco-desc">Wellness coaching, weight management, and lifestyle medicine automation.</div><span class="eco-badge soon">Coming Soon</span></div></div>
+      <div class="eco-card reveal"><div class="eco-icon">🟣</div><div><div class="eco-name"><span>Flow</span>Rx</div><div class="eco-desc">Practice operations, scheduling, and workflow optimization.</div><span class="eco-badge soon">Coming Soon</span></div></div>
+      <div class="eco-card reveal"><div class="eco-icon">🌿</div><div><div class="eco-name"><span>Grow</span>Rx</div><div class="eco-desc">Marketing, patient retention, and practice growth intelligence.</div><span class="eco-badge soon">Coming Soon</span></div></div>
+      <div class="eco-card reveal"><div class="eco-icon">🔵</div><div><div class="eco-name"><span>Mind</span>Rx</div><div class="eco-desc">The central AI brain that connects and learns across all 5 pillars.</div><span class="eco-badge soon">Coming Soon</span></div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PHYSICIAN MENTAL HEALTH SUPPORT (v7) -->
+<section class="vrx-support" aria-label="Physician mental health support">
+  <div class="vrx-support-grid">
+    <div>
+      <span class="vrx-s-eyebrow">A different kind of bottom line</span>
+      <h2>If this is finding you on a hard night.</h2>
+      <p class="vrx-s-lead">
+        Physicians die by suicide at higher rates than the general population. Women physicians, in particular, carry a suicide rate markedly higher than women outside medicine &mdash; and job-related stressors precede physician suicide far more often than they do in the general public (AMA; <cite>JAMA Psychiatry</cite>, 2025). One of those stressors, quietly and for years, has been the documentation that follows you home.
+      </p>
+      <p>
+        VoiceRx was built to lift a small, measurable piece of that weight. It is not a mental health tool. It does not replace care. But if shaving ninety minutes off your evening gives you one more dinner with your family, one more full night of sleep, one less reason to feel trapped by the work you love &mdash; that matters to us. That&rsquo;s why we built it.
+      </p>
+      <p class="vrx-s-pull">
+        You are not alone. The profession needs you. Your family needs you. Your patients need you. And if tonight is heavy, please reach for one of the numbers below.
+      </p>
+    </div>
+
+    <aside class="vrx-s-resources" aria-label="Crisis and peer support resources">
+      <span class="vrx-s-rhead">Resources available now</span>
+
+      <div class="vrx-rcard">
+        <div class="vrx-rcard-name">Physician Support Line</div>
+        <a class="vrx-rcard-phone" href="tel:+18884090141">1 (888) 409-0141</a>
+        <p class="vrx-rcard-desc">Free. Confidential. Peer-to-peer support from volunteer psychiatrists who are physicians themselves. No appointment needed.</p>
+        <a class="vrx-rcard-link" href="https://www.physiciansupportline.com" target="_blank" rel="noopener">physiciansupportline.com &rarr;</a>
+      </div>
+
+      <div class="vrx-rcard">
+        <div class="vrx-rcard-name">988 Suicide &amp; Crisis Lifeline</div>
+        <a class="vrx-rcard-phone" href="tel:988">Call or text <strong>988</strong></a>
+        <p class="vrx-rcard-desc">Available 24 hours a day, 7 days a week. Free and confidential support for anyone in distress &mdash; including clinicians.</p>
+        <a class="vrx-rcard-link" href="https://988lifeline.org" target="_blank" rel="noopener">988lifeline.org &rarr;</a>
+      </div>
+
+      <div class="vrx-rcard">
+        <div class="vrx-rcard-name" style="color:var(--orange2)">Dr. Lorna Breen Heroes&rsquo; Foundation</div>
+        <p class="vrx-rcard-desc" style="margin-top:6px">Advocacy, peer support, and systemic change in physician mental health &mdash; named for ER physician Dr. Lorna Breen, who died by suicide in 2020.</p>
+        <a class="vrx-rcard-link" href="https://drlornabreen.org" target="_blank" rel="noopener">drlornabreen.org &rarr;</a>
+      </div>
+
+      <p class="vrx-s-note">
+        If you&rsquo;re in immediate danger, please call 911 or go to your nearest emergency department. None of these resources are substitutes for emergency care.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission-section">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-eyebrow reveal" style="justify-content:center">The Covenant</div>
+    <blockquote class="serif reveal">"To serve others with compassion — <em>no matter the outcome.</em>"</blockquote>
+    <div class="mission-source reveal">The sacred covenant of <strong>gigiSafeHOUSE Inc.</strong> · Founded 2012<br><span style="font-size:12px;color:var(--muted)">10% of every VoiceRx subscription removes financial barriers to healthcare for those who cannot afford it.</span></div>
+    <div class="mission-stats">
+      <div class="reveal"><div class="mstat-num">$99</div><div class="mstat-label">Starting price/month</div></div>
+      <div class="reveal"><div class="mstat-num">10%</div><div class="mstat-label">To gigiSafeHOUSE</div></div>
+      <div class="reveal"><div class="mstat-num">2 min</div><div class="mstat-label">Avg. note time</div></div>
+      <div class="reveal"><div class="mstat-num">∞</div><div class="mstat-label">Hours of burnout prevented</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal" style="justify-content:center">Ready to Start?</div>
+    <h2 class="reveal">Your notes should<br><em>write themselves.</em></h2>
+    <p class="reveal">Book a free 20-minute discovery call with Gigi. She'll walk you through VoiceRx live and answer every question.</p>
+    <a href="#" onclick="openCalendly();return false;" class="btn-primary" style="font-size:16px;padding:20px 48px;">Book My Free Discovery Call →</a>
+    <div class="cta-chips">
+      <div class="cta-chip">📧 <a href="mailto:gigi@voicerx.org" style="color:inherit">gigi@voicerx.org</a></div>
+      <div class="cta-chip">📞 VoiceRx: <a href="tel:8168473088" style="color:inherit">(816) 847-3088</a></div>
+      <div class="cta-chip">🏥 GFM Office: <a href="tel:8163307575" style="color:inherit">(816) 330-7575</a></div>
+      <div class="cta-chip">📍 Blue Springs, Missouri</div>
+    </div>
+  </div>
+</section>
+
+<div id="vrx-thankyou" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0b1628 0%,#0f2040 100%);align-items:center;justify-content:center;padding:24px;overflow-y:auto;">
+  <div style="max-width:600px;width:100%;text-align:center;margin:auto;">
+    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 28px;box-shadow:0 0 40px rgba(249,115,22,0.4);">✓</div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#f97316;margin-bottom:16px;">Payment Confirmed</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:20px;color:#fff;">Welcome to <em style="color:#f97316;font-style:italic;">VoiceRx!</em></h2>
+    <p style="font-size:17px;color:rgba(255,255,255,0.65);line-height:1.75;margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;">Your subscription is active. Gigi will personally reach out within <strong style="color:#fb923c;">24 hours</strong> to schedule your setup call and get your practice configured.</p>
+    <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:16px;padding:32px;margin-bottom:36px;text-align:left;">
+      <div style="font-size:13px;font-weight:700;color:#f97316;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px;">What happens next</div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">1</div><div><div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;">Check your email</div><div style="font-size:13px;color:rgba(255,255,255,0.55);">Stripe sent you a receipt. Save it for your records.</div></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">2</div><div><div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;">Gigi reaches out within 24 hours</div><div style="font-size:13px;color:rgba(255,255,255,0.55);">She'll schedule your personal setup call and walk you through everything.</div></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">3</div><div><div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;">Go live — same week</div><div style="font-size:13px;color:rgba(255,255,255,0.55);">Most practices are dictating notes on day one. Your time back starts now.</div></div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;">
+      <a href="tel:8168473088" style="display:inline-flex;align-items:center;gap:8px;color:#fb923c;font-size:14px;font-weight:600;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);padding:12px 24px;border-radius:30px;text-decoration:none;">📞 (816) 847-3088</a>
+      <a href="mailto:gigi@voicerx.org" style="display:inline-flex;align-items:center;gap:8px;color:#fb923c;font-size:14px;font-weight:600;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);padding:12px 24px;border-radius:30px;text-decoration:none;">📧 gigi@voicerx.org</a>
+    </div>
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">Can't wait? Call or text Gigi directly at (816) 847-3088 &middot; Office: (816) 330-7575</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">Voice<span>Rx</span></div>
+  <div class="footer-sub">
+    <strong>VoiceRx</strong> by PracticeRx · GEG Ventures LLC · &copy; 2026<br>
+    <a href="https://garciafamilymedicine.care">garciafamilymedicine.care</a> · <a href="https://gigisafehouse.com">gigisafehouse.com</a><br>
+    📧 <a href="mailto:gigi@voicerx.org">gigi@voicerx.org</a> · 📞 VoiceRx: (816) 847-3088 · 🏥 GFM: (816) 330-7575 · 📍 Blue Springs, MO<br>
+    <span style="color:rgba(255,255,255,0.3)">VoiceRx is not health insurance. It is an AI documentation tool for licensed physicians.</span>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('success') === 'true'){
+      const el = document.getElementById('vrx-thankyou');
+      el.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  })();
+</script>
+
+<script>
+  const waveform = document.getElementById('waveform');
+  if (waveform) {
+    for (let i = 0; i < 28; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'wave-bar';
+      const h = 12 + Math.random() * 28;
+      bar.style.height = h + 'px';
+      bar.style.animationDelay = (i * 0.06) + 's';
+      waveform.appendChild(bar);
+    }
+  }
+  const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } }); }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+<!-- SCORECARD MODAL -->
+<div id="vrx-sc-overlay" onclick="vrxScOverlayClick(event)">
+  <div class="vrx-sc-modal" id="vrx-sc-modal">
+    <button class="vrx-sc-close" onclick="vrxScorecardClose()">×</button>
+    <div class="vrx-sc-header">
+      <div class="vrx-sc-logo-row">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="180" height="72">
+          <defs><linearGradient id="bg-popup" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0b1f3a"/><stop offset="100%" stop-color="#0d2d4a"/></linearGradient></defs>
+          <rect width="400" height="160" rx="20" fill="url(#bg-popup)"/>
+          <rect x="36" y="44" width="28" height="42" rx="14" fill="none" stroke="#f97316" stroke-width="3.5"/>
+          <path d="M24 82c0 16 28 26 28 26s28-10 28-26" fill="none" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="52" y1="108" x2="52" y2="118" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="40" y1="118" x2="64" y2="118" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="92" cy="72" r="3.5" fill="#f97316" opacity="0.5"/>
+          <circle cx="92" cy="85" r="3.5" fill="#f97316" opacity="0.7"/>
+          <circle cx="92" cy="98" r="3.5" fill="#f97316" opacity="0.5"/>
+          <text x="108" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" fill="#ffffff" letter-spacing="-1">Voice</text>
+          <text x="280" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" fill="#f97316" letter-spacing="-1">Rx</text>
+          <text x="108" y="124" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="rgba(255,255,255,0.45)" letter-spacing="0.5">CLINICAL DICTATION · GEG VENTURES</text>
+        </svg>
+        <div class="vrx-sc-badge">🩺 DPC Assessment</div>
+      </div>
+      <h2 class="vrx-sc-headline">How bad is your<br><em style="font-style:italic;color:var(--orange)">documentation burden?</em></h2>
+      <p class="vrx-sc-subline">7 quick questions. Instant personalized score. Find out if VoiceRx can give you back your evenings.</p>
+    </div>
+    <div class="vrx-sc-prog-wrap">
+      <div class="vrx-sc-prog-labels"><span id="vrx-sc-ptxt">Question 1 of 7</span><span id="vrx-sc-ppct">0%</span></div>
+      <div class="vrx-sc-prog-bar"><div class="vrx-sc-prog-fill" id="vrx-sc-pfill"></div></div>
+    </div>
+    <div class="vrx-sc-body">
+      <div class="vrx-sc-step active" id="vrx-sc-s0"><div class="vrx-sc-qnum">Question 1 of 7</div><div class="vrx-sc-qtext">How many hours per day do you spend on clinical documentation?</div><div class="vrx-sc-opts"><div class="vrx-sc-opt" onclick="vrxScSel(this,0,5)"><span class="vrx-sc-oi">⚡</span><span class="vrx-sc-ol">Less than 1 hour — I'm efficient</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,0,30)"><span class="vrx-sc-oi">🕐</span><span class="vrx-sc-ol">1–2 hours — manageable but annoying</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,0,65)"><span class="vrx-sc-oi">⏰</span><span class="vrx-sc-ol">2–3 hours — it's seriously eating my day</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,0,100)"><span class="vrx-sc-oi">🚨</span><span class="vrx-sc-ol">3+ hours — I'm drowning in notes</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-next" id="vrx-sc-n0" onclick="vrxScNext(1)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s1"><div class="vrx-sc-qnum">Question 2 of 7</div><div class="vrx-sc-qtext">Do you chart after hours — evenings, weekends, or late at night?</div><div class="vrx-sc-opts"><div class="vrx-sc-opt" onclick="vrxScSel(this,1,0)"><span class="vrx-sc-oi">😌</span><span class="vrx-sc-ol">Never — all done during office hours</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,1,35)"><span class="vrx-sc-oi">🌙</span><span class="vrx-sc-ol">Occasionally — a few nights per week</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,1,75)"><span class="vrx-sc-oi">😴</span><span class="vrx-sc-ol">Most evenings — it's become routine</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,1,100)"><span class="vrx-sc-oi">💔</span><span class="vrx-sc-ol">Every night and weekends too</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(0)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n1" onclick="vrxScNext(2)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s2"><div class="vrx-sc-qnum">Question 3 of 7</div><div class="vrx-sc-qtext">What's your biggest frustration with documentation right now?</div><div class="vrx-sc-opts"><div class="vrx-sc-opt" onclick="vrxScSel(this,2,20)"><span class="vrx-sc-oi">⌨️</span><span class="vrx-sc-ol">Typing speed — I can't keep up</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,2,60)"><span class="vrx-sc-oi">🧠</span><span class="vrx-sc-ol">Mental load — recalling visits hours later</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,2,80)"><span class="vrx-sc-oi">🔁</span><span class="vrx-sc-ol">Repetition — same note types every day</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,2,100)"><span class="vrx-sc-oi">🔥</span><span class="vrx-sc-ol">All of it — I'm burning out</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(1)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n2" onclick="vrxScNext(3)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s3"><div class="vrx-sc-qnum">Question 4 of 7</div><div class="vrx-sc-qtext">How many patients do you see on an average day?</div><div class="vrx-sc-opts two"><div class="vrx-sc-opt" onclick="vrxScSel(this,3,20)"><span class="vrx-sc-oi">👤</span><span class="vrx-sc-ol">Fewer than 8</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,3,55)"><span class="vrx-sc-oi">👥</span><span class="vrx-sc-ol">8–14 patients</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,3,80)"><span class="vrx-sc-oi">🏃</span><span class="vrx-sc-ol">15–20 patients</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,3,100)"><span class="vrx-sc-oi">🌊</span><span class="vrx-sc-ol">20+ patients</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(2)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n3" onclick="vrxScNext(4)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s4"><div class="vrx-sc-qnum">Question 5 of 7</div><div class="vrx-sc-qtext">Have you tried any voice dictation or AI note tools before?</div><div class="vrx-sc-opts"><div class="vrx-sc-opt" onclick="vrxScSel(this,4,10)"><span class="vrx-sc-oi">✅</span><span class="vrx-sc-ol">Yes — and loved it (still using it)</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,4,50)"><span class="vrx-sc-oi">😕</span><span class="vrx-sc-ol">Yes — but it didn't work well for DPC</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,4,70)"><span class="vrx-sc-oi">💸</span><span class="vrx-sc-ol">Yes — too expensive (Dragon, etc.)</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,4,85)"><span class="vrx-sc-oi">🙅</span><span class="vrx-sc-ol">No — haven't tried anything yet</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(3)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n4" onclick="vrxScNext(5)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s5"><div class="vrx-sc-qnum">Question 6 of 7</div><div class="vrx-sc-qtext">How many providers are in your DPC practice?</div><div class="vrx-sc-opts two"><div class="vrx-sc-opt" onclick="vrxScSel(this,5,90)"><span class="vrx-sc-oi">🧍</span><span class="vrx-sc-ol">Just me (solo)</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,5,70)"><span class="vrx-sc-oi">👫</span><span class="vrx-sc-ol">2–3 providers</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,5,50)"><span class="vrx-sc-oi">👨‍👩‍👧</span><span class="vrx-sc-ol">4–6 providers</span><span class="vrx-sc-oc"></span></div><div class="vrx-sc-opt" onclick="vrxScSel(this,5,30)"><span class="vrx-sc-oi">🏥</span><span class="vrx-sc-ol">7+ or a network</span><span class="vrx-sc-oc"></span></div></div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(4)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n5" onclick="vrxScNext(6)" disabled>Next →</button></div></div>
+      <div class="vrx-sc-step" id="vrx-sc-s6"><div class="vrx-sc-qnum">Last step</div><div class="vrx-sc-qtext">Where should we send your <em style="font-style:italic;color:var(--orange)">personalized score report?</em></div><div class="vrx-sc-fwrap"><div class="vrx-sc-field"><label>Your Name</label><input type="text" id="vrx-sc-name" placeholder="Dr. Jane Smith" oninput="vrxScChkContact()"></div><div class="vrx-sc-field"><label>Practice Email</label><input type="email" id="vrx-sc-email" placeholder="you@yourpractice.com" oninput="vrxScChkContact()"></div><div class="vrx-sc-field"><label>Practice Name <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px;">(optional)</span></label><input type="text" id="vrx-sc-practice" placeholder="Blue Springs DPC"></div></div><div class="vrx-sc-privacy">🔒 Your info is private. We'll only use it to send your score and book your free demo if you'd like.</div><div class="vrx-sc-nav"><button class="vrx-sc-back" onclick="vrxScBack(5)">← Back</button><button class="vrx-sc-next" id="vrx-sc-n6" onclick="vrxScShowResult()" disabled>Get My Score →</button></div></div>
+    </div>
+    <div id="vrx-sc-result">
+      <div class="vrx-sc-ring-wrap">
+        <div class="vrx-sc-ring"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="70" cy="70" r="56" stroke="rgba(255,255,255,0.07)" stroke-width="10" fill="none"/><circle cx="70" cy="70" r="56" stroke="url(#vrxScGrad)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="352" id="vrx-sc-ring-c" stroke-dashoffset="352" style="transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"/><defs><linearGradient id="vrxScGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#fb923c"/></linearGradient></defs></svg><div class="vrx-sc-ring-num"><div class="vrx-sc-snum" id="vrx-sc-sdisplay">0</div><div class="vrx-sc-slbl">/ 100</div></div></div>
+        <div class="vrx-sc-tier" id="vrx-sc-tier"></div>
+      </div>
+      <p class="vrx-sc-desc" id="vrx-sc-desc"></p>
+      <div class="vrx-sc-bkdn" id="vrx-sc-bkdn"></div>
+      <div class="vrx-sc-cta">
+        <div class="vrx-sc-cta-h" id="vrx-sc-ctah"></div>
+        <div class="vrx-sc-cta-s" id="vrx-sc-ctas"></div>
+        <a href="#" onclick="Calendly.initPopupWidget({url:'https://calendly.com/gigi-voicerx-demo/new-meeting'});return false;" class="vrx-sc-cta-btn">📅 Book My Free VoiceRx Demo →</a>
+        <div class="vrx-sc-cta-note">20 minutes · No pressure · Gigi walks you through it live</div>
+        <div style="margin-top:16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+          <a href="tel:8168473088" style="display:inline-flex;align-items:center;gap:8px;color:var(--orange2);font-size:13px;font-weight:600;text-decoration:none;background:rgba(249,115,22,0.08);border:1px solid var(--border-orange);padding:10px 20px;border-radius:30px;">📞 (816) 847-3088</a>
+          <a href="mailto:gigi@voicerx.org" style="display:inline-flex;align-items:center;gap:8px;color:var(--orange2);font-size:13px;font-weight:600;text-decoration:none;background:rgba(249,115,22,0.08);border:1px solid var(--border-orange);padding:10px 20px;border-radius:30px;">📧 gigi@voicerx.org</a>
+        </div>
+      </div>
+      <button class="vrx-sc-restart" onclick="vrxScRestart()">↩ Retake the assessment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const TOTAL=7;
+  let scScores=new Array(TOTAL).fill(null);
+  window.vrxScorecardOpen=function(){document.getElementById('vrx-sc-overlay').classList.add('open');document.body.style.overflow='hidden';};
+  window.vrxScorecardClose=function(){document.getElementById('vrx-sc-overlay').classList.remove('open');document.body.style.overflow='';};
+  window.vrxScOverlayClick=function(e){if(e.target===document.getElementById('vrx-sc-overlay'))vrxScorecardClose();};
+  window.vrxScSel=function(el,q,score){const step=document.getElementById('vrx-sc-s'+q);step.querySelectorAll('.vrx-sc-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');scScores[q]=score;const nb=document.getElementById('vrx-sc-n'+q);if(nb)nb.disabled=false;};
+  function scProg(step){const pct=Math.round((step/TOTAL)*100);document.getElementById('vrx-sc-pfill').style.width=pct+'%';document.getElementById('vrx-sc-ppct').textContent=pct+'%';if(step<TOTAL){document.getElementById('vrx-sc-ptxt').textContent='Question '+(step+1)+' of '+TOTAL;}else{document.getElementById('vrx-sc-ptxt').textContent='Almost done!';document.getElementById('vrx-sc-pfill').style.width='90%';document.getElementById('vrx-sc-ppct').textContent='90%';}}
+  window.vrxScNext=function(n){document.getElementById('vrx-sc-s'+(n-1)).classList.remove('active');document.getElementById('vrx-sc-s'+n).classList.add('active');scProg(n);document.getElementById('vrx-sc-modal').scrollTo({top:0,behavior:'smooth'});};
+  window.vrxScBack=function(n){document.getElementById('vrx-sc-s'+(n+1)).classList.remove('active');document.getElementById('vrx-sc-s'+n).classList.add('active');scProg(n);document.getElementById('vrx-sc-modal').scrollTo({top:0,behavior:'smooth'});};
+  window.vrxScChkContact=function(){const n=document.getElementById('vrx-sc-name').value.trim();const e=document.getElementById('vrx-sc-email').value.trim();document.getElementById('vrx-sc-n6').disabled=!(n.length>1&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));};
+  window.vrxScShowResult=function(){
+    const weights=[2,2,1.5,1,1.5,1,0];let tot=0,ws=0;
+    for(let i=0;i<6;i++){if(scScores[i]!==null){tot+=scScores[i]*weights[i];ws+=weights[i];}}
+    const fs=ws>0?Math.round(tot/ws):50;
+    document.querySelectorAll('.vrx-sc-step').forEach(s=>s.classList.remove('active'));
+    document.querySelector('.vrx-sc-prog-wrap').style.display='none';
+    document.querySelector('.vrx-sc-body').style.display='none';
+    document.querySelector('.vrx-sc-header').style.display='none';
+    const rEl=document.getElementById('vrx-sc-result');rEl.style.display='block';setTimeout(()=>rEl.classList.add('active'),10);
+    setTimeout(()=>{const c=document.getElementById('vrx-sc-ring-c');c.style.strokeDashoffset=352-(fs/100)*352;let cnt=0;const t=setInterval(()=>{cnt+=2;if(cnt>=fs){cnt=fs;clearInterval(t);}document.getElementById('vrx-sc-sdisplay').textContent=cnt;},20);},300);
+    let tier,desc,ctaH,ctaS,bd;
+    if(fs<30){tier='Manageable Load 🟢';desc='Your documentation burden is relatively light. VoiceRx could still reclaim 30–60 minutes daily — time that compounds into weeks over a year.';ctaH='Even small gains add up.';ctaS='See how VoiceRx could sharpen your workflow.';bd=[{l:'Time lost to charting',p:25},{l:'After-hours documentation',p:15},{l:'Mental energy spent',p:30},{l:'Burnout risk level',p:20}];}
+    else if(fs<60){tier='Documentation Creep 🟡';desc='Notes are taking a real chunk of your day — likely bleeding into personal time. VoiceRx was built exactly for this stage, before it gets worse.';ctaH="Don't wait until you're burned out.";ctaS='Physicians at your score typically recover 1–2 hours per day with VoiceRx.';bd=[{l:'Time lost to charting',p:55},{l:'After-hours documentation',p:45},{l:'Mental energy spent',p:60},{l:'Burnout risk level',p:50}];}
+    else if(fs<80){tier='High Burnout Risk 🟠';desc='Documentation is actively hurting your quality of life. This is a critical window. Intervene now and reverse it — those who wait often don\'t.';ctaH='This is the turning point.';ctaS='VoiceRx was built for you. Let Gigi personally set up your practice this week.';bd=[{l:'Time lost to charting',p:75},{l:'After-hours documentation',p:70},{l:'Mental energy spent',p:80},{l:'Burnout risk level',p:75}];}
+    else{tier='Critical — Act Now 🔴';desc='Your documentation load is at a crisis level. You\'re losing hours every day and burning out. VoiceRx can reverse this starting this week.';ctaH='You deserve your evenings back.';ctaS='Gigi will personally onboard you. Most physicians see relief on day one.';bd=[{l:'Time lost to charting',p:95},{l:'After-hours documentation',p:90},{l:'Mental energy spent',p:95},{l:'Burnout risk level',p:92}];}
+    const _scName=document.getElementById('vrx-sc-name').value.trim();const _scEmail=document.getElementById('vrx-sc-email').value.trim();const _scPract=(document.getElementById('vrx-sc-practice')||{}).value||'';
+    fetch('https://formspree.io/f/xgorwera',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:_scName,email:_scEmail,practice:_scPract,score:fs,tier:tier,source:'VoiceRx Landing Page Scorecard'})}).catch(()=>{});
+    document.getElementById('vrx-sc-tier').textContent=tier;document.getElementById('vrx-sc-desc').textContent=desc;document.getElementById('vrx-sc-ctah').textContent=ctaH;document.getElementById('vrx-sc-ctas').textContent=ctaS;
+    const bEl=document.getElementById('vrx-sc-bkdn');bEl.innerHTML=bd.map(b=>`<div class="vrx-sc-bitem"><div class="vrx-sc-blbl">${b.l}</div><div class="vrx-sc-bbar-w"><div class="vrx-sc-bbar" style="width:0%" data-t="${b.p}%"></div></div></div>`).join('');
+    setTimeout(()=>bEl.querySelectorAll('.vrx-sc-bbar').forEach(b=>b.style.width=b.dataset.t),600);
+    document.getElementById('vrx-sc-modal').scrollTo({top:0,behavior:'smooth'});
+  };
+  window.vrxScRestart=function(){scScores=new Array(TOTAL).fill(null);document.querySelectorAll('.vrx-sc-opt').forEach(o=>o.classList.remove('sel'));document.querySelectorAll('.vrx-sc-next').forEach(b=>{if(b.id!=='vrx-sc-n6')b.disabled=true;});document.getElementById('vrx-sc-n6').disabled=true;['vrx-sc-name','vrx-sc-email','vrx-sc-practice'].forEach(id=>document.getElementById(id).value='');document.getElementById('vrx-sc-result').style.display='none';document.getElementById('vrx-sc-result').classList.remove('active');document.querySelector('.vrx-sc-prog-wrap').style.display='block';document.querySelector('.vrx-sc-body').style.display='block';document.querySelector('.vrx-sc-header').style.display='block';document.getElementById('vrx-sc-s0').classList.add('active');document.getElementById('vrx-sc-pfill').style.width='0%';document.getElementById('vrx-sc-ppct').textContent='0%';document.getElementById('vrx-sc-ptxt').textContent='Question 1 of 7';document.getElementById('vrx-sc-modal').scrollTo({top:0,behavior:'smooth'});};
+})();
+</script>
+
+<script>
+function openCalendly(){
+  var url='https://calendly.com/gigi-voicerx-demo/new-meeting';
+  if(typeof Calendly!=='undefined'&&Calendly.initPopupWidget){Calendly.initPopupWidget({url:url});}
+  else{window.open(url,'_blank');}
+}
+</script>
+
+</body>
+</html>
