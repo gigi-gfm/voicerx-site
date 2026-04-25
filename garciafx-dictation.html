@@ -1,266 +1,855 @@
-// ─────────────────────────────────────────────────────────────────────
-// VoiceRx Worker v2 — Whisper + Anthropic two-step pipeline
-// ─────────────────────────────────────────────────────────────────────
-//
-// SECRETS REQUIRED (Cloudflare dash → Worker → Settings → Variables):
-//   ANTHROPIC_API_KEY   ← sk-ant-…
-//   CLIENT_TOKENS       ← Dr. Tess's token (comma-separated if multiple)
-//   OPENAI_API_KEY      ← sk-… (for Whisper transcription)
-//
-// ENDPOINTS:
-//   GET  /          → health check
-//   POST /transcribe → multipart: audio file + token field
-//                      Returns { transcript, note }
-//   POST /          → legacy Anthropic passthrough (kept for compatibility)
-//
-// PHI handling: passthrough only. No storage, no logging.
-// Cloudflare Workers = no BAA needed (passthrough).
-// Anthropic BAA ✅  |  OpenAI BAA: check before production PHI.
-// ─────────────────────────────────────────────────────────────────────
 
-const ALLOWED_ORIGIN = 'https://voicerx.pages.dev';
-const ANTHROPIC_MODEL = 'claude-sonnet-4-5';
-const MAX_TOKENS = 4096;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f2040">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VoiceRx">
+<title>VoiceRx · GFM Dictation</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--teal:#1d4ed8;
+  --orange:#f97316;--orange2:#fb923c;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d0d8e4;
+  --bg:#f2f4f8;--white:#fff;
+  --red:#dc2626;--redlt:#fef2f2;
+  --green:#16a34a;--greenlt:#f0fdf4;
+  --amber:#b45309;--amberlt:#fef3c7;
+  --text:#1a2535;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#1e3a8a,#1e40af);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;background:var(--bg)}
 
-const CORS = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400',
-};
+/* ── HEADER ──────────────────────────────────────────────────── */
+.hdr{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-bottom:3px solid var(--orange);padding:11px 16px 10px;flex-shrink:0}
+.hdr-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.logo{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:#fff}
+.logo span{color:var(--orange)}
+.logo-sub{font-size:9px;color:rgba(255,255,255,0.38);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.nt-toggle{display:flex;background:rgba(255,255,255,0.08);border-radius:7px;padding:2px}
+.nt{padding:4px 11px;border-radius:5px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;border:none;background:transparent;font-family:'Poppins',sans-serif;transition:all 0.15s}
+.nt.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;font-weight:500}
+.gear-btn{background:rgba(255,255,255,0.08);border:none;border-radius:7px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.7)}
+.gear-btn:hover{background:rgba(255,255,255,0.15)}
 
-// ── Dr. Tess's system prompt ──────────────────────────────────────────
-const CLINICAL_SYSTEM_PROMPT = `You are a medical scribe assistant for Dr. Theresa Garcia, MD, a Direct Primary Care physician at Garcia Family Medicine in Blue Springs, MO.
+.physician-bar{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:6px 10px;margin-bottom:8px}
+.phys-name{font-size:12px;font-weight:500;color:rgba(255,255,255,0.85)}
+.phys-practice{font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px}
 
-You receive raw transcripts from ambient patient encounter recordings. Your job is to clean and format them into structured clinical notes.
+.patient-bar{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pt-field{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 8px;cursor:pointer;transition:background 0.15s}
+.pt-field:hover{background:rgba(255,255,255,0.13)}
+.pt-field.empty .ptv{color:rgba(255,255,255,0.3)}
+.ptl{font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1px}
+.ptv{font-size:11px;color:rgba(255,255,255,0.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-field.full-width{grid-column:1/-1}
 
-FORMAT THE NOTE AS:
-**CHIEF COMPLAINT:**
-[What brought the patient in today]
+/* ── TABS ────────────────────────────────────────────────────── */
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab.active{color:var(--navy2);border-bottom-color:var(--orange)}
 
-**HISTORY OF PRESENT ILLNESS:**
-[Narrative of the current problem — onset, duration, character, associated symptoms, what makes it better/worse]
+/* ── PANES ───────────────────────────────────────────────────── */
+.pane{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.pane.active{display:flex}
 
-**REVIEW OF SYSTEMS:**
-[Pertinent positives and negatives mentioned]
+/* ── RECORD PANE ─────────────────────────────────────────────── */
+.record-pane{align-items:center;padding:24px 20px;gap:20px}
 
-**ASSESSMENT:**
-[Dr. Garcia's clinical impressions and diagnoses mentioned]
+.status-badge{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:24px;padding:8px 18px;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.3s}
+.status-badge.recording{background:var(--redlt);border-color:var(--red);color:var(--red)}
+.status-badge.processing{background:var(--amberlt);border-color:var(--amber);color:var(--amber)}
+.status-badge.done{background:var(--greenlt);border-color:var(--green);color:var(--green)}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.status-badge.recording .pulse-dot{background:var(--red);animation:pulse 1.2s ease-in-out infinite}
+.status-badge.processing .pulse-dot{background:var(--amber);animation:pulse 0.8s ease-in-out infinite}
+.status-badge.done .pulse-dot{background:var(--green)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.75)}}
 
-**PLAN:**
-[Treatments, prescriptions, referrals, follow-up, labs, imaging ordered]
+.timer{font-family:'DM Mono',monospace;font-size:48px;font-weight:400;color:var(--navy);letter-spacing:-1px;line-height:1}
+.timer.recording{color:var(--red)}
 
-**PATIENT EDUCATION:**
-[Instructions given to the patient, if any]
+/* Waveform visualizer */
+.waveform{width:100%;height:48px;display:flex;align-items:center;justify-content:center;gap:3px;opacity:0.3;transition:opacity 0.3s}
+.waveform.active{opacity:1}
+.bar{width:4px;border-radius:2px;background:linear-gradient(to top,var(--navy),var(--teal));min-height:4px;transition:height 0.1s ease}
 
-RULES:
-- Include ONLY what was actually said in the transcript. Never add clinical content that wasn't spoken.
-- If a section has no content from the transcript, write "Not documented this visit."
-- Clean up filler words (um, uh, like) and false starts naturally.
-- Preserve Dr. Garcia's exact clinical language and phrasing.
-- Flag anything that sounds incomplete or unclear with [REVIEW] tag.
-- This note requires physician review and approval before becoming a legal record.`;
+/* Record button */
+.record-btn-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.record-btn-ring{width:120px;height:120px;border-radius:50%;background:rgba(220,38,38,0.1);display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+.record-btn-ring.recording{background:rgba(220,38,38,0.15);animation:ring-pulse 2s ease-in-out infinite}
+@keyframes ring-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.record-btn{width:96px;height:96px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:linear-gradient(145deg,var(--red),#b91c1c);box-shadow:0 8px 24px rgba(220,38,38,0.4)}
+.record-btn:hover{transform:scale(1.04);box-shadow:0 12px 28px rgba(220,38,38,0.5)}
+.record-btn:active{transform:scale(0.96)}
+.record-btn.recording{background:linear-gradient(145deg,#374151,#1f2937);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.record-btn svg{pointer-events:none}
 
-export default {
-  async fetch(request, env) {
-    // CORS preflight
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS });
-    }
+.record-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.6;max-width:220px}
 
-    // Health check
-    if (request.method === 'GET') {
-      return new Response(JSON.stringify({ status: 'VoiceRx API v2: ok', whisper: true }), {
-        status: 200,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
+/* Processing overlay */
+.processing-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;text-align:center;display:none;flex-direction:column;align-items:center;gap:12px}
+.processing-card.show{display:flex}
+.processing-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing-step{font-size:14px;font-weight:500;color:var(--slate)}
+.processing-sub{font-size:12px;color:var(--muted)}
+
+/* ── NOTE REVIEW PANE ────────────────────────────────────────── */
+.review-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0;gap:8px}
+.review-toolbar-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.review-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px;background:var(--amberlt);color:var(--amber);border:1px solid #fbbf24;white-space:nowrap}
+.review-badge.approved{background:var(--greenlt);color:var(--green);border-color:#86efac}
+.review-patient{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-sm{border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.15s;white-space:nowrap}
+.btn-approve{background:linear-gradient(135deg,var(--green),#15803d);color:#fff;box-shadow:0 2px 6px rgba(22,163,74,0.3)}
+.btn-approve:hover{box-shadow:0 4px 10px rgba(22,163,74,0.4)}
+.btn-copy{background:var(--bg);color:var(--slate);border:1px solid var(--border)}
+.btn-copy:hover{background:var(--border)}
+
+.note-body-wrap{flex:1;overflow-y:auto;padding:16px}
+.note-body{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;word-break:break-word;font-family:'Poppins',sans-serif}
+.note-empty{color:var(--muted);font-style:italic;text-align:center;margin-top:60px;font-size:13px;line-height:2}
+.note-section-head{font-weight:600;color:var(--navy2);font-size:12px}
+
+/* Raw transcript toggle */
+.transcript-toggle{padding:10px 16px;border-top:1px solid var(--border);background:var(--white);flex-shrink:0}
+.transcript-toggle-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;color:var(--muted);padding:0}
+.transcript-toggle-btn svg{transition:transform 0.2s}
+.transcript-toggle-btn.open svg{transform:rotate(180deg)}
+.raw-transcript{font-size:11px;color:var(--muted);line-height:1.7;font-family:'DM Mono',monospace;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;display:none;white-space:pre-wrap;word-break:break-word}
+.raw-transcript.show{display:block}
+
+/* ── TODAY'S NOTES PANE ──────────────────────────────────────── */
+.notes-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0}
+.notes-title{font-size:13px;font-weight:600;color:var(--slate)}
+.btn-copy-all{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif}
+.notes-list{flex:1;overflow-y:auto;padding:12px}
+.note-card{background:var(--white);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.note-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)}
+.note-card-meta{display:flex;flex-direction:column;gap:2px}
+.note-card-patient{font-size:13px;font-weight:500;color:var(--text)}
+.note-card-time{font-size:10px;color:var(--muted)}
+.note-card-actions{display:flex;gap:6px}
+.ico-btn{background:var(--bg);border:1px solid var(--border);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.15s}
+.ico-btn:hover{background:var(--border);color:var(--slate)}
+.note-card-body{padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;font-family:'DM Mono',monospace;max-height:80px;overflow:hidden;position:relative}
+.note-card-body::after{content:'';position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(transparent,var(--white))}
+.ttl-badge{font-size:9px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+.notes-empty{color:var(--muted);font-style:italic;text-align:center;margin-top:60px;font-size:13px;line-height:2;padding:0 30px}
+
+/* ── SETTINGS MODAL ──────────────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(2px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--white);border-radius:18px 18px 0 0;width:100%;max-width:520px;padding:24px 20px 36px;max-height:85vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--navy);margin-bottom:18px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:600;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;display:block}
+.form-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Poppins',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--navy2)}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.modal-save{width:100%;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;margin-top:6px}
+.modal-save:hover{opacity:0.92}
+.form-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Poppins',sans-serif;color:var(--text);background:var(--bg);outline:none}
+
+/* ── PATIENT MODAL ───────────────────────────────────────────── */
+.pt-modal-inner{display:flex;flex-direction:column;gap:12px}
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a2535;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:500;z-index:200;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── ERROR CARD ──────────────────────────────────────────────── */
+.error-card{background:var(--redlt);border:1px solid #fca5a5;border-radius:10px;padding:14px;margin:12px;font-size:13px;color:var(--red);display:none}
+.error-card.show{display:block}
+.error-card strong{display:block;margin-bottom:4px;font-size:13px}
+.error-card span{font-size:12px;color:#b91c1c;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-row1">
+      <div>
+        <div class="logo">Voice<span>Rx</span></div>
+        <div class="logo-sub">GFM Clinical Dictation</div>
+      </div>
+      <div class="hdr-right">
+        <div class="nt-toggle">
+          <button class="nt active" onclick="setNoteType('SOAP')" id="nt-soap">SOAP</button>
+          <button class="nt" onclick="setNoteType('HPI')" id="nt-hpi">HPI</button>
+          <button class="nt" onclick="setNoteType('FU')" id="nt-fu">F/U</button>
+        </div>
+        <button class="gear-btn" onclick="openSettings()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="physician-bar">
+      <div class="phys-name">Dr. Theresa Garcia, MD</div>
+      <div class="phys-practice">Garcia Family Medicine · Blue Springs, MO</div>
+    </div>
+
+    <div class="patient-bar">
+      <div class="pt-field empty full-width" id="pt-name-field" onclick="openPatientModal()">
+        <div class="ptl">Patient Name</div>
+        <div class="ptv" id="pt-name-display">Tap to enter</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tab-record" onclick="switchTab('record')">🎙 Record</div>
+    <div class="tab" id="tab-review" onclick="switchTab('review')">📋 Review</div>
+    <div class="tab" id="tab-notes" onclick="switchTab('notes')">📁 Today</div>
+  </div>
+
+  <!-- RECORD PANE -->
+  <div class="pane active record-pane" id="pane-record">
+
+    <div class="status-badge" id="status-badge">
+      <div class="pulse-dot" id="pulse-dot"></div>
+      <span id="status-text">Ready to record</span>
+    </div>
+
+    <div class="timer" id="timer">0:00</div>
+
+    <!-- Waveform -->
+    <div class="waveform" id="waveform">
+      <div class="bar" id="b0" style="height:8px"></div>
+      <div class="bar" id="b1" style="height:16px"></div>
+      <div class="bar" id="b2" style="height:24px"></div>
+      <div class="bar" id="b3" style="height:12px"></div>
+      <div class="bar" id="b4" style="height:32px"></div>
+      <div class="bar" id="b5" style="height:20px"></div>
+      <div class="bar" id="b6" style="height:28px"></div>
+      <div class="bar" id="b7" style="height:14px"></div>
+      <div class="bar" id="b8" style="height:36px"></div>
+      <div class="bar" id="b9" style="height:18px"></div>
+      <div class="bar" id="b10" style="height:22px"></div>
+      <div class="bar" id="b11" style="height:10px"></div>
+      <div class="bar" id="b12" style="height:30px"></div>
+      <div class="bar" id="b13" style="height:16px"></div>
+      <div class="bar" id="b14" style="height:26px"></div>
+    </div>
+
+    <!-- Record button -->
+    <div class="record-btn-wrap">
+      <div class="record-btn-ring" id="record-ring">
+        <button class="record-btn" id="record-btn" onclick="toggleRecording()">
+          <!-- Mic icon -->
+          <svg id="btn-mic-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+          <!-- Stop icon -->
+          <svg id="btn-stop-icon" width="36" height="36" viewBox="0 0 24 24" fill="#fff" style="display:none">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="record-hint" id="record-hint">
+      Tap to begin recording.<br>Place phone on desk during patient visit.
+    </div>
+
+    <!-- Processing card -->
+    <div class="processing-card" id="processing-card">
+      <div class="processing-spinner"></div>
+      <div class="processing-step" id="processing-step">Transcribing with Whisper…</div>
+      <div class="processing-sub" id="processing-sub">This takes about 30–60 seconds</div>
+    </div>
+
+    <!-- Error card -->
+    <div class="error-card" id="error-card">
+      <strong id="error-title">Error</strong>
+      <span id="error-detail"></span>
+    </div>
+
+  </div>
+
+  <!-- REVIEW PANE -->
+  <div class="pane" id="pane-review" style="flex-direction:column">
+    <div class="review-toolbar">
+      <div class="review-toolbar-left">
+        <div class="review-badge" id="review-badge">PENDING REVIEW</div>
+        <div class="review-patient" id="review-patient-label">—</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-sm btn-copy" id="btn-copy-note" onclick="copyNote()">Copy</button>
+        <button class="btn-sm btn-approve" id="btn-approve" onclick="approveNote()">✓ Approve</button>
+      </div>
+    </div>
+
+    <div class="note-body-wrap">
+      <div class="note-body" id="note-body">
+        <div class="note-empty">No note yet.<br>Record a patient encounter<br>and it will appear here.</div>
+      </div>
+    </div>
+
+    <div class="transcript-toggle" id="transcript-section" style="display:none">
+      <button class="transcript-toggle-btn" id="transcript-toggle-btn" onclick="toggleTranscript()">
+        <span>Raw Whisper transcript</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="raw-transcript" id="raw-transcript"></div>
+    </div>
+  </div>
+
+  <!-- TODAY'S NOTES PANE -->
+  <div class="pane" id="pane-notes" style="flex-direction:column">
+    <div class="notes-toolbar">
+      <div class="notes-title" id="notes-count-label">Today's Approved Notes</div>
+      <button class="btn-copy-all" onclick="copyAllNotes()">Copy All</button>
+    </div>
+    <div class="notes-list" id="notes-list">
+      <div class="notes-empty">No approved notes yet.<br>Approve a note to add it here.<br>Notes are cleared after 72 hours.</div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Settings</div>
+
+    <div class="form-group">
+      <label class="form-label">Access Token</label>
+      <input type="password" class="form-input" id="s-token" placeholder="Your VoiceRx token" autocomplete="off">
+      <div class="form-hint">Provided by GEG Ventures. Required to use the service.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Worker URL</label>
+      <input type="text" class="form-input" id="s-worker" placeholder="https://voicerx-api.workers.dev">
+      <div class="form-hint">Leave as default unless told otherwise.</div>
+    </div>
+
+    <button class="modal-save" onclick="saveSettings()">Save Settings</button>
+  </div>
+</div>
+
+<!-- PATIENT MODAL -->
+<div class="modal-bg" id="patient-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Patient Info</div>
+    <div class="pt-modal-inner">
+      <div class="form-group">
+        <label class="form-label">Patient Name</label>
+        <input type="text" class="form-input" id="m-patient-name" placeholder="First Last" autocomplete="off">
+        <div class="form-hint">Used in the note header only. Not stored or transmitted separately.</div>
+      </div>
+    </div>
+    <button class="modal-save" onclick="savePatient()" style="margin-top:16px">Set Patient</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────
+const WORKER_URL_DEFAULT = 'https://voicerx-api.winter-shadow-e82d.workers.dev';
+const NOTES_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
+
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let timerInterval = null;
+let timerSeconds = 0;
+let waveInterval = null;
+let analyser = null;
+let audioCtx = null;
+let sourceNode = null;
+let currentNoteType = 'SOAP';
+let currentTranscript = '';
+let currentNote = '';
+let currentPatientName = '';
+let noteApproved = false;
+
+// ── SETTINGS ─────────────────────────────────────────────────────────
+function loadSettings() {
+  return {
+    token: localStorage.getItem('vrx_token') || '',
+    workerUrl: localStorage.getItem('vrx_worker') || WORKER_URL_DEFAULT,
+  };
+}
+function openSettings() {
+  const s = loadSettings();
+  document.getElementById('s-token').value = s.token;
+  document.getElementById('s-worker').value = s.workerUrl;
+  document.getElementById('settings-modal').classList.add('show');
+}
+function saveSettings() {
+  const token = document.getElementById('s-token').value.trim();
+  const workerUrl = document.getElementById('s-worker').value.trim() || WORKER_URL_DEFAULT;
+  if (token) localStorage.setItem('vrx_token', token);
+  localStorage.setItem('vrx_worker', workerUrl);
+  document.getElementById('settings-modal').classList.remove('show');
+  toast('Settings saved');
+}
+document.getElementById('settings-modal').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('show');
+});
+
+// ── PATIENT ──────────────────────────────────────────────────────────
+function openPatientModal() {
+  document.getElementById('m-patient-name').value = currentPatientName;
+  document.getElementById('patient-modal').classList.add('show');
+  setTimeout(() => document.getElementById('m-patient-name').focus(), 300);
+}
+function savePatient() {
+  currentPatientName = document.getElementById('m-patient-name').value.trim();
+  const field = document.getElementById('pt-name-field');
+  document.getElementById('pt-name-display').textContent = currentPatientName || 'Tap to enter';
+  field.classList.toggle('empty', !currentPatientName);
+  document.getElementById('patient-modal').classList.remove('show');
+}
+document.getElementById('patient-modal').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('show');
+});
+
+// ── NOTE TYPE ────────────────────────────────────────────────────────
+function setNoteType(type) {
+  currentNoteType = type;
+  ['soap','hpi','fu'].forEach(t => document.getElementById('nt-'+t).classList.remove('active'));
+  document.getElementById('nt-'+type.toLowerCase()).classList.add('active');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['record','review','notes'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('pane-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+// ── TIMER ─────────────────────────────────────────────────────────────
+function startTimer() {
+  timerSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// ── WAVEFORM ──────────────────────────────────────────────────────────
+function startWaveform(stream) {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    sourceNode = audioCtx.createMediaStreamSource(stream);
+    sourceNode.connect(analyser);
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const bars = Array.from({length:15}, (_,i) => document.getElementById('b'+i));
+    const waveEl = document.getElementById('waveform');
+    waveEl.classList.add('active');
+
+    waveInterval = setInterval(() => {
+      analyser.getByteFrequencyData(data);
+      bars.forEach((bar, i) => {
+        const val = data[Math.floor(i * data.length / bars.length)] || 0;
+        const h = 4 + (val / 255) * 44;
+        bar.style.height = h + 'px';
       });
-    }
-
-    if (request.method !== 'POST') {
-      return json({ error: 'Method not allowed' }, 405);
-    }
-
-    const url = new URL(request.url);
-
-    // ── Route: /transcribe (Whisper + Anthropic pipeline) ─────────────
-    if (url.pathname === '/transcribe') {
-      return handleTranscribe(request, env);
-    }
-
-    // ── Route: / (legacy Anthropic passthrough) ───────────────────────
-    return handleLegacy(request, env);
-  },
-};
-
-// ─────────────────────────────────────────────────────────────────────
-// TRANSCRIBE — two-step: Whisper → Anthropic
-// ─────────────────────────────────────────────────────────────────────
-async function handleTranscribe(request, env) {
-  // Validate secrets
-  if (!env.OPENAI_API_KEY) return json({ error: 'Server not configured (missing OPENAI_API_KEY)' }, 500);
-  if (!env.ANTHROPIC_API_KEY) return json({ error: 'Server not configured (missing ANTHROPIC_API_KEY)' }, 500);
-
-  // Parse multipart form
-  let formData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return json({ error: 'Expected multipart/form-data with audio file and token' }, 400);
+    }, 80);
+  } catch(e) {
+    // waveform is cosmetic — fail silently
   }
-
-  // Token gate
-  const token = formData.get('token');
-  const validTokens = String(env.CLIENT_TOKENS || '')
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean);
-  if (!token || !validTokens.includes(token)) {
-    return json({ error: 'Invalid or missing token' }, 401);
-  }
-
-  // Audio file
-  const audioFile = formData.get('audio');
-  if (!audioFile || typeof audioFile === 'string') {
-    return json({ error: 'audio field must be a file' }, 400);
-  }
-
-  // Optional metadata
-  const patientName = formData.get('patientName') || 'Patient';
-  const noteType = formData.get('noteType') || 'SOAP';
-  const visitDate = formData.get('visitDate') || new Date().toLocaleDateString('en-US');
-
-  // ── Step 1: Whisper transcription ─────────────────────────────────
-  const whisperForm = new FormData();
-  whisperForm.append('file', audioFile, 'encounter.webm');
-  whisperForm.append('model', 'whisper-1');
-  whisperForm.append('language', 'en');
-  whisperForm.append('response_format', 'text');
-
-  let transcript;
-  try {
-    const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}` },
-      body: whisperForm,
-    });
-
-    if (!whisperRes.ok) {
-      const errText = await whisperRes.text();
-      return json({ error: 'Whisper transcription failed', detail: errText }, 502);
-    }
-
-    transcript = await whisperRes.text();
-    if (!transcript || transcript.trim().length === 0) {
-      return json({ error: 'No speech detected in recording' }, 422);
-    }
-  } catch (err) {
-    return json({ error: 'Whisper connection failed', detail: String(err) }, 502);
-  }
-
-  // ── Step 2: Anthropic note formatting ─────────────────────────────
-  const userMessage = `Patient: ${patientName}
-Visit Date: ${visitDate}
-Note Type: ${noteType}
-
-RAW TRANSCRIPT:
-${transcript}
-
-Please format this into a structured clinical note.`;
-
-  let formattedNote;
-  try {
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: MAX_TOKENS,
-        system: CLINICAL_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
-    });
-
-    if (!anthropicRes.ok) {
-      const errText = await anthropicRes.text();
-      return json({ error: 'Anthropic formatting failed', detail: errText }, 502);
-    }
-
-    const anthropicData = await anthropicRes.json();
-    formattedNote = anthropicData.content?.[0]?.text || '';
-
-    if (!formattedNote) {
-      return json({ error: 'Anthropic returned empty response' }, 502);
-    }
-  } catch (err) {
-    return json({ error: 'Anthropic connection failed', detail: String(err) }, 502);
-  }
-
-  // ── Return both transcript and formatted note ──────────────────────
-  return json({ transcript, note: formattedNote, patientName, visitDate });
+}
+function stopWaveform() {
+  clearInterval(waveInterval);
+  waveInterval = null;
+  document.getElementById('waveform').classList.remove('active');
+  Array.from({length:15}, (_,i) => document.getElementById('b'+i)).forEach(b => b.style.height = '8px');
+  try { sourceNode && sourceNode.disconnect(); } catch(e){}
+  try { audioCtx && audioCtx.close(); } catch(e){}
+  analyser = null; sourceNode = null; audioCtx = null;
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// LEGACY — original Anthropic passthrough (unchanged)
-// ─────────────────────────────────────────────────────────────────────
-async function handleLegacy(request, env) {
-  let body;
+// ── RECORDING ────────────────────────────────────────────────────────
+async function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  const s = loadSettings();
+  if (!s.token) {
+    toast('⚙️ Open Settings and enter your token first');
+    openSettings();
+    return;
+  }
+
+  hideError();
+
   try {
-    body = await request.json();
-  } catch {
-    return json({ error: 'Invalid JSON body' }, 400);
-  }
-
-  const { token, systemPrompt, messages } = body || {};
-
-  const validTokens = String(env.CLIENT_TOKENS || '')
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean);
-  if (!token || !validTokens.includes(token)) {
-    return json({ error: 'Invalid or missing token' }, 401);
-  }
-
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return json({ error: 'messages array required' }, 400);
-  }
-  if (!env.ANTHROPIC_API_KEY) {
-    return json({ error: 'Server not configured (missing ANTHROPIC_API_KEY)' }, 500);
-  }
-
-  let upstream;
-  try {
-    upstream = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: MAX_TOKENS,
-        system: systemPrompt || '',
-        messages,
-      }),
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        sampleRate: 16000,
+      }
     });
-  } catch (err) {
-    return json({ error: 'Upstream connection failed', detail: String(err) }, 502);
+
+    audioChunks = [];
+    const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4']
+      .find(t => MediaRecorder.isTypeSupported(t)) || '';
+
+    mediaRecorder = new MediaRecorder(stream, mimeType ? {mimeType} : {});
+    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => processRecording(stream);
+    mediaRecorder.start(1000); // collect every second
+
+    isRecording = true;
+    setRecordingUI(true);
+    startTimer();
+    startWaveform(stream);
+
+  } catch(err) {
+    if (err.name === 'NotAllowedError') {
+      showError('Microphone permission denied', 'Allow microphone access in your browser or phone settings, then try again.');
+    } else {
+      showError('Could not start recording', err.message);
+    }
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  }
+  stopTimer();
+  stopWaveform();
+  isRecording = false;
+  setRecordingUI(false);
+}
+
+function setRecordingUI(recording) {
+  const badge = document.getElementById('status-badge');
+  const statusText = document.getElementById('status-text');
+  const timer = document.getElementById('timer');
+  const btn = document.getElementById('record-btn');
+  const ring = document.getElementById('record-ring');
+  const micIcon = document.getElementById('btn-mic-icon');
+  const stopIcon = document.getElementById('btn-stop-icon');
+  const hint = document.getElementById('record-hint');
+
+  badge.className = 'status-badge' + (recording ? ' recording' : '');
+  statusText.textContent = recording ? 'Recording encounter…' : 'Ready to record';
+  timer.className = 'timer' + (recording ? ' recording' : '');
+  btn.className = 'record-btn' + (recording ? ' recording' : '');
+  ring.className = 'record-btn-ring' + (recording ? ' recording' : '');
+  micIcon.style.display = recording ? 'none' : '';
+  stopIcon.style.display = recording ? '' : 'none';
+  hint.textContent = recording
+    ? 'Recording… Tap the stop button when the visit is complete.'
+    : 'Tap to begin recording. Place phone on desk during patient visit.';
+}
+
+async function processRecording(stream) {
+  const audioBlob = new Blob(audioChunks, {type: mediaRecorder.mimeType || 'audio/webm'});
+  const durationSec = timerSeconds;
+
+  // Show processing UI
+  const processingCard = document.getElementById('processing-card');
+  const processingStep = document.getElementById('processing-step');
+  const processingSubtext = document.getElementById('processing-sub');
+  const badge = document.getElementById('status-badge');
+  const statusText = document.getElementById('status-text');
+
+  processingCard.classList.add('show');
+  badge.className = 'status-badge processing';
+  statusText.textContent = 'Processing…';
+  document.getElementById('timer').className = 'timer';
+  document.getElementById('record-hint').textContent = '';
+
+  const s = loadSettings();
+  const patientName = currentPatientName || 'Patient';
+  const visitDate = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+
+  try {
+    // Build multipart form
+    const formData = new FormData();
+    formData.append('token', s.token);
+    formData.append('audio', audioBlob, 'encounter.webm');
+    formData.append('patientName', patientName);
+    formData.append('noteType', currentNoteType);
+    formData.append('visitDate', visitDate);
+
+    // Step 1 label
+    processingStep.textContent = 'Transcribing with Whisper…';
+    processingSubtext.textContent = `${Math.round(durationSec/60)}m ${durationSec%60}s recording — est. ${Math.max(15, Math.round(durationSec * 0.3))}s`;
+
+    const res = await fetch((s.workerUrl || WORKER_URL_DEFAULT) + '/transcribe', {
+      method: 'POST',
+      body: formData,
+    });
+
+    // Step 2 label (happens inside worker but we update optimistically)
+    processingStep.textContent = 'Formatting clinical note…';
+    processingSubtext.textContent = 'Almost done';
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({error: 'Unknown error', detail: ''}));
+      throw new Error(errData.detail || errData.error || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    currentTranscript = data.transcript || '';
+    currentNote = data.note || '';
+    noteApproved = false;
+
+    // Success
+    processingCard.classList.remove('show');
+    badge.className = 'status-badge done';
+    statusText.textContent = 'Note ready for review';
+    document.getElementById('timer').textContent = '0:00';
+    document.getElementById('record-hint').textContent = 'Tap to record another patient.';
+
+    // Populate review pane
+    renderNote(currentNote, patientName, visitDate);
+    populateTranscript(currentTranscript);
+
+    // Auto-switch to review
+    switchTab('review');
+
+    toast('✓ Note ready — review and approve');
+
+  } catch(err) {
+    processingCard.classList.remove('show');
+    badge.className = 'status-badge';
+    statusText.textContent = 'Ready to record';
+    document.getElementById('record-hint').textContent = 'Tap to begin recording. Place phone on desk during patient visit.';
+    showError('Processing failed', err.message);
+  }
+}
+
+// ── NOTE RENDERING ────────────────────────────────────────────────────
+function renderNote(noteText, patientName, visitDate) {
+  const bodyEl = document.getElementById('note-body');
+  const badge = document.getElementById('review-badge');
+  const patLabel = document.getElementById('review-patient-label');
+
+  badge.className = 'review-badge';
+  badge.textContent = 'PENDING REVIEW';
+  patLabel.textContent = patientName + ' · ' + visitDate;
+
+  if (!noteText) {
+    bodyEl.innerHTML = '<div class="note-empty">No note content returned.</div>';
+    return;
   }
 
-  const text = await upstream.text();
-  return new Response(text, {
-    status: upstream.status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
+  // Escape HTML, convert markdown bold, convert newlines to <br>
+  const html = noteText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="note-section-head">$1</strong>')
+    .replace(/\[REVIEW\]/g, '<span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 5px;font-size:11px;font-weight:600">⚑ REVIEW</span>')
+    .replace(/\n/g, '<br>');
+
+  bodyEl.innerHTML = html;
 }
 
-function json(obj, status = 200) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
+function populateTranscript(transcript) {
+  const section = document.getElementById('transcript-section');
+  const raw = document.getElementById('raw-transcript');
+  if (transcript) {
+    section.style.display = '';
+    raw.textContent = transcript;
+  } else {
+    section.style.display = 'none';
+  }
 }
+
+function toggleTranscript() {
+  const btn = document.getElementById('transcript-toggle-btn');
+  const raw = document.getElementById('raw-transcript');
+  const open = raw.classList.toggle('show');
+  btn.classList.toggle('open', open);
+}
+
+// ── APPROVE ───────────────────────────────────────────────────────────
+function approveNote() {
+  if (!currentNote) return;
+  if (noteApproved) { toast('Already approved'); return; }
+
+  noteApproved = true;
+  document.getElementById('review-badge').className = 'review-badge approved';
+  document.getElementById('review-badge').textContent = '✓ APPROVED';
+
+  const patientName = currentPatientName || 'Patient';
+  const visitDate = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+
+  const savedNote = {
+    id: Date.now(),
+    patient: patientName,
+    visitDate,
+    noteType: currentNoteType,
+    note: currentNote,
+    transcript: currentTranscript,
+    savedAt: Date.now(),
+    expiresAt: Date.now() + 72 * 60 * 60 * 1000,
+  };
+
+  const notes = loadNotes();
+  notes.unshift(savedNote);
+  saveNotes(notes);
+  renderNotesList();
+  toast('✓ Note approved and saved');
+}
+
+function copyNote() {
+  if (!currentNote) { toast('No note to copy'); return; }
+  navigator.clipboard.writeText(currentNote).then(() => toast('Note copied'));
+}
+
+// ── TODAY'S NOTES ─────────────────────────────────────────────────────
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem('vrx_notes_v2');
+    if (!raw) return [];
+    const notes = JSON.parse(raw);
+    const now = Date.now();
+    return notes.filter(n => n.expiresAt > now);
+  } catch { return []; }
+}
+function saveNotes(notes) {
+  localStorage.setItem('vrx_notes_v2', JSON.stringify(notes));
+}
+
+function renderNotesList() {
+  const list = document.getElementById('notes-list');
+  const label = document.getElementById('notes-count-label');
+  const notes = loadNotes();
+
+  label.textContent = `Today's Approved Notes (${notes.length})`;
+
+  if (notes.length === 0) {
+    list.innerHTML = '<div class="notes-empty">No approved notes yet.<br>Approve a note to add it here.<br>Notes are cleared after 72 hours.</div>';
+    return;
+  }
+
+  list.innerHTML = notes.map(n => {
+    const timeStr = new Date(n.savedAt).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+    const hoursLeft = Math.round((n.expiresAt - Date.now()) / 3600000);
+    const preview = n.note.replace(/\*\*/g,'').substring(0, 120) + '…';
+    return `
+    <div class="note-card">
+      <div class="note-card-hdr">
+        <div class="note-card-meta">
+          <div class="note-card-patient">${esc(n.patient)}</div>
+          <div class="note-card-time">${n.visitDate} · ${timeStr} · ${n.noteType}</div>
+        </div>
+        <div class="note-card-actions">
+          <span class="ttl-badge">${hoursLeft}h</span>
+          <button class="ico-btn" onclick="copyNoteById(${n.id})" title="Copy">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="ico-btn" onclick="deleteNote(${n.id})" title="Delete" style="color:var(--red)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="note-card-body">${esc(preview)}</div>
+    </div>`;
+  }).join('');
+}
+
+function copyNoteById(id) {
+  const notes = loadNotes();
+  const n = notes.find(x => x.id === id);
+  if (!n) return;
+  navigator.clipboard.writeText(n.note).then(() => toast('Note copied'));
+}
+
+function deleteNote(id) {
+  const notes = loadNotes().filter(n => n.id !== id);
+  saveNotes(notes);
+  renderNotesList();
+  toast('Note removed');
+}
+
+function copyAllNotes() {
+  const notes = loadNotes();
+  if (notes.length === 0) { toast('No notes to copy'); return; }
+  const combined = notes.map(n =>
+    `PATIENT: ${n.patient}\nDATE: ${n.visitDate}\nNOTE TYPE: ${n.noteType}\n\n${n.note}`
+  ).join('\n\n' + '─'.repeat(60) + '\n\n');
+  navigator.clipboard.writeText(combined).then(() => toast(`Copied ${notes.length} note${notes.length>1?'s':''}`));
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function showError(title, detail) {
+  const card = document.getElementById('error-card');
+  document.getElementById('error-title').textContent = title;
+  document.getElementById('error-detail').textContent = detail || '';
+  card.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('error-card').classList.remove('show');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+(function init() {
+  renderNotesList();
+
+  // Prompt for token on first load
+  const s = loadSettings();
+  if (!s.token) {
+    setTimeout(openSettings, 800);
+  }
+
+  // Auto-expire notes hourly
+  setInterval(renderNotesList, 3600000);
+})();
+</script>
+</body>
+</html>
