@@ -498,6 +498,66 @@ function stopWaveform() {
   analyser = null; sourceNode = null; audioCtx = null;
 }
 
+// ── CRASH-SAFE RECORDING BUFFER (IndexedDB) ───────────────────────────
+// Each audio chunk is written to IndexedDB the moment it is captured, so a
+// long encounter survives the recording tab being killed (Android memory or
+// battery pressure, an accidental reload, or a crash). On the next load we
+// detect the leftover audio and offer to recover and transcribe it, so a
+// dictation can no longer be silently lost. The buffer is cleared only after
+// the note is successfully produced.
+const REC_DB = 'vrx-recovery';
+let recIdbReady = null;
+function recOpen() {
+  if (recIdbReady) return recIdbReady;
+  recIdbReady = new Promise((resolve, reject) => {
+    const req = indexedDB.open(REC_DB, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('chunks')) db.createObjectStore('chunks', { autoIncrement: true });
+      if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return recIdbReady;
+}
+function recWrite(stores, fn) {
+  return recOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(stores, 'readwrite');
+    fn(tx);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  }));
+}
+async function recStart(meta) {
+  try { await recWrite(['chunks','meta'], tx => {
+    tx.objectStore('chunks').clear();
+    tx.objectStore('meta').put(meta, 'session');
+  }); } catch (e) { /* best-effort */ }
+}
+async function recSaveChunk(blob) {
+  try { await recWrite(['chunks'], tx => tx.objectStore('chunks').add(blob)); } catch (e) {}
+}
+async function recLoad() {
+  try {
+    const db = await recOpen();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(['chunks','meta'], 'readonly');
+      const chunksReq = tx.objectStore('chunks').getAll();
+      const metaReq = tx.objectStore('meta').get('session');
+      tx.oncomplete = () => resolve({ chunks: chunksReq.result || [], meta: metaReq.result || null });
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) { return { chunks: [], meta: null }; }
+}
+async function recClear() {
+  try { await recWrite(['chunks','meta'], tx => {
+    tx.objectStore('chunks').clear();
+    tx.objectStore('meta').clear();
+  }); } catch (e) {}
+}
+
 // ── SCREEN WAKE LOCK ──────────────────────────────────────────────────
 // Keeps the screen awake while recording. Without this, the phone auto-locks
 // after a couple of minutes, iOS suspends the microphone, and the recording
@@ -554,8 +614,13 @@ async function startRecording() {
     const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4']
       .find(t => MediaRecorder.isTypeSupported(t)) || '';
 
+    // Start a fresh crash-safe buffer for this encounter
+    recStart({ patientName: currentPatientName || 'Patient', noteType: currentNoteType, mimeType, startedAt: Date.now() });
+
     mediaRecorder = new MediaRecorder(stream, mimeType ? {mimeType} : {});
-    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) { audioChunks.push(e.data); recSaveChunk(e.data); }
+    };
     mediaRecorder.onstop = () => processRecording(stream);
     // If the recorder errors out (e.g. iOS suspends it), stop cleanly and
     // process whatever audio we captured rather than losing the encounter.
@@ -618,7 +683,15 @@ function setRecordingUI(recording) {
 
 async function processRecording(stream) {
   const audioBlob = new Blob(audioChunks, {type: mediaRecorder.mimeType || 'audio/webm'});
-  const durationSec = timerSeconds;
+  const visitDate = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  await transcribeAndShow(audioBlob, timerSeconds, currentPatientName || 'Patient', currentNoteType, visitDate);
+}
+
+// Upload an audio blob, transcribe + format it, and show the note. Shared by
+// the normal stop-recording path and the crash-recovery path.
+async function transcribeAndShow(audioBlob, durationSec, patientName, noteType, visitDate) {
+  currentPatientName = patientName;
+  currentNoteType = noteType;
 
   // Show processing UI
   const processingCard = document.getElementById('processing-card');
@@ -634,8 +707,6 @@ async function processRecording(stream) {
   document.getElementById('record-hint').textContent = '';
 
   const s = loadSettings();
-  const patientName = currentPatientName || 'Patient';
-  const visitDate = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
 
   try {
     // Build multipart form
@@ -643,7 +714,7 @@ async function processRecording(stream) {
     formData.append('token', s.token);
     formData.append('audio', audioBlob, 'encounter.webm');
     formData.append('patientName', patientName);
-    formData.append('noteType', currentNoteType);
+    formData.append('noteType', noteType);
     formData.append('visitDate', visitDate);
 
     // Step 1 label
@@ -668,6 +739,9 @@ async function processRecording(stream) {
     currentTranscript = data.transcript || '';
     currentNote = data.note || '';
     noteApproved = false;
+
+    // Note produced successfully — the audio is no longer needed for recovery
+    await recClear();
 
     // Success
     processingCard.classList.remove('show');
@@ -933,6 +1007,55 @@ function hideError() {
   document.getElementById('error-card').classList.remove('show');
 }
 
+// ── CRASH RECOVERY PROMPT ─────────────────────────────────────────────
+// On load, if a previous recording was interrupted before a note was made,
+// offer to transcribe the recovered audio instead of losing the encounter.
+async function checkForRecovery() {
+  if (isRecording) return;
+  let data;
+  try { data = await recLoad(); } catch (e) { return; }
+  if (!data || !data.chunks || data.chunks.length === 0) return;
+  const meta = data.meta || {};
+  const blob = new Blob(data.chunks, { type: meta.mimeType || 'audio/webm' });
+  const durationSec = data.chunks.length; // ~1 chunk per second
+  const patientName = meta.patientName || 'Patient';
+  const noteType = meta.noteType || 'SOAP';
+  const startedAt = meta.startedAt || Date.now();
+  const visitDate = new Date(startedAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  showRecoveryPrompt({ blob, durationSec, patientName, noteType, visitDate, startedAt });
+}
+
+function showRecoveryPrompt({ blob, durationSec, patientName, noteType, visitDate, startedAt }) {
+  const mins = Math.floor(durationSec/60), secs = durationSec%60;
+  const when = new Date(startedAt).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const overlay = document.createElement('div');
+  overlay.id = 'recovery-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:18px';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:12px;max-width:460px;width:100%;font-family:'Poppins',sans-serif;overflow:hidden">
+      <div style="padding:16px 18px 6px;font-weight:600;color:#1e293b;font-size:16px">Recover unfinished recording?</div>
+      <div style="padding:0 18px 14px;font-size:13px;color:#475569;line-height:1.5">
+        A recording was interrupted before a note was created.<br>
+        <b>${esc(patientName)}</b> · ${esc(noteType)} · ${mins}m ${secs}s · started ${esc(when)}<br>
+        Transcribe it now, or discard it.
+      </div>
+      <div style="display:flex;gap:8px;padding:0 18px 16px">
+        <button id="rec-discard" style="flex:1;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:7px;padding:10px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif">Discard</button>
+        <button id="rec-go" style="flex:2;background:linear-gradient(135deg,#1e3a5f,#2d4f7c);color:#fff;border:none;border-radius:7px;padding:10px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif">Transcribe it</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('rec-discard').onclick = async () => {
+    overlay.remove();
+    await recClear();
+    toast('Recording discarded');
+  };
+  document.getElementById('rec-go').onclick = async () => {
+    overlay.remove();
+    await transcribeAndShow(blob, durationSec, patientName, noteType, visitDate);
+  };
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────
 (function init() {
   renderNotesList();
@@ -942,6 +1065,10 @@ function hideError() {
   if (!s.token) {
     setTimeout(openSettings, 800);
   }
+
+  // Offer to recover any recording interrupted by a crash, reload, or the
+  // tab being killed mid-encounter.
+  checkForRecovery();
 
   // Auto-expire notes hourly
   setInterval(renderNotesList, 3600000);
