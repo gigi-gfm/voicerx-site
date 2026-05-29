@@ -1,0 +1,8 @@
+name = "voicerx-tess"
+compatibility_date = "2026-05-29"
+
+# voicerx-tess is a static-assets Worker: it serves the dictation page
+# (public/index.html) at https://voicerx-tess.winter-shadow-e82d.workers.dev
+# There is no server code — just the HTML asset.
+[assets]
+directory = "./public"
