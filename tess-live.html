@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceRx — Clinical Dictation</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f1e3d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VoiceRx">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2e5a;
+  --navy-dark: #0f1e3d;
+  --teal: #0d7377;
+  --teal-light: #14a085;
+  --amber: #e8a838;
+  --amber-light: #f5c05a;
+  --white: #ffffff;
+  --gray-50: #f8f9fc;
+  --gray-100: #eef0f5;
+  --gray-200: #d8dce8;
+  --gray-400: #9097b0;
+  --gray-600: #5a6080;
+  --text: #1a2038;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(10,20,60,0.10);
+  --shadow-lg: 0 8px 40px rgba(10,20,60,0.16);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--gray-50);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* NAV */
+.nav {
+  background: var(--navy-dark);
+  padding: 0 24px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo .rx { color: var(--amber); }
+.nav-logo .mic-icon { font-size: 18px; }
+.nav-actions { display:flex; gap:10px; align-items:center; }
+.nav-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.8);
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav-btn.primary {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--navy-dark);
+  font-weight: 600;
+}
+.nav-btn.primary:hover { background: var(--amber-light); }
+
+/* LAYOUT */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* PATIENT CARD */
+.patient-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  border: 1px solid var(--gray-100);
+}
+.patient-card h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 14px;
+}
+.patient-fields {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 820px) {
+  .patient-fields { grid-template-columns: 1fr 1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .patient-fields { grid-template-columns: 1fr 1fr; }
+}
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: 5px;
+}
+.field input, .field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--gray-50);
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: #fff;
+}
+
+/* RECORDER CARD */
+.recorder-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  border: 1px solid var(--gray-100);
+  text-align: center;
+}
+
+/* WAVEFORM */
+.waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 48px;
+  margin: 0 auto 20px;
+}
+.waveform-bar {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--gray-200);
+  height: 8px;
+  transition: height 0.1s;
+}
+.waveform.active .waveform-bar {
+  background: var(--teal);
+  animation: wave 0.8s ease-in-out infinite;
+}
+.waveform.active .waveform-bar:nth-child(1) { animation-delay: 0s; }
+.waveform.active .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+.waveform.active .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+.waveform.active .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+.waveform.active .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+.waveform.active .waveform-bar:nth-child(6) { animation-delay: 0.3s; }
+.waveform.active .waveform-bar:nth-child(7) { animation-delay: 0.2s; }
+.waveform.active .waveform-bar:nth-child(8) { animation-delay: 0.1s; }
+.waveform.active .waveform-bar:nth-child(9) { animation-delay: 0s; }
+@keyframes wave {
+  0%, 100% { height: 6px; }
+  50% { height: 36px; }
+}
+
+.timer {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+}
+.status-text {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-bottom: 24px;
+  min-height: 20px;
+}
+.status-text.active { color: var(--teal); }
+.status-text.processing { color: var(--amber); }
+.status-text.done { color: var(--success); }
+.status-text.error { color: var(--danger); }
+.status-text.warning { color: #d97706; }
+
+/* RECORD BUTTON */
+.record-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 30px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-lg);
+  background: var(--teal);
+  color: white;
+}
+.record-btn:hover { transform: scale(1.05); }
+.record-btn.recording {
+  background: var(--danger);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
+}
+.record-btn:disabled {
+  background: var(--gray-200);
+  color: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+  animation: none;
+  box-shadow: none;
+}
+
+.note-type-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+.note-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-50);
+  font-size: 12px;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+}
+.note-chip:hover { border-color: var(--teal); color: var(--teal); }
+.note-chip.selected {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+  font-weight: 500;
+}
+
+/* TRANSCRIPT CARD */
+.transcript-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  border: 1px solid var(--gray-100);
+  display: none;
+}
+.transcript-card.visible { display: block; }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+.card-actions { display: flex; gap: 8px; }
+.action-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.action-btn.outline {
+  background: none;
+  border: 1px solid var(--gray-200);
+  color: var(--gray-600);
+}
+.action-btn.outline:hover { border-color: var(--teal); color: var(--teal); }
+.action-btn.primary {
+  background: var(--navy);
+  color: #fff;
+}
+.action-btn.primary:hover { background: var(--navy-dark); }
+.action-btn.amber {
+  background: var(--amber);
+  color: var(--navy-dark);
+  font-weight: 600;
+}
+.action-btn.amber:hover { background: var(--amber-light); }
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.transcript-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* SOAP CARD */
+.soap-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  border: 1px solid var(--gray-100);
+  display: none;
+}
+.soap-card.visible { display: block; }
+.soap-section { margin-bottom: 20px; }
+.soap-section:last-child { margin-bottom: 0; }
+.soap-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.soap-content {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* NOTES LIST */
+.notes-list-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-100);
+}
+.note-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.note-item:last-child { border-bottom: none; }
+.note-item:hover { background: var(--gray-50); margin: 0 -8px; padding: 12px 8px; border-radius: 6px; }
+.note-meta { flex: 1; min-width: 0; }
+.note-patient { font-weight: 600; font-size: 13px; color: var(--navy); }
+.note-date { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.note-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.note-badge.soap { background: #e0f2fe; color: #0369a1; }
+.empty-state {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--gray-400);
+  font-size: 13px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--navy-dark);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 1000;
+  max-width: 300px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--teal); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: #d97706; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,20,50,0.6);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(12px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--navy);
+  margin-bottom: 20px;
+}
+.modal-field { margin-bottom: 16px; }
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: 6px;
+}
+.modal-field input, .modal-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--gray-50);
+}
+.modal-field input:focus, .modal-field select:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: #fff;
+}
+.custom-pronouns-field { display: none; }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.modal-btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.modal-btn.cancel {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+.modal-btn.cancel:hover { background: var(--gray-200); }
+.modal-btn.confirm {
+  background: var(--teal);
+  color: #fff;
+}
+.modal-btn.confirm:hover { background: var(--teal-light); }
+
+/* SETTINGS MODAL */
+.settings-field { margin-bottom: 16px; }
+.settings-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: 6px;
+}
+.settings-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-family: 'Poppins', monospace;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--gray-50);
+}
+.settings-field input:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: #fff;
+}
+.settings-note {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-top: 4px;
+}
+
+/* SECTION TABS */
+.section-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--gray-100);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+.section-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--gray-400);
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  font-family: 'Poppins', sans-serif;
+}
+.section-tab.active {
+  background: var(--white);
+  color: var(--navy);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* SAVE INDICATOR */
+.save-indicator {
+  font-size: 11px;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.save-indicator.saved { color: var(--success); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <span class="mic-icon">🎙️</span>
+    Voice<span class="rx">Rx</span>
+  </div>
+  <div class="nav-actions">
+    <span id="providerBadge" onclick="openProviderSettings()" style="color:rgba(255,255,255,0.85); font-size:12px; padding:4px 10px; border:1px solid rgba(255,255,255,0.2); border-radius:14px; display:none; cursor:pointer;" title="Click to edit profile"></span>
+    <button class="nav-btn" id="adminAddProviderBtn" onclick="openAddProvider()" style="display:none;">+ Provider</button>
+    <button class="nav-btn" onclick="openSettings()">⚙ Settings</button>
+    <button class="nav-btn primary" onclick="startNewEncounter()">+ New</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- SECTION TABS -->
+  <div class="section-tabs">
+    <button class="section-tab active" onclick="showSection('record')">🎙 Record</button>
+    <button class="section-tab" onclick="showSection('notes')">📋 Notes</button>
+  </div>
+
+  <!-- RECORD SECTION -->
+  <div class="section active" id="section-record">
+
+    <!-- PATIENT CARD -->
+    <div class="patient-card">
+      <h3>Patient Info</h3>
+      <div class="patient-fields">
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="patientName" placeholder="Full name" autocomplete="off" list="patientNameOptions">
+          <datalist id="patientNameOptions"></datalist>
+        </div>
+        <div class="field" style="grid-column: span 2;">
+          <label>Chief Complaint</label>
+          <input type="text" id="chiefComplaint" placeholder="e.g. Weight management, knee pain, follow-up DM" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Pronouns</label>
+          <select id="pronounsSelect">
+            <option value="she/her">she/her</option>
+            <option value="he/him">he/him</option>
+            <option value="they/them">they/them</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Visit Date</label>
+          <input type="date" id="visitDate">
+        </div>
+        <div class="field">
+          <label>Note Language</label>
+          <select id="noteLang">
+            <option value="en">🇺🇸 English</option>
+            <option value="es">🇲🇽 Español</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Note Type</label>
+          <select id="noteTypeSelect">
+            <option value="SOAP">SOAP Note</option>
+            <option value="H&P">H&P</option>
+            <option value="Followup">Follow-Up</option>
+            <option value="Annual">Annual Exam</option>
+            <option value="Urgent">Urgent Care</option>
+            <option value="Procedure">Procedure</option>
+            <option value="Mental Health">Mental Health</option>
+            <option value="Weight Management">Weight Management</option>
+            <option value="DOT Physical">DOT Physical</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECORDER CARD -->
+    <div class="recorder-card">
+      <div class="waveform" id="waveform">
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+        <div class="waveform-bar"></div>
+      </div>
+      <div class="timer" id="timer">0:00</div>
+      <div class="status-text" id="statusText">Ready to record</div>
+      <div id="langBadge" style="font-size:12px; color:var(--gray-400); margin-bottom:16px; margin-top:-10px;"></div>
+      <button class="record-btn" id="recordBtn" onclick="toggleRecording()">🎙</button>
+      <div style="margin-top:8px;">
+        <a href="javascript:void(0)" onclick="openPasteTranscript()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">…or paste an existing transcript</a>
+      </div>
+      <div class="note-type-row" id="noteChips"></div>
+    </div>
+
+    <!-- TRANSCRIPT CARD -->
+    <div class="transcript-card" id="transcriptCard">
+      <div class="card-header">
+        <span class="card-title">Transcript</span>
+        <div class="card-actions" style="flex-wrap:wrap;">
+          <div class="save-indicator" id="saveIndicator">💾 Auto-saved</div>
+          <button class="action-btn outline" id="editTranscriptBtn" onclick="enableTranscriptEditing()">Edit</button>
+          <button class="action-btn primary" id="saveTranscriptBtn" onclick="saveTranscriptEdit()" style="display:none;">Save Edit</button>
+          <button class="action-btn outline" id="cancelEditTranscriptBtn" onclick="cancelTranscriptEdit()" style="display:none;">Cancel</button>
+          <button class="action-btn outline" onclick="copyTranscript()">Copy</button>
+          <button class="action-btn amber" id="formatBtn" onclick="formatSOAP()">Format SOAP ✦</button>
+        </div>
+      </div>
+      <div class="transcript-text" id="transcriptText"></div>
+    </div>
+
+    <!-- SOAP / H&P CARD -->
+    <div class="soap-card" id="soapCard">
+      <div class="card-header">
+        <span class="card-title" id="soapCardTitle">SOAP Note</span>
+        <div class="card-actions" style="flex-wrap:wrap;">
+          <button class="action-btn outline" id="reformatBtn" onclick="reformatToggle()" style="display:none;">Reformat as H&P</button>
+          <button class="action-btn outline" onclick="copySOAP()">Copy</button>
+          <button class="action-btn outline" onclick="printCurrentSOAP()">Print</button>
+          <button class="action-btn outline" onclick="generatePatientSummary()">📄 Patient Summary</button>
+          <button class="action-btn primary" onclick="saveNote()">Save Note</button>
+        </div>
+      </div>
+      <div id="soapContent"></div>
+    </div>
+
+    <!-- PATIENT SUMMARY CARD (after-visit summary) -->
+    <div class="soap-card" id="summaryCard" style="display:none;">
+      <div class="card-header">
+        <span class="card-title">📄 After-Visit Summary (for Patient)</span>
+        <div class="card-actions">
+          <button class="action-btn outline" onclick="copyPatientSummary()">Copy</button>
+          <button class="action-btn outline" onclick="printPatientSummary()">Print</button>
+        </div>
+      </div>
+      <div id="summaryContent" style="font-size:14px; line-height:1.7; white-space:pre-wrap;"></div>
+    </div>
+
+  </div><!-- /section-record -->
+
+  <!-- NOTES SECTION -->
+  <div class="section" id="section-notes">
+    <div class="notes-list-card">
+      <div class="card-header">
+        <span class="card-title">Saved Notes</span>
+        <button class="action-btn outline" onclick="clearAllNotes()">Clear All</button>
+      </div>
+      <div id="notesList"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>⚙ Settings</h2>
+    <div class="settings-field">
+      <label>Worker URL</label>
+      <input type="text" id="workerUrl" placeholder="https://voicerx-api.workers.dev">
+      <div class="settings-note">Your Cloudflare Worker endpoint</div>
+    </div>
+    <div class="settings-field">
+      <label>Access Token</label>
+      <input type="text" id="accessToken" placeholder="Your token">
+      <div class="settings-note">Provided by VoiceRx admin</div>
+    </div>
+    <!-- AssemblyAI key no longer needed in browser — handled by Worker. Field kept hidden for legacy compatibility. -->
+    <input type="hidden" id="assemblyKey">
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeSettings()">Cancel</button>
+      <button class="modal-btn confirm" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PROVIDER MODAL (gigi-only) -->
+<div class="modal-overlay" id="addProviderModal">
+  <div class="modal" style="max-width:560px; max-height:90vh; overflow-y:auto;">
+    <h2>➕ Add a New Provider</h2>
+    <p style="font-size:12px; color:var(--gray-600); margin-bottom:14px;">
+      Create a new provider account. They'll get a personalized QR code to scan for one-tap setup on their phone.
+    </p>
+    <div class="settings-field">
+      <label>Provider ID (lowercase, no spaces — used internally)</label>
+      <input type="text" id="newprov_id" placeholder="e.g., smith, jones, dr-lopez">
+      <div class="settings-note">Letters, numbers, dashes, underscores only. Permanent — don't change later.</div>
+    </div>
+    <div class="settings-field">
+      <label>Display Name (shown in the app)</label>
+      <input type="text" id="newprov_display_name" placeholder="e.g., Dr. Smith">
+    </div>
+    <div class="settings-field">
+      <label>Default Pronouns</label>
+      <select id="newprov_default_pronouns">
+        <option value="she/her">she/her</option>
+        <option value="he/him">he/him</option>
+        <option value="they/them">they/them</option>
+      </select>
+    </div>
+    <div class="settings-field">
+      <label>Default Note Type</label>
+      <select id="newprov_default_note_type">
+        <option value="SOAP">SOAP Note</option>
+        <option value="H&P">H&P</option>
+        <option value="Followup">Follow-Up</option>
+        <option value="Annual">Annual Exam</option>
+        <option value="Urgent">Urgent Care</option>
+      </select>
+    </div>
+    <div class="settings-field">
+      <label>Default Language</label>
+      <select id="newprov_default_lang">
+        <option value="en">🇺🇸 English</option>
+        <option value="es">🇲🇽 Español</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeAddProvider()">Cancel</button>
+      <button class="modal-btn confirm" onclick="submitAddProvider()">Create Provider</button>
+    </div>
+
+    <!-- Success view — replaces form after creation -->
+    <div id="newprov_result" style="display:none; margin-top:16px; padding:16px; background:var(--gray-50); border-radius:10px;">
+      <h3 style="margin-bottom:10px; color:var(--navy);">✅ Provider Created</h3>
+      <p style="font-size:13px; margin-bottom:10px;"><strong>Display name:</strong> <span id="newprov_result_name"></span></p>
+      <p style="font-size:13px; margin-bottom:10px;"><strong>Access token:</strong></p>
+      <code id="newprov_result_token" style="display:block; padding:8px; background:#fff; border:1px solid var(--gray-200); border-radius:6px; font-size:11px; word-break:break-all; margin-bottom:14px;"></code>
+      <p style="font-size:12px; color:var(--gray-600); margin-bottom:10px;">
+        Save this token in Bitwarden NOW — it won't be shown again. Share the QR code below with the provider for one-tap setup.
+      </p>
+      <div id="newprov_result_qr" style="text-align:center; padding:14px 0;"></div>
+      <button class="modal-btn confirm" onclick="closeAddProvider()" style="width:100%;">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASTE TRANSCRIPT MODAL -->
+<div class="modal-overlay" id="pasteTranscriptModal">
+  <div class="modal" style="max-width:640px; max-height:88vh; overflow-y:auto;">
+    <h2>📋 Paste or Type Transcript</h2>
+    <p style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
+      Paste a transcript from Commure, type one manually, or anything else. VoiceRx will treat it as if it came from a fresh recording — you can format SOAP/H&P, generate patient summary, save to cloud, etc.
+    </p>
+    <div class="settings-field">
+      <label>Patient Name (optional — can also set after)</label>
+      <input type="text" id="paste_patient_name" placeholder="Full name">
+    </div>
+    <div class="settings-field">
+      <label>Transcript</label>
+      <textarea id="paste_transcript_text" rows="14" placeholder="Paste your transcript here…" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;background:var(--gray-50);resize:vertical;line-height:1.6;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closePasteTranscript()">Cancel</button>
+      <button class="modal-btn confirm" onclick="usePastedTranscript()">Use This Transcript</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROVIDER SETTINGS MODAL -->
+<div class="modal-overlay" id="providerModal">
+  <div class="modal" style="max-width:560px; max-height:88vh; overflow-y:auto;">
+    <h2 id="providerModalTitle">Provider Settings</h2>
+    <div class="settings-field">
+      <label>Display Name</label>
+      <input type="text" id="prov_display_name" placeholder="Dr. Last Name">
+      <div class="settings-note">How your name appears in the app and on notes</div>
+    </div>
+    <div class="settings-field">
+      <label>Default Pronouns (for new patients)</label>
+      <select id="prov_default_pronouns">
+        <option value="she/her">she/her</option>
+        <option value="he/him">he/him</option>
+        <option value="they/them">they/them</option>
+      </select>
+    </div>
+    <div class="settings-field">
+      <label>Default Note Type</label>
+      <select id="prov_default_note_type">
+        <option value="SOAP">SOAP Note</option>
+        <option value="Followup">Follow-Up</option>
+        <option value="Annual">Annual Exam</option>
+        <option value="Urgent">Urgent Care</option>
+        <option value="Procedure">Procedure</option>
+        <option value="Mental Health">Mental Health</option>
+        <option value="Weight Management">Weight Management</option>
+        <option value="DOT Physical">DOT Physical</option>
+      </select>
+    </div>
+    <div class="settings-field">
+      <label>Default Language</label>
+      <select id="prov_default_lang">
+        <option value="en">🇺🇸 English</option>
+        <option value="es">🇲🇽 Español</option>
+      </select>
+    </div>
+    <div class="settings-field">
+      <label>Signature (appended at end of each SOAP note)</label>
+      <textarea id="prov_signature" rows="3" placeholder="e.g.&#10;Dr. Tess Royals, MD&#10;Garcia Family Medicine" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;background:var(--gray-50);resize:vertical;"></textarea>
+      <div class="settings-note">Appears at the bottom of every formatted SOAP note</div>
+    </div>
+    <div class="settings-field">
+      <label>Voice Style Examples (helps the AI sound like you)</label>
+      <textarea id="prov_style_examples" rows="8" placeholder="Paste 2–5 examples of your actual past SOAP notes here. The AI will match your phrasing, structure, and detail level." style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;background:var(--gray-50);resize:vertical;"></textarea>
+      <div class="settings-note">More examples = better voice match. Paste in real notes from past patients.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeProviderSettings()">Cancel</button>
+      <button class="modal-btn confirm" onclick="saveProviderSettings()">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE VIEW MODAL -->
+<div class="modal-overlay" id="noteViewModal">
+  <div class="modal" style="max-width:600px; max-height:85vh; overflow-y:auto;">
+    <h2 id="noteViewTitle">Note</h2>
+    <div id="noteViewChartedStatus" style="font-size:12px; margin-bottom:12px; color:var(--gray-600);"></div>
+    <div id="noteViewContent" style="font-size:13px; line-height:1.75; white-space:pre-wrap; color:var(--text);"></div>
+    <div class="modal-actions" style="flex-wrap:wrap; gap:8px;">
+      <button class="modal-btn cancel" onclick="closeNoteView()">Close</button>
+      <button class="modal-btn cancel" onclick="deleteViewedNote()" style="background:#fee; color:var(--danger);">Delete</button>
+      <button class="modal-btn confirm" onclick="copyViewedNote()">Copy</button>
+      <button class="modal-btn confirm" onclick="continueEditingViewedNote()" style="background:var(--teal); color:#fff;">✎ Continue Editing</button>
+      <button class="modal-btn confirm" id="chartedToggleBtn" onclick="toggleViewedNoteCharted()" style="background:var(--amber); color:var(--navy-dark);">Mark as Charted</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================
+// AUDIO RECOVERY — IndexedDB so a network blip / crash mid-recording doesn't lose work
+// =====================
+const AUDIO_DB_NAME = 'voicerx-audio-v1';
+const AUDIO_STORE = 'recordings';
+const AUDIO_SNAPSHOT_INTERVAL_MS = 5000; // snapshot every 5s during recording
+
+function audioDbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(AUDIO_DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(AUDIO_STORE)) {
+        db.createObjectStore(AUDIO_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+async function audioSave(id, blob, meta) {
+  try {
+    const db = await audioDbOpen();
+    await new Promise((res, rej) => {
+      const tx = db.transaction([AUDIO_STORE], 'readwrite');
+      tx.objectStore(AUDIO_STORE).put({ id, blob, meta, savedAt: Date.now() });
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  } catch (e) { console.warn('audioSave failed:', e); }
+}
+async function audioDelete(id) {
+  try {
+    const db = await audioDbOpen();
+    await new Promise((res, rej) => {
+      const tx = db.transaction([AUDIO_STORE], 'readwrite');
+      tx.objectStore(AUDIO_STORE).delete(id);
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  } catch (e) { console.warn('audioDelete failed:', e); }
+}
+async function audioListAll() {
+  try {
+    const db = await audioDbOpen();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction([AUDIO_STORE], 'readonly');
+      const req = tx.objectStore(AUDIO_STORE).getAll();
+      req.onsuccess = () => res(req.result || []);
+      req.onerror = () => rej(req.error);
+    });
+  } catch (e) { return []; }
+}
+
+async function checkForRecoverableAudio() {
+  const sessions = await audioListAll();
+  // Filter out sessions older than 24h
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recoverable = sessions.filter(s => s.savedAt > dayAgo);
+  if (!recoverable.length) return;
+  const s = recoverable[0];
+  const ageMin = Math.round((Date.now() - s.savedAt) / 60000);
+  const ok = confirm(`Found an interrupted recording from ${ageMin} min ago (patient: ${s.meta?.patientName || 'unknown'}). Recover and transcribe it now?`);
+  if (ok) {
+    audioChunks = [s.blob];
+    // Restore patient context if available
+    if (s.meta?.patientName) document.getElementById('patientName').value = s.meta.patientName;
+    if (s.meta?.visitDate) document.getElementById('visitDate').value = s.meta.visitDate;
+    if (s.meta?.lang) document.getElementById('noteLang').value = s.meta.lang;
+    if (s.meta?.pronouns) document.getElementById('pronounsSelect').value = s.meta.pronouns;
+    // Process the saved blob
+    setStatus('Recovering audio…', 'processing');
+    document.getElementById('recordBtn').disabled = true;
+    document.getElementById('recordBtn').textContent = '⏳';
+    // Fake mediaRecorder.mimeType for the blob.type
+    if (!mediaRecorder) mediaRecorder = { mimeType: s.blob.type || 'audio/webm' };
+    processAudio().then(() => audioDelete(s.id));
+  } else {
+    audioDelete(s.id);
+  }
+}
+
+// =====================
+// STATE
+// =====================
+let mediaRecorder = null;
+let audioChunks = [];
+let audioSnapshotTimer = null;
+let currentAudioSessionId = null;
+let recordingTimer = null;
+let seconds = 0;
+let isRecording = false;
+let currentTranscript = '';
+let currentSOAP = '';
+let currentTranslationEn = '';
+let currentNoteId = null;
+let viewedNoteContent = '';
+let viewedNoteId = null;
+
+// NOTE TYPES
+const noteTypes = ['SOAP','H&P','Followup','Annual','Urgent','Procedure','Mental Health','Weight Management','DOT Physical'];
+let selectedNoteType = 'SOAP';
+
+// =====================
+// INIT
+// =====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date
+  document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+  
+  // Language badge update
+  const langSelect = document.getElementById('noteLang');
+  function updateLangBadge() {
+    const badge = document.getElementById('langBadge');
+    badge.textContent = langSelect.value === 'es' ? '🇲🇽 Nota en Español' : '';
+  }
+  langSelect.addEventListener('change', updateLangBadge);
+  updateLangBadge();
+  
+  // Build note chips
+  const chipsContainer = document.getElementById('noteChips');
+  noteTypes.forEach(t => {
+    const chip = document.createElement('button');
+    chip.className = 'note-chip' + (t === 'SOAP' ? ' selected' : '');
+    chip.textContent = t;
+    chip.onclick = () => selectNoteType(t);
+    chipsContainer.appendChild(chip);
+  });
+
+  // Auto-fill settings from URL hash (one-tap onboarding via personalized QR code)
+  // Format: #w=<worker_url>&t=<access_token>
+  applyHashSettingsIfPresent();
+
+  // Load settings
+  loadSettings();
+
+  // Identify provider (calls /whoami → shows "Provider: Dr. Tess" badge)
+  refreshProviderBadge();
+
+  // Populate patient name autocomplete from recent notes
+  refreshPatientAutocomplete();
+
+  // Check for orphan audio chunks from an interrupted recording (audio recovery)
+  checkForRecoverableAudio();
+
+  // Before unload warning
+  window.addEventListener('beforeunload', (e) => {
+    if (isRecording || currentTranscript) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved recording data. Are you sure you want to leave?';
+    }
+  });
+
+  renderNotesList();
+  cleanExpiredNotes();
+});
+
+// Auto-fill Settings from URL hash params (used by personalized provider QR codes)
+// Hash is never sent to server, so the token doesn't leak to logs.
+function applyHashSettingsIfPresent() {
+  if (!location.hash || location.hash.length < 2) return;
+  const params = new URLSearchParams(location.hash.slice(1));
+  const w = params.get('w');
+  const t = params.get('t');
+  if (w) localStorage.setItem('vrx_worker_url', w);
+  if (t) localStorage.setItem('vrx_token', t);
+  if (w || t) {
+    // Clear hash so the token doesn't sit in the address bar / bookmarks
+    history.replaceState(null, '', location.pathname + location.search);
+    showToast('Settings configured ✓', 'success');
+  }
+}
+
+// Provider display names — maps provider_id from Worker to a human label
+const PROVIDER_DISPLAY_NAMES = {
+  gigi: 'Gigi',
+  tess: 'Dr. Tess',
+  default: 'VoiceRx',
+};
+
+let currentProviderProfile = null;
+
+async function refreshProviderBadge() {
+  const badge = document.getElementById('providerBadge');
+  if (!badge) return;
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) {
+    badge.style.display = 'none';
+    return;
+  }
+  try {
+    const res = await fetch(base + '/whoami', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error('whoami ' + res.status);
+    const data = await res.json();
+    currentProviderProfile = data.profile || null;
+    const label = (data.profile && data.profile.display_name)
+      || PROVIDER_DISPLAY_NAMES[data.provider_id]
+      || data.provider_id;
+    badge.textContent = '👤 ' + label + ' ⚙';
+    badge.style.display = 'inline-block';
+
+    // Show admin "+ Provider" button only for gigi
+    const adminBtn = document.getElementById('adminAddProviderBtn');
+    if (adminBtn) adminBtn.style.display = (data.provider_id === 'gigi') ? 'inline-block' : 'none';
+
+    // Apply provider defaults to the current encounter UI (only if user hasn't changed them)
+    applyProviderDefaultsIfFresh();
+  } catch (err) {
+    console.error('whoami failed:', err);
+    badge.style.display = 'none';
+  }
+}
+
+function applyProviderDefaultsIfFresh() {
+  if (!currentProviderProfile) return;
+  const p = currentProviderProfile;
+  // Only set defaults if no current transcript (i.e., fresh encounter)
+  if (!currentTranscript) {
+    if (p.default_pronouns) document.getElementById('pronounsSelect').value = p.default_pronouns;
+    if (p.default_lang) {
+      document.getElementById('noteLang').value = p.default_lang;
+      document.getElementById('noteLang').dispatchEvent(new Event('change'));
+    }
+    if (p.default_note_type) {
+      const ntSel = document.getElementById('noteTypeSelect');
+      if (ntSel) ntSel.value = p.default_note_type;
+      if (typeof selectNoteType === 'function') selectNoteType(p.default_note_type);
+    }
+  }
+}
+
+// ---- Provider Settings modal ----
+async function openProviderSettings() {
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) {
+    showToast('Set Worker URL + Access Token first', 'error');
+    return;
+  }
+  try {
+    const res = await fetch(base + '/provider/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error('Load failed: ' + res.status);
+    const data = await res.json();
+    const p = data.profile || {};
+    document.getElementById('prov_display_name').value = p.display_name || '';
+    document.getElementById('prov_default_pronouns').value = p.default_pronouns || 'they/them';
+    document.getElementById('prov_default_note_type').value = p.default_note_type || 'SOAP';
+    document.getElementById('prov_default_lang').value = p.default_lang || 'en';
+    document.getElementById('prov_signature').value = p.signature || '';
+    document.getElementById('prov_style_examples').value = p.style_examples || '';
+    document.getElementById('providerModal').classList.add('open');
+  } catch (err) {
+    showToast('Could not load profile: ' + err.message, 'error');
+  }
+}
+
+function closeProviderSettings() {
+  document.getElementById('providerModal').classList.remove('open');
+}
+
+async function saveProviderSettings() {
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) return;
+  const payload = {
+    display_name: document.getElementById('prov_display_name').value.trim(),
+    default_pronouns: document.getElementById('prov_default_pronouns').value,
+    default_note_type: document.getElementById('prov_default_note_type').value,
+    default_lang: document.getElementById('prov_default_lang').value,
+    signature: document.getElementById('prov_signature').value,
+    style_examples: document.getElementById('prov_style_examples').value,
+  };
+  try {
+    const res = await fetch(base + '/provider/me', {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Save failed: ' + res.status);
+    const data = await res.json();
+    currentProviderProfile = data.profile;
+    showToast('Profile saved ✓', 'success');
+    closeProviderSettings();
+    refreshProviderBadge();
+  } catch (err) {
+    showToast('Save failed: ' + err.message, 'error');
+  }
+}
+
+function selectNoteType(type) {
+  selectedNoteType = type;
+  document.querySelectorAll('.note-chip').forEach(c => {
+    c.classList.toggle('selected', c.textContent === type);
+  });
+  document.getElementById('noteTypeSelect').value = type;
+}
+
+document.getElementById('noteTypeSelect').addEventListener('change', function() {
+  selectNoteType(this.value);
+});
+
+function getPronouns() {
+  return document.getElementById('pronounsSelect').value;
+}
+
+function getLang() {
+  return document.getElementById('noteLang').value;
+}
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'notes') renderNotesList();
+}
+
+// =====================
+// SETTINGS
+// =====================
+function loadSettings() {
+  document.getElementById('workerUrl').value = localStorage.getItem('vrx_worker_url') || '';
+  document.getElementById('accessToken').value = localStorage.getItem('vrx_token') || 'b9f6e257341c0a8d';
+  document.getElementById('assemblyKey').value = localStorage.getItem('vrx_assembly_key') || '';
+}
+
+function saveSettings() {
+  localStorage.setItem('vrx_worker_url', document.getElementById('workerUrl').value.trim());
+  localStorage.setItem('vrx_token', document.getElementById('accessToken').value.trim());
+  localStorage.setItem('vrx_assembly_key', document.getElementById('assemblyKey').value.trim());
+  closeSettings();
+  showToast('Settings saved', 'success');
+  refreshProviderBadge();
+}
+
+function openSettings() {
+  loadSettings();
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+// =====================
+// RECORDING
+// =====================
+async function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 16000,
+        channelCount: 1
+      }
+    });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    
+    mediaRecorder.addEventListener('dataavailable', e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    });
+
+    mediaRecorder.addEventListener('stop', () => {
+      stream.getTracks().forEach(t => t.stop());
+      processAudio();
+    });
+
+    // Recording-interrupted detection: phone calls, lost mic access, OS suspend
+    mediaRecorder.addEventListener('error', (e) => {
+      console.error('MediaRecorder error:', e);
+      handleRecordingInterrupted('Recording was interrupted — your audio so far has been saved. When you come back, VoiceRx will offer to recover it.');
+    });
+
+    // If the audio track ends unexpectedly (call took the mic, OS revoked permission)
+    stream.getAudioTracks().forEach(t => {
+      t.addEventListener('ended', () => {
+        if (isRecording) {
+          handleRecordingInterrupted('Microphone access was lost (likely a phone call) — your audio so far has been saved. Reopen VoiceRx to recover it.');
+        }
+      });
+    });
+
+    mediaRecorder.start(1000);
+    isRecording = true;
+    seconds = 0;
+    currentAudioSessionId = 'audio_' + Date.now();
+
+    // Snapshot to IndexedDB every 5 seconds so a crash/network blip doesn't lose this recording
+    audioSnapshotTimer = setInterval(() => {
+      if (audioChunks.length) {
+        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const meta = {
+          patientName: document.getElementById('patientName').value,
+          visitDate: document.getElementById('visitDate').value,
+          pronouns: getPronouns(),
+          lang: getLang(),
+          noteType: selectedNoteType,
+        };
+        audioSave(currentAudioSessionId, blob, meta);
+      }
+    }, AUDIO_SNAPSHOT_INTERVAL_MS);
+
+    document.getElementById('recordBtn').classList.add('recording');
+    document.getElementById('recordBtn').textContent = '⏹';
+    document.getElementById('waveform').classList.add('active');
+    setStatus('Recording… click to stop', 'active');
+
+    recordingTimer = setInterval(() => {
+      seconds++;
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+      // Warning at 50 minutes
+      if (seconds === 50 * 60) {
+        showToast('⚠ 50 minute mark — recording will auto-stop at 60 min', 'warning');
+      }
+      // Hard stop at 60 minutes
+      if (seconds >= 60 * 60) {
+        showToast('Maximum 60 min reached — stopping recording', 'warning');
+        stopRecording();
+      }
+    }, 1000);
+
+  } catch (err) {
+    setStatus('Microphone access denied', 'error');
+    showToast('Please allow microphone access', 'error');
+  }
+}
+
+// Called when something OUTSIDE the user stops the recording (phone call, lost mic, error).
+// Saves current audio to IndexedDB so it can be recovered later, then resets UI cleanly.
+async function handleRecordingInterrupted(message) {
+  if (!isRecording) return;
+  clearInterval(recordingTimer);
+  if (audioSnapshotTimer) { clearInterval(audioSnapshotTimer); audioSnapshotTimer = null; }
+  isRecording = false;
+
+  // Snapshot whatever we have to IndexedDB so it survives a page close
+  if (audioChunks.length && currentAudioSessionId) {
+    try {
+      const blob = new Blob(audioChunks, { type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm' });
+      const meta = {
+        patientName: document.getElementById('patientName').value,
+        visitDate: document.getElementById('visitDate').value,
+        pronouns: getPronouns(),
+        lang: getLang(),
+        noteType: selectedNoteType,
+      };
+      await audioSave(currentAudioSessionId, blob, meta);
+    } catch (e) { console.error('Final snapshot failed:', e); }
+  }
+
+  document.getElementById('recordBtn').classList.remove('recording');
+  document.getElementById('recordBtn').textContent = '🎙';
+  document.getElementById('recordBtn').disabled = false;
+  document.getElementById('waveform').classList.remove('active');
+  setStatus('Recording interrupted — audio preserved', 'warning');
+  showToast(message, 'warning');
+}
+
+function stopRecording() {
+  if (mediaRecorder && isRecording) {
+    clearInterval(recordingTimer);
+    if (audioSnapshotTimer) { clearInterval(audioSnapshotTimer); audioSnapshotTimer = null; }
+    isRecording = false;
+    mediaRecorder.stop();
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('recordBtn').disabled = true;
+    document.getElementById('recordBtn').textContent = '⏳';
+    document.getElementById('waveform').classList.remove('active');
+    setStatus('Processing audio…', 'processing');
+  }
+}
+
+async function processAudio() {
+  const workerUrl = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!workerUrl || !token) {
+    showToast('Worker URL or Access Token not set — go to Settings', 'error');
+    resetRecorder();
+    return;
+  }
+
+  try {
+    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+
+    // Step 1: send audio to Worker (Worker forwards to AssemblyAI using its server-side key)
+    setStatus('Uploading audio…', 'processing');
+    const lang = getLang() === 'es' ? 'es' : 'en';
+    const transcribeRes = await fetch(`${workerUrl}/transcribe?language_code=${lang}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/octet-stream',
+      },
+      body: audioBlob,
+    });
+    if (!transcribeRes.ok) {
+      const err = await transcribeRes.text();
+      throw new Error('Transcribe failed (' + transcribeRes.status + '): ' + err);
+    }
+    const { id: transcriptId } = await transcribeRes.json();
+    if (!transcriptId) throw new Error('No transcript id returned');
+
+    // Step 2: poll Worker for completion (Worker proxies AssemblyAI)
+    setStatus('Transcribing…', 'processing');
+    let transcript = null;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 60; // 60 × 2s = 2 minutes max
+    while (!transcript && attempts < MAX_ATTEMPTS) {
+      await new Promise(r => setTimeout(r, 2000));
+      attempts++;
+      const pollRes = await fetch(`${workerUrl}/poll/${transcriptId}`, {
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      if (!pollRes.ok) {
+        console.warn('Poll attempt failed', pollRes.status);
+        continue;
+      }
+      const pollData = await pollRes.json();
+      if (pollData.status === 'completed') {
+        transcript = pollData.text || '';
+      } else if (pollData.status === 'error') {
+        throw new Error(pollData.error || 'Transcription error');
+      }
+    }
+    if (!transcript) throw new Error('Transcription timed out after 2 minutes');
+
+    currentTranscript = transcript;
+    currentNoteId = 'vrx_' + Date.now();
+
+    // Auto-save transcript immediately
+    autoSaveTranscript();
+
+    // Transcription succeeded — clean up the IndexedDB audio snapshot
+    if (currentAudioSessionId) {
+      audioDelete(currentAudioSessionId);
+      currentAudioSessionId = null;
+    }
+    // Refresh patient autocomplete now that we have a new patient saved
+    refreshPatientAutocomplete();
+
+    setStatus('Transcription complete ✓', 'done');
+    showTranscript(transcript);
+    resetRecorder(false);
+
+    // If Spanish — automatically fetch English translation
+    if (getLang() === 'es') {
+      fetchEnglishTranslation(transcript);
+    }
+
+  } catch (err) {
+    console.error(err);
+    setStatus('Transcription failed', 'error');
+    showToast('Transcription error: ' + err.message, 'error');
+    resetRecorder();
+  }
+}
+
+function resetRecorder(fullReset = true) {
+  document.getElementById('recordBtn').disabled = false;
+  document.getElementById('recordBtn').textContent = '🎙';
+  document.getElementById('recordBtn').classList.remove('recording');
+  if (fullReset) {
+    document.getElementById('timer').textContent = '0:00';
+    setStatus('Ready to record', '');
+    currentTranscript = '';
+    currentNoteId = null;
+  }
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('statusText');
+  el.textContent = msg;
+  el.className = 'status-text' + (type ? ' ' + type : '');
+}
+
+// =====================
+// TRANSCRIPT & SOAP
+// =====================
+function showTranscript(text, translationEn = '') {
+  const lang = getLang();
+  let html = '';
+
+  if (lang === 'es') {
+    html += `<div style="margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">🇲🇽 Spanish Transcript</div>
+      <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${escHtml(text)}</div>
+    </div>`;
+    if (translationEn) {
+      html += `<div style="padding-top:14px;border-top:1px solid var(--gray-100);">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;">🇺🇸 English Translation</div>
+        <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${escHtml(translationEn)}</div>
+      </div>`;
+    } else {
+      html += `<div style="padding-top:14px;border-top:1px solid var(--gray-100);font-size:12px;color:var(--gray-400);">⏳ Translating to English…</div>`;
+    }
+  } else {
+    html = `<div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${escHtml(text)}</div>`;
+  }
+
+  document.getElementById('transcriptText').innerHTML = html;
+  document.getElementById('transcriptCard').classList.add('visible');
+  document.getElementById('saveIndicator').textContent = '💾 Auto-saved';
+  document.getElementById('saveIndicator').className = 'save-indicator saved';
+}
+
+async function fetchEnglishTranslation(spanishText) {
+  const workerUrl = localStorage.getItem('vrx_worker_url');
+  const token = localStorage.getItem('vrx_token');
+  if (!workerUrl) return;
+
+  try {
+    const params = new URLSearchParams({ mode: 'translate' });
+    const res = await fetch(`${workerUrl}/format?${params}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ transcript: spanishText, translateOnly: true })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const translationEn = data.translation || data.note || data.text || '';
+
+    currentTranslationEn = translationEn;
+    updateSavedNote(currentNoteId, { transcript_en: translationEn });
+    showTranscript(currentTranscript, translationEn);
+    setStatus('Transcription + translation complete ✓', 'done');
+  } catch (err) {
+    console.error('Translation error:', err);
+  }
+}
+
+function copyTranscript() {
+  const lang = getLang();
+  let text = currentTranscript;
+  if (lang === 'es' && currentTranslationEn) {
+    text = `🇲🇽 Spanish:\n${currentTranscript}\n\n🇺🇸 English:\n${currentTranslationEn}`;
+  }
+  navigator.clipboard.writeText(text).then(() => showToast('Transcript copied'));
+}
+
+async function formatSOAP() {
+  const workerUrl = localStorage.getItem('vrx_worker_url');
+  const token = localStorage.getItem('vrx_token');
+  const patientName = document.getElementById('patientName').value.trim() || 'Patient';
+  const visitDate = document.getElementById('visitDate').value;
+  const pronouns = getPronouns();
+
+  if (!workerUrl) {
+    showToast('Worker URL not set — go to Settings', 'error');
+    return;
+  }
+  if (!currentTranscript) {
+    showToast('No transcript to format', 'error');
+    return;
+  }
+
+  document.getElementById('formatBtn').disabled = true;
+  document.getElementById('formatBtn').textContent = 'Formatting…';
+  setStatus('Formatting SOAP note…', 'processing');
+
+  try {
+    const params = new URLSearchParams({
+      patientName,
+      noteType: selectedNoteType,
+      visitDate,
+      pronouns,
+      lang: getLang(),
+      chiefComplaint: document.getElementById('chiefComplaint').value.trim(),
+    });
+
+    const res = await fetch(`${workerUrl}/format?${params}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ transcript: currentTranscript })
+    });
+
+    if (!res.ok) throw new Error('Worker returned ' + res.status);
+    const data = await res.json();
+    const soapText = data.note || data.text || data.content || '';
+
+    currentSOAP = soapText;
+    renderSOAP(soapText);
+    updateReformatButton();
+    setStatus((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note ready ✓', 'done');
+    showToast((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note formatted!', 'success');
+
+    // Update saved note with SOAP
+    if (currentNoteId) updateSavedNote(currentNoteId, { soap: soapText });
+
+  } catch (err) {
+    console.error(err);
+    setStatus('Formatting failed', 'error');
+    showToast('Could not format note: ' + err.message, 'error');
+  } finally {
+    document.getElementById('formatBtn').disabled = false;
+    document.getElementById('formatBtn').textContent = 'Format SOAP ✦';
+  }
+}
+
+function renderSOAP(text) {
+  const card = document.getElementById('soapCard');
+  const content = document.getElementById('soapContent');
+  card.classList.add('visible');
+
+  // Try to parse SOAP sections
+  const sections = ['Subjective', 'Objective', 'Assessment', 'Plan'];
+  let html = '';
+  let remaining = text;
+
+  sections.forEach((section, i) => {
+    const regex = new RegExp(`\\*?\\*?${section}[:\\*]*([\\s\\S]*?)(?=\\*?\\*?(?:${sections.slice(i+1).join('|')})[:\\*]|$)`, 'i');
+    const match = remaining.match(regex);
+    if (match) {
+      html += `<div class="soap-section">
+        <div class="soap-label">${section}</div>
+        <div class="soap-content">${escHtml(match[1].trim())}</div>
+      </div>`;
+    }
+  });
+
+  if (!html) {
+    html = `<div class="soap-section"><div class="soap-content">${escHtml(text)}</div></div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copySOAP() {
+  navigator.clipboard.writeText(currentSOAP).then(() => showToast('Note copied'));
+}
+
+// ---- Admin: Add New Provider (gigi only) ----
+function openAddProvider() {
+  document.getElementById('newprov_id').value = '';
+  document.getElementById('newprov_display_name').value = '';
+  document.getElementById('newprov_default_pronouns').value = 'they/them';
+  document.getElementById('newprov_default_note_type').value = 'SOAP';
+  document.getElementById('newprov_default_lang').value = 'en';
+  document.getElementById('newprov_result').style.display = 'none';
+  document.getElementById('addProviderModal').classList.add('open');
+}
+function closeAddProvider() {
+  document.getElementById('addProviderModal').classList.remove('open');
+}
+async function submitAddProvider() {
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) return;
+  const id = document.getElementById('newprov_id').value.trim().toLowerCase();
+  const display_name = document.getElementById('newprov_display_name').value.trim();
+  if (!id || !display_name) {
+    showToast('Provider ID and Display Name are required', 'error');
+    return;
+  }
+  const payload = {
+    id,
+    display_name,
+    default_pronouns: document.getElementById('newprov_default_pronouns').value,
+    default_note_type: document.getElementById('newprov_default_note_type').value,
+    default_lang: document.getElementById('newprov_default_lang').value,
+  };
+  try {
+    const res = await fetch(base + '/admin/providers', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'HTTP ' + res.status);
+    }
+    const data = await res.json();
+    // Show success view with token + QR code
+    document.getElementById('newprov_result_name').textContent = data.display_name;
+    document.getElementById('newprov_result_token').textContent = data.token;
+    const frontendUrl = location.origin + location.pathname;
+    const autoLoginUrl = frontendUrl + '#w=' + encodeURIComponent(base) + '&t=' + data.token;
+    const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=' + encodeURIComponent(autoLoginUrl);
+    document.getElementById('newprov_result_qr').innerHTML = `
+      <img src="${qrApi}" alt="Auto-login QR for ${data.display_name}" style="max-width:240px; border:8px solid #fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
+      <div style="font-size:11px; color:var(--gray-600); margin-top:6px;">Scan with phone camera to set up ${data.display_name}'s device</div>
+    `;
+    // Hide the form, show the result
+    document.querySelectorAll('#addProviderModal .settings-field').forEach(f => f.style.display = 'none');
+    document.querySelector('#addProviderModal .modal-actions').style.display = 'none';
+    document.getElementById('newprov_result').style.display = 'block';
+    showToast('Provider created ✓', 'success');
+  } catch (err) {
+    showToast('Could not create provider: ' + err.message, 'error');
+  }
+}
+
+// ---- Paste / Type Transcript flow ----
+function openPasteTranscript() {
+  document.getElementById('paste_patient_name').value = document.getElementById('patientName').value || '';
+  document.getElementById('paste_transcript_text').value = '';
+  document.getElementById('pasteTranscriptModal').classList.add('open');
+  setTimeout(() => document.getElementById('paste_transcript_text').focus(), 100);
+}
+function closePasteTranscript() {
+  document.getElementById('pasteTranscriptModal').classList.remove('open');
+}
+async function usePastedTranscript() {
+  const text = document.getElementById('paste_transcript_text').value.trim();
+  if (!text) { showToast('Please paste or type a transcript first', 'error'); return; }
+  const pName = document.getElementById('paste_patient_name').value.trim();
+  if (pName) document.getElementById('patientName').value = pName;
+
+  currentTranscript = text;
+  currentNoteId = 'vrx_' + Date.now();
+  await autoSaveTranscript();
+  setStatus('Transcript loaded ✓', 'done');
+  showTranscript(text);
+  closePasteTranscript();
+  showToast('Transcript ready — now click Format SOAP', 'success');
+}
+
+// ---- Edit transcript in place ----
+function enableTranscriptEditing() {
+  const card = document.getElementById('transcriptCard');
+  if (!currentTranscript) return;
+  // Replace the rendered transcript with a textarea for editing
+  const editor = document.createElement('textarea');
+  editor.id = 'transcriptEditor';
+  editor.value = currentTranscript;
+  editor.rows = Math.max(6, Math.min(24, currentTranscript.split('\n').length + 2));
+  editor.style.cssText = 'width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:Poppins,sans-serif;font-size:14px;background:#fff;resize:vertical;line-height:1.7;';
+  const textArea = document.getElementById('transcriptText');
+  textArea.innerHTML = '';
+  textArea.appendChild(editor);
+  // Swap the Edit button for Save/Cancel
+  const editBtn = document.getElementById('editTranscriptBtn');
+  if (editBtn) editBtn.style.display = 'none';
+  const saveBtn = document.getElementById('saveTranscriptBtn');
+  const cancelBtn = document.getElementById('cancelEditTranscriptBtn');
+  if (saveBtn) saveBtn.style.display = 'inline-block';
+  if (cancelBtn) cancelBtn.style.display = 'inline-block';
+  editor.focus();
+}
+async function saveTranscriptEdit() {
+  const editor = document.getElementById('transcriptEditor');
+  if (!editor) return;
+  const newText = editor.value.trim();
+  if (!newText) { showToast('Transcript cannot be empty', 'error'); return; }
+  currentTranscript = newText;
+  showTranscript(newText, currentTranslationEn);
+  // Auto-save the updated transcript to cloud
+  if (currentNoteId) {
+    await updateSavedNote(currentNoteId, { transcript: newText });
+  }
+  toggleEditButtons(false);
+  showToast('Transcript updated ✓', 'success');
+}
+function cancelTranscriptEdit() {
+  showTranscript(currentTranscript, currentTranslationEn);
+  toggleEditButtons(false);
+}
+function toggleEditButtons(editing) {
+  const editBtn = document.getElementById('editTranscriptBtn');
+  const saveBtn = document.getElementById('saveTranscriptBtn');
+  const cancelBtn = document.getElementById('cancelEditTranscriptBtn');
+  if (editBtn) editBtn.style.display = editing ? 'none' : 'inline-block';
+  if (saveBtn) saveBtn.style.display = editing ? 'inline-block' : 'none';
+  if (cancelBtn) cancelBtn.style.display = editing ? 'inline-block' : 'none';
+}
+
+// Show a "Reformat as H&P" or "Reformat as SOAP" button after a note is generated.
+// Only shown when current note type is SOAP or H&P (other types just keep their format).
+function updateReformatButton() {
+  const btn = document.getElementById('reformatBtn');
+  const title = document.getElementById('soapCardTitle');
+  if (!btn) return;
+  if (!currentSOAP) {
+    btn.style.display = 'none';
+    return;
+  }
+  if (selectedNoteType === 'SOAP') {
+    btn.textContent = 'Reformat as H&P';
+    btn.dataset.target = 'H&P';
+    btn.style.display = 'inline-block';
+    if (title) title.textContent = 'SOAP Note';
+  } else if (selectedNoteType === 'H&P') {
+    btn.textContent = 'Reformat as SOAP';
+    btn.dataset.target = 'SOAP';
+    btn.style.display = 'inline-block';
+    if (title) title.textContent = 'H&P Note';
+  } else {
+    btn.style.display = 'none';
+    if (title) title.textContent = selectedNoteType + ' Note';
+  }
+}
+
+// Re-runs formatting on the existing transcript with the toggled note type.
+async function reformatToggle() {
+  const btn = document.getElementById('reformatBtn');
+  const target = btn.dataset.target;
+  if (!target || !currentTranscript) return;
+  selectNoteType(target); // updates dropdown + chips + selectedNoteType
+  await formatSOAP();      // re-runs formatting with the new type
+}
+
+// ---- Print current SOAP ----
+function printCurrentSOAP() {
+  if (!currentSOAP) { showToast('Nothing to print', 'error'); return; }
+  const patientName = document.getElementById('patientName').value || 'Patient';
+  const visitDate = document.getElementById('visitDate').value || '';
+  const providerName = (currentProviderProfile && currentProviderProfile.display_name) || '';
+  openPrintWindow({
+    title: `SOAP — ${patientName}`,
+    heading: `${patientName} — ${visitDate}`,
+    subheading: providerName ? `Provider: ${providerName}` : '',
+    body: currentSOAP,
+  });
+}
+
+function printPatientSummary() {
+  if (!currentPatientSummary) { showToast('Nothing to print', 'error'); return; }
+  const patientName = document.getElementById('patientName').value || 'Patient';
+  const visitDate = document.getElementById('visitDate').value || '';
+  openPrintWindow({
+    title: `Patient Summary — ${patientName}`,
+    heading: `Visit Summary for ${patientName}`,
+    subheading: visitDate,
+    body: currentPatientSummary,
+  });
+}
+
+function openPrintWindow({ title, heading, subheading, body }) {
+  const w = window.open('', '_blank', 'width=800,height=900');
+  if (!w) { showToast('Pop-up blocked — allow pop-ups for printing', 'error'); return; }
+  const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  w.document.write(`<!DOCTYPE html><html><head><title>${esc(title)}</title>
+    <style>
+      body { font-family: Georgia, 'Times New Roman', serif; max-width: 7in; margin: 0.5in auto; padding: 0 0.5in; color: #111; line-height: 1.6; }
+      h1 { font-size: 22px; margin: 0 0 4px 0; }
+      h2 { font-size: 16px; color: #555; margin: 0 0 24px 0; font-weight: normal; }
+      pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 13px; }
+      @media print {
+        body { margin: 0; padding: 0.5in; }
+        .no-print { display: none !important; }
+      }
+      .header { border-bottom: 2px solid #1a2e5a; padding-bottom: 12px; margin-bottom: 18px; }
+      .footer { margin-top: 36px; font-size: 11px; color: #888; }
+    </style></head><body>
+    <div class="header">
+      <h1>${esc(heading)}</h1>
+      ${subheading ? `<h2>${esc(subheading)}</h2>` : ''}
+    </div>
+    <pre>${esc(body)}</pre>
+    <div class="footer">Generated by VoiceRx · ${new Date().toLocaleString()}</div>
+    <script>setTimeout(() => window.print(), 300);<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+// ---- Patient after-visit summary ----
+let currentPatientSummary = '';
+async function generatePatientSummary() {
+  if (!currentSOAP) { showToast('Format a SOAP note first', 'error'); return; }
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) { showToast('Settings not configured', 'error'); return; }
+
+  const patientName = document.getElementById('patientName').value.trim() || 'Patient';
+  const lang = getLang();
+  showToast('Generating patient summary…', 'success');
+  try {
+    const params = new URLSearchParams({ patientName, lang });
+    const res = await fetch(`${base}/summary?${params}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ soap: currentSOAP }),
+    });
+    if (!res.ok) throw new Error('Summary failed: ' + res.status);
+    const data = await res.json();
+    currentPatientSummary = data.summary || '';
+    document.getElementById('summaryContent').textContent = currentPatientSummary;
+    document.getElementById('summaryCard').style.display = 'block';
+    document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Patient summary ready ✓', 'success');
+  } catch (err) {
+    showToast('Could not generate summary: ' + err.message, 'error');
+  }
+}
+
+function copyPatientSummary() {
+  navigator.clipboard.writeText(currentPatientSummary).then(() => showToast('Summary copied'));
+}
+
+// ---- Patient name autocomplete (recent patients for this provider) ----
+async function refreshPatientAutocomplete() {
+  const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!base || !token) return;
+  try {
+    const res = await fetch(base + '/patients', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const dl = document.getElementById('patientNameOptions');
+    if (!dl) return;
+    dl.innerHTML = (data.patients || []).map(p => `<option value="${p.replace(/"/g, '&quot;')}"></option>`).join('');
+  } catch (err) {
+    console.error('patients autocomplete failed:', err);
+  }
+}
+
+// =====================
+// AUTO-SAVE / NOTES — cloud-synced via Cloudflare D1
+// =====================
+const NOTES_CACHE_KEY = 'vrx_notes_cache_v3'; // local cache only — server is source of truth
+let notesCache = [];
+
+// --- API helpers ---
+function getApiBase() {
+  return (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+}
+function getApiAuth() {
+  const token = localStorage.getItem('vrx_token') || '';
+  return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+}
+
+async function cloudSaveNote(note) {
+  const base = getApiBase();
+  if (!base) throw new Error('Worker URL not set');
+  // Map browser camelCase → server snake_case
+  const payload = {
+    id: note.id,
+    patient_name: note.patientName || note.patient_name || 'Unknown Patient',
+    visit_date: note.visitDate || note.visit_date || '',
+    note_type: note.noteType || note.note_type || 'SOAP',
+    pronouns: note.pronouns || 'they/them',
+    lang: note.lang || 'en',
+    transcript: note.transcript || '',
+    transcript_en: note.transcript_en || '',
+    soap: note.soap || '',
+    charted: note.charted ? 1 : 0,
+    saved_at: note.savedAt || note.saved_at || Date.now(),
+  };
+  const res = await fetch(base + '/notes', {
+    method: 'POST',
+    headers: getApiAuth(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Cloud save failed: ' + res.status);
+  return res.json();
+}
+
+async function cloudListNotes() {
+  const base = getApiBase();
+  if (!base) return [];
+  const res = await fetch(base + '/notes', { headers: getApiAuth() });
+  if (!res.ok) throw new Error('Cloud list failed: ' + res.status);
+  const data = await res.json();
+  // Map server snake_case → browser camelCase for rendering
+  return (data.notes || []).map(n => ({
+    id: n.id,
+    patientName: n.patient_name,
+    visitDate: n.visit_date,
+    noteType: n.note_type,
+    pronouns: n.pronouns,
+    lang: n.lang,
+    transcript: n.transcript,
+    transcript_en: n.transcript_en,
+    soap: n.soap,
+    charted: !!n.charted,
+    savedAt: n.saved_at,
+    updatedAt: n.updated_at,
+  }));
+}
+
+async function cloudDeleteNote(id) {
+  const base = getApiBase();
+  if (!base) return;
+  await fetch(base + '/notes/' + encodeURIComponent(id), {
+    method: 'DELETE',
+    headers: getApiAuth(),
+  });
+}
+
+// --- Local cache (offline-friendly fallback) ---
+function loadCachedNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveCachedNotes(notes) {
+  try { localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(notes)); } catch {}
+}
+
+// --- Save / update flows ---
+function buildCurrentNoteEntry() {
+  const patientName = document.getElementById('patientName').value.trim() || 'Unknown Patient';
+  const visitDate = document.getElementById('visitDate').value;
+  return {
+    id: currentNoteId,
+    patientName,
+    visitDate,
+    noteType: selectedNoteType,
+    pronouns: getPronouns(),
+    lang: getLang(),
+    transcript: currentTranscript,
+    transcript_en: currentTranslationEn,
+    soap: currentSOAP || '',
+    savedAt: Date.now(),
+  };
+}
+
+async function autoSaveTranscript() {
+  const entry = buildCurrentNoteEntry();
+  // Local cache first (instant), then push to cloud
+  notesCache = notesCache.filter(n => n.id !== entry.id);
+  notesCache.unshift(entry);
+  saveCachedNotes(notesCache);
+  try {
+    await cloudSaveNote(entry);
+  } catch (err) {
+    console.error('Cloud save failed (kept local copy):', err);
+    showToast('Saved locally — cloud sync failed', 'warning');
+  }
+}
+
+async function updateSavedNote(id, updates) {
+  const idx = notesCache.findIndex(n => n.id === id);
+  if (idx >= 0) {
+    notesCache[idx] = { ...notesCache[idx], ...updates };
+    saveCachedNotes(notesCache);
+    try {
+      await cloudSaveNote(notesCache[idx]);
+    } catch (err) {
+      console.error('Cloud update failed:', err);
+    }
+  } else {
+    // Not in cache — build from current state and save
+    const entry = { ...buildCurrentNoteEntry(), ...updates, id };
+    notesCache.unshift(entry);
+    saveCachedNotes(notesCache);
+    try { await cloudSaveNote(entry); } catch (err) { console.error(err); }
+  }
+}
+
+async function saveNote() {
+  if (!currentTranscript && !currentSOAP) {
+    showToast('Nothing to save', 'error');
+    return;
+  }
+  await autoSaveTranscript();
+  if (currentSOAP) await updateSavedNote(currentNoteId, { soap: currentSOAP });
+  showToast('Note saved to cloud ✓', 'success');
+}
+
+// kept for compatibility — no longer needed since server doesn't expire
+function cleanExpiredNotes() { /* no-op */ }
+
+// --- Render ---
+async function renderNotesList() {
+  const container = document.getElementById('notesList');
+  container.innerHTML = '<div class="empty-state">Loading notes…</div>';
+  let notes = [];
+  try {
+    notes = await cloudListNotes();
+    notesCache = notes;
+    saveCachedNotes(notes);
+  } catch (err) {
+    console.error('Cloud list failed, using local cache:', err);
+    notes = loadCachedNotes();
+    if (notes.length) showToast('Showing local cache — cloud unreachable', 'warning');
+  }
+
+  if (!notes.length) {
+    container.innerHTML = '<div class="empty-state">No saved notes yet</div>';
+    return;
+  }
+
+  container.innerHTML = notes.map(n => `
+    <div class="note-item" onclick="viewNote('${n.id}')">
+      <div class="note-meta">
+        <div class="note-patient">${escHtml(n.patientName || '')}${n.lang === 'es' ? ' 🇲🇽' : ''}${n.charted ? ' <span style="color:var(--success);">✓ charted</span>' : ''}</div>
+        <div class="note-date">${n.visitDate || ''} · ${n.noteType || 'SOAP'}</div>
+      </div>
+      <span class="note-badge${n.soap ? ' soap' : ''}">${n.soap ? 'SOAP Ready' : (n.lang === 'es' && n.transcript_en ? 'ES + EN' : 'Transcript')}</span>
+      <button onclick="deleteNoteFromList('${n.id}', event)" style="background:none; border:none; cursor:pointer; padding:4px 8px; margin-left:4px; color:var(--gray-400); font-size:18px; line-height:1;" title="Delete note">×</button>
+    </div>
+  `).join('');
+}
+
+function viewNote(id) {
+  const note = notesCache.find(n => n.id === id) || loadCachedNotes().find(n => n.id === id);
+  if (!note) return;
+
+  let content = note.soap || '';
+  if (!content && note.lang === 'es') {
+    content = '';
+    if (note.transcript) content += `🇲🇽 Spanish Transcript:\n${note.transcript}`;
+    if (note.transcript_en) content += `\n\n🇺🇸 English Translation:\n${note.transcript_en}`;
+  } else if (!content) {
+    content = note.transcript || '';
+  }
+
+  viewedNoteContent = content;
+  viewedNoteId = id;
+  document.getElementById('noteViewTitle').textContent = (note.patientName || 'Note') + ' — ' + (note.visitDate || '');
+  document.getElementById('noteViewContent').textContent = viewedNoteContent;
+
+  // Charted status + button
+  const statusEl = document.getElementById('noteViewChartedStatus');
+  const btn = document.getElementById('chartedToggleBtn');
+  if (note.charted) {
+    statusEl.innerHTML = '✓ <strong style="color:var(--success);">Charted</strong> — already pasted into EHR';
+    btn.textContent = 'Unmark Charted';
+    btn.style.background = 'var(--gray-200)';
+    btn.style.color = 'var(--gray-600)';
+  } else {
+    statusEl.innerHTML = '○ Not yet charted';
+    btn.textContent = 'Mark as Charted';
+    btn.style.background = 'var(--amber)';
+    btn.style.color = 'var(--navy-dark)';
+  }
+
+  document.getElementById('noteViewModal').classList.add('open');
+}
+
+function closeNoteView() {
+  document.getElementById('noteViewModal').classList.remove('open');
+  viewedNoteId = null;
+}
+
+function copyViewedNote() {
+  navigator.clipboard.writeText(viewedNoteContent).then(() => showToast('Copied'));
+}
+
+async function toggleViewedNoteCharted() {
+  if (!viewedNoteId) return;
+  const note = notesCache.find(n => n.id === viewedNoteId);
+  if (!note) return;
+  const newCharted = !note.charted;
+  note.charted = newCharted;
+  saveCachedNotes(notesCache);
+  try {
+    await cloudSaveNote(note);
+    showToast(newCharted ? 'Marked as charted ✓' : 'Unmarked charted', 'success');
+    // Refresh modal display
+    viewNote(viewedNoteId);
+    // Refresh background list (if on Notes tab)
+    renderNotesList();
+  } catch (err) {
+    console.error('Charted toggle failed:', err);
+    note.charted = !newCharted; // rollback
+    showToast('Failed to update — try again', 'error');
+  }
+}
+
+// Loads a saved note back into the active workspace so it can be reformatted, summarized, printed, etc.
+function continueEditingViewedNote() {
+  if (!viewedNoteId) return;
+  const note = notesCache.find(n => n.id === viewedNoteId) || loadCachedNotes().find(n => n.id === viewedNoteId);
+  if (!note) { showToast('Note not found', 'error'); return; }
+
+  // Restore all the active-workspace state from the saved note
+  currentNoteId = note.id;
+  currentTranscript = note.transcript || '';
+  currentSOAP = note.soap || '';
+  currentTranslationEn = note.transcript_en || '';
+
+  // Restore the form fields
+  document.getElementById('patientName').value = note.patientName || '';
+  document.getElementById('chiefComplaint').value = ''; // chief complaint isn't stored per-note yet; leave blank
+  if (note.visitDate) document.getElementById('visitDate').value = note.visitDate;
+  if (note.pronouns) document.getElementById('pronounsSelect').value = note.pronouns;
+  if (note.lang) {
+    document.getElementById('noteLang').value = note.lang;
+    document.getElementById('noteLang').dispatchEvent(new Event('change'));
+  }
+  if (note.noteType) selectNoteType(note.noteType);
+
+  // Show transcript + SOAP cards with the loaded content
+  if (currentTranscript) {
+    showTranscript(currentTranscript, currentTranslationEn);
+  }
+  if (currentSOAP) {
+    document.getElementById('soapCard').classList.add('visible');
+    renderSOAP(currentSOAP);
+    updateReformatButton();
+  } else {
+    document.getElementById('soapCard').classList.remove('visible');
+  }
+  document.getElementById('summaryCard').style.display = 'none';
+  document.getElementById('summaryContent').textContent = '';
+  currentPatientSummary = '';
+  setStatus('Continuing previous note — ' + (note.patientName || 'Patient'), 'done');
+
+  closeNoteView();
+  showToast('Loaded note for editing', 'success');
+
+  // Switch back to Record tab and scroll to top
+  showSectionByName('record');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Helper that switches to a section by name (mirrors showSection but doesn't need an event)
+function showSectionByName(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  const tab = document.querySelector('.section-tab[onclick*="' + name + '"]');
+  if (tab) tab.classList.add('active');
+  if (name === 'notes') renderNotesList();
+}
+
+async function deleteViewedNote() {
+  if (!viewedNoteId) return;
+  if (!confirm('Delete this note? This cannot be undone.')) return;
+  try {
+    await cloudDeleteNote(viewedNoteId);
+    notesCache = notesCache.filter(n => n.id !== viewedNoteId);
+    saveCachedNotes(notesCache);
+    closeNoteView();
+    renderNotesList();
+    showToast('Note deleted');
+  } catch (err) {
+    console.error(err);
+    showToast('Delete failed', 'error');
+  }
+}
+
+async function deleteNoteFromList(id, event) {
+  event.stopPropagation(); // don't open the modal
+  if (!confirm('Delete this note?')) return;
+  try {
+    await cloudDeleteNote(id);
+    notesCache = notesCache.filter(n => n.id !== id);
+    saveCachedNotes(notesCache);
+    renderNotesList();
+    showToast('Note deleted');
+  } catch (err) {
+    console.error(err);
+    showToast('Delete failed', 'error');
+  }
+}
+
+async function clearAllNotes() {
+  if (!confirm('Clear ALL saved notes from the cloud? This cannot be undone.')) return;
+  const notes = notesCache.length ? notesCache : loadCachedNotes();
+  for (const n of notes) {
+    try { await cloudDeleteNote(n.id); } catch (e) { console.error(e); }
+  }
+  notesCache = [];
+  localStorage.removeItem(NOTES_CACHE_KEY);
+  renderNotesList();
+  showToast('All notes cleared');
+}
+
+// =====================
+// NEW ENCOUNTER
+// =====================
+function startNewEncounter() {
+  if (isRecording) {
+    showToast('Stop recording first', 'error');
+    return;
+  }
+  currentTranscript = '';
+  currentSOAP = '';
+  currentTranslationEn = '';
+  currentNoteId = null;
+  document.getElementById('patientName').value = '';
+  document.getElementById('chiefComplaint').value = '';
+  document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pronounsSelect').value = 'she/her';
+  document.getElementById('noteLang').value = 'en';
+  selectNoteType('SOAP');
+  document.getElementById('timer').textContent = '0:00';
+  setStatus('Ready to record', '');
+  document.getElementById('transcriptCard').classList.remove('visible');
+  document.getElementById('soapCard').classList.remove('visible');
+  document.getElementById('transcriptText').textContent = '';
+  document.getElementById('soapContent').innerHTML = '';
+  document.getElementById('summaryCard').style.display = 'none';
+  document.getElementById('summaryContent').textContent = '';
+  currentPatientSummary = '';
+  const rfBtn = document.getElementById('reformatBtn');
+  if (rfBtn) rfBtn.style.display = 'none';
+  document.getElementById('recordBtn').disabled = false;
+  document.getElementById('recordBtn').textContent = '🎙';
+}
+
+// =====================
+// TOAST
+// =====================
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+
+// Close modals on overlay click
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+document.getElementById('noteViewModal').addEventListener('click', function(e) {
+  if (e.target === this) closeNoteView();
+});
+document.getElementById('providerModal').addEventListener('click', function(e) {
+  if (e.target === this) closeProviderSettings();
+});
+document.getElementById('pasteTranscriptModal').addEventListener('click', function(e) {
+  if (e.target === this) closePasteTranscript();
+});
+document.getElementById('addProviderModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddProvider();
+});
+</script>
+</body>
+</html>
