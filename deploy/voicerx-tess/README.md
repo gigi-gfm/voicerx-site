@@ -28,24 +28,29 @@ QR code and Dr. Tess's saved link keep working unchanged.
 ## Updating the page
 
 `public/index.html` is the **single source of truth** for Dr. Tess's
-dictation page. Edit it, then run `wrangler deploy` again.
+dictation page. It is her real production page (provider login / Bearer-token
+auth, pronoun selection, multi-note types, after-visit summaries, and the
+existing IndexedDB audio snapshot + recovery). Edit it, then run
+`wrangler deploy` again.
 
-## Reliability features built into the page
+> History note: an older backup copy was briefly deployed by mistake and rolled
+> back. The live page was captured and patched directly, so this file now
+> matches what Dr. Tess actually uses.
 
-Three layers protect a dictation from being lost:
+## Reliability features
 
-1. **Screen Wake Lock** — while recording, the page holds the screen on so the
-   phone does not auto-lock. This is the fix for the "recording stopped at
-   ~2:30" bug: the screen was timing out and the OS suspended the microphone.
-2. **Crash-safe recording buffer** — every second of audio is written to the
-   browser's IndexedDB *as it records*. If the tab is killed mid-encounter
-   (Android memory/battery pressure, an accidental reload, or a crash), the
-   audio is not lost. On the next load the page shows a **"Recover unfinished
-   recording?"** prompt with the patient name, note type, and length, and lets
-   you **Transcribe it** or **Discard** it. The buffer is cleared only after a
-   note is produced successfully, so even a failed upload stays recoverable.
-3. **Robust copy** — the Copy buttons try the Clipboard API, fall back to the
-   legacy method, and as a last resort show the note text pre-selected so it
+1. **Screen Wake Lock** *(added)* — while recording, the page holds the screen
+   on so the phone does not auto-lock. This is the fix for the "recording
+   stopped at ~2:30" bug: the screen was timing out and the OS suspended the
+   microphone. Re-acquired automatically when the tab regains focus.
+2. **No recording time limit** *(changed)* — recording continues until Stop is
+   tapped (the old 60-minute auto-stop was removed). A gentle "still recording"
+   reminder appears every 30 minutes.
+3. **Crash-safe recording** *(already in the page)* — audio is snapshotted to
+   IndexedDB every few seconds and on interruption (phone call, lost mic, OS
+   suspend), and offered for recovery on reopen.
+4. **Robust copy** *(added)* — the Copy buttons try the Clipboard API, fall back
+   to the legacy method, and as a last resort show the text pre-selected so it
    can be copied by hand. Copy can no longer silently fail.
 
 ### Limits worth knowing
@@ -69,3 +74,5 @@ Test on the device Dr. Tess actually uses (Android, in Chrome):
    recording?" prompt → tap **Transcribe it** → the note appears.
 4. **Copy:** generate a note and tap **Copy** — confirm it copies (and that the
    manual fallback box appears if the browser blocks programmatic copy).
+5. **Auth + pronouns:** stop a short recording and confirm a note is produced
+   (no "Unauthorized") and that it uses the pronouns selected for the patient.
