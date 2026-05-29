@@ -682,6 +682,10 @@ body {
       <div style="margin-top:8px;">
         <a href="javascript:void(0)" onclick="openPasteTranscript()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">…or paste an existing transcript</a>
       </div>
+      <div style="margin-top:8px;">
+        <a href="javascript:void(0)" onclick="document.getElementById('audioFileInput').click()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">⬆ Upload a recording (most reliable for long visits)</a>
+        <input type="file" id="audioFileInput" accept="audio/*" style="display:none" onchange="handleAudioUpload(event)">
+      </div>
       <div class="note-type-row" id="noteChips"></div>
     </div>
 
@@ -1435,6 +1439,30 @@ function stopRecording() {
   }
 }
 
+// Upload an audio file recorded elsewhere (e.g. the phone's native Voice
+// Recorder app — the most reliable way to capture a long encounter, since the
+// OS handles background recording instead of a fragile browser tab). The file
+// is fed straight into the same transcribe/format pipeline.
+async function handleAudioUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = ''; // allow re-selecting the same file later
+  if (!file) return;
+  if (isRecording) { showToast('Stop the current recording first', 'error'); return; }
+  const workerUrl = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
+  const token = localStorage.getItem('vrx_token') || '';
+  if (!workerUrl || !token) { showToast('Set Worker URL and Access Token in Settings first', 'error'); return; }
+
+  // Feed the uploaded file into the existing pipeline (a File is a Blob).
+  audioChunks = [file];
+  mediaRecorder = { mimeType: file.type || 'audio/m4a' };
+  currentAudioSessionId = null;
+  const mb = (file.size / (1024 * 1024)).toFixed(1);
+  showToast(`Uploading recording (${mb} MB)…`);
+  document.getElementById('recordBtn').disabled = true;
+  document.getElementById('recordBtn').textContent = '⏳';
+  await processAudio();
+}
+
 async function processAudio() {
   const workerUrl = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
   const token = localStorage.getItem('vrx_token') || '';
@@ -1469,10 +1497,12 @@ async function processAudio() {
     setStatus('Transcribing…', 'processing');
     let transcript = null;
     let attempts = 0;
-    const MAX_ATTEMPTS = 60; // 60 × 2s = 2 minutes max
-    while (!transcript && attempts < MAX_ATTEMPTS) {
+    const MAX_ATTEMPTS = 900; // 900 × 2s = 30 minutes — long visits take time to transcribe
+    while (transcript === null && attempts < MAX_ATTEMPTS) {
       await new Promise(r => setTimeout(r, 2000));
       attempts++;
+      // Keep the user informed on longer transcripts
+      if (attempts === 60) setStatus('Transcribing… (long recording, this can take a few minutes)', 'processing');
       const pollRes = await fetch(`${workerUrl}/poll/${transcriptId}`, {
         headers: { 'Authorization': 'Bearer ' + token },
       });
@@ -1487,7 +1517,7 @@ async function processAudio() {
         throw new Error(pollData.error || 'Transcription error');
       }
     }
-    if (!transcript) throw new Error('Transcription timed out after 2 minutes');
+    if (transcript === null) throw new Error('Transcription timed out after 30 minutes');
 
     currentTranscript = transcript;
     currentNoteId = 'vrx_' + Date.now();

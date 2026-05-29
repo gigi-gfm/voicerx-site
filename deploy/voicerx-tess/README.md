@@ -52,6 +52,23 @@ existing IndexedDB audio snapshot + recovery). Edit it, then run
 4. **Robust copy** *(added)* — the Copy buttons try the Clipboard API, fall back
    to the legacy method, and as a last resort show the text pre-selected so it
    can be copied by hand. Copy can no longer silently fail.
+5. **Upload a recording** *(added)* — an "Upload a recording" link feeds an
+   audio file straight into the transcribe/format pipeline.
+6. **Longer transcription window** *(changed)* — the completion poll now waits
+   up to 30 minutes instead of 2, so long visits don't fail with a false
+   "timed out" while AssemblyAI is still working.
+
+## Most reliable workflow for real encounters
+
+In-browser recording on a phone cannot be 100% guaranteed — mobile operating
+systems may suspend a browser tab's microphone when the screen turns off, on a
+phone call, under memory pressure, or in Battery Saver. The wake lock reduces
+this but cannot fully prevent it.
+
+For important/long visits, record with the **phone's native Voice Recorder app**
+(built for hours of reliable background recording), then in VoiceRx tap
+**"Upload a recording"** and pick the file. VoiceRx transcribes and formats it
+exactly as if it had recorded it live. This removes every fragile dependency.
 
 ### Limits worth knowing
 - The wake lock prevents the *automatic* screen timeout. Pressing the power
