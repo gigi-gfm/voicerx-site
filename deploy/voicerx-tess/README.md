@@ -27,9 +27,8 @@ QR code and Dr. Tess's saved link keep working unchanged.
 
 ## Updating the page
 
-The canonical source of the dictation page is `public/index.html` here.
-(It is the same file as the repo's top-level `garciafx-dictation.html`.)
-Edit `public/index.html`, then run `wrangler deploy` again.
+`public/index.html` is the **single source of truth** for Dr. Tess's
+dictation page. Edit it, then run `wrangler deploy` again.
 
 ## Verify after deploy
 
