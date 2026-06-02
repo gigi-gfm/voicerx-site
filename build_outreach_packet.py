@@ -81,8 +81,8 @@ h2("Template B — Social Security disability: Missouri DDS Consultative Exam (C
 small("Goal: enroll to perform SSA Consultative Exams for Missouri claimants. Ask for the Professional Relations Officer.")
 body("Subject: Consultative Examination (CE) provider enrollment — Garcia Family Medicine, Blue Springs MO")
 body("Hello,")
-body("I'd like to inquire about enrolling Garcia Family Medicine as a Consultative Examination provider for Missouri Disability Determination Services. Dr. Tess Garcia is a dual board-certified physician with 26+ years of experience, located in Blue Springs (Jackson County), with capacity for adult physical and mental status consultative exams.")
-body("Could you connect me with the Professional Relations Officer (or the correct contact) and share the CE provider application, fee schedule, and documentation requirements? We can offer prompt scheduling and timely, complete reports.")
+body("I'd like to inquire about enrolling Garcia Family Medicine as a Consultative Examination provider for Missouri Disability Determination Services (DDS, administered through the Department of Elementary & Secondary Education / Vocational Rehabilitation). Dr. Tess Garcia is a dual board-certified physician with 26+ years of experience, located in Blue Springs (Jackson County), with capacity for adult physical and mental status consultative exams.")
+body("Could you connect me with the Professional Relations Officer and share the CE provider application, fee schedule, and documentation requirements? We can offer prompt scheduling and timely, complete reports.")
 body("Thank you,\n[Name], [Title]\nGarcia Family Medicine • (816) 330-7575")
 
 rule()
