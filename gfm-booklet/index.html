@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garcia Family Medicine · Services Booklet</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#13284f;--navy2:#1e3a8a;--navy3:#1e40af;--orange:#f97316;--orange2:#fb923c;
+  --cream:#fff7ed;--ink:#1a2535;--slate:#3a4a5c;--muted:#6b7a8d;--line:#e3e8f0;
+  --gold:#f6b35a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#5a6b80;font-family:'Poppins',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+/* ── Screen toolbar ─────────────────────────────────────────── */
+.toolbar{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.toolbar .tb-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+.toolbar .tb-title span{color:var(--orange)}
+.toolbar .tb-note{font-size:11px;color:rgba(255,255,255,.55);margin-left:14px;font-weight:300}
+.print-btn{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif}
+.print-btn:hover{filter:brightness(1.05)}
+
+/* ── Page frame ─────────────────────────────────────────────── */
+.book{padding:26px 0 60px}
+.page{
+  width:8.5in;min-height:11in;background:#fff;margin:0 auto 26px;position:relative;
+  overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.28);display:flex;flex-direction:column;
+}
+.pg-num{position:absolute;bottom:.42in;right:.55in;font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.pg-foot{position:absolute;bottom:.4in;left:.55in;font-size:9.5px;letter-spacing:.16em;color:#aeb8c6;text-transform:uppercase;font-weight:500}
+
+/* ── Photo placeholders (auto-swap to real images) ──────────── */
+.photo{position:relative;overflow:hidden;background:linear-gradient(135deg,#eef2f8,#e3e9f2);display:flex;align-items:center;justify-content:center}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#9aa6b6;padding:18px;gap:8px;
+  background:repeating-linear-gradient(45deg,#eef2f8,#eef2f8 14px,#e7edf5 14px,#e7edf5 28px)}
+.photo .ph svg{width:34px;height:34px;opacity:.55}
+.photo .ph .ph-cap{font-size:11px;font-weight:600;letter-spacing:.04em;color:#7c899b}
+.photo .ph .ph-file{font-size:9px;font-family:monospace;color:#aab4c2;margin-top:2px}
+
+/* ── Shared type ────────────────────────────────────────────── */
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)}
+h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12}
+.lead{font-size:14px;line-height:1.75;color:var(--slate);font-weight:300}
+.body{font-size:12.5px;line-height:1.72;color:var(--slate);font-weight:300}
+.body strong{color:var(--ink);font-weight:600}
+
+/* ════════════════════════════════════════════════════════════
+   PAGE 1 — COVER
+   ════════════════════════════════════════════════════════════ */
+.cover{background:radial-gradient(120% 90% at 80% -10%,#27447e 0%,var(--navy2) 38%,var(--navy) 78%);color:#fff;padding:0}
+.cover-glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.38),transparent 65%);top:-160px;right:-120px;filter:blur(6px)}
+.cover-glow2{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(99,140,210,.35),transparent 68%);bottom:-120px;left:-110px}
+.cover-rings{position:absolute;inset:0;background-image:radial-gradient(circle at 18% 78%,rgba(255,255,255,.05) 0 1px,transparent 1px);background-size:26px 26px;opacity:.5}
+.cover-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:.85in .8in .7in}
+.cover-top{display:flex;align-items:center;gap:13px}
+.crest{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:800;font-size:24px;color:#fff;box-shadow:0 8px 22px rgba(249,115,22,.5)}
+.cover-top .brand{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;letter-spacing:.01em}
+.cover-top .brand small{display:block;font-family:'Poppins';font-size:9.5px;font-weight:300;letter-spacing:.34em;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:3px}
+
+.cover-hero{flex:1;display:flex;flex-direction:column;justify-content:center;margin:.3in 0}
+.cover-hero .kicker{font-size:12px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--orange2);margin-bottom:20px}
+.cover-hero h1{font-size:62px;font-weight:800;color:#fff;line-height:1.03;letter-spacing:-.01em}
+.cover-hero h1 .amp{color:var(--orange);font-style:italic}
+.cover-hero .sub{font-size:17px;font-weight:300;color:rgba(255,255,255,.82);margin-top:22px;line-height:1.6;max-width:5.6in}
+.cover-hero .sub b{font-weight:600;color:#fff}
+
+.cover-photo{height:2.55in;border-radius:18px;margin:.18in 0 .3in;border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.cover-photo .ph{background:repeating-linear-gradient(45deg,#21386a,#21386a 14px,#1d3360 14px,#1d3360 28px);color:rgba(255,255,255,.5)}
+.cover-photo .ph svg{opacity:.6}
+.cover-photo .ph .ph-cap,.cover-photo .ph .ph-file{color:rgba(255,255,255,.55)}
+
+.cover-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.cbadge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:8px 16px;font-size:11.5px;font-weight:500;letter-spacing:.02em;backdrop-filter:blur(4px)}
+.cbadge b{color:var(--orange2);font-weight:700}
+.cover-foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:11.5px;font-weight:300;color:rgba(255,255,255,.72)}
+.cover-foot b{font-weight:600;color:#fff}
+
+/* ════════════════════════════════════════════════════════════
+   Interior page scaffolding
+   ════════════════════════════════════════════════════════════ */
+.pg{padding:.7in .75in .8in;flex:1;display:flex;flex-direction:column}
+.pg-head{border-left:4px solid var(--orange);padding-left:14px;margin-bottom:22px}
+.pg-head h2{font-size:30px;font-weight:700;margin-top:6px}
+.pg-head h2.sm{font-size:26px}
+
+/* Meet Dr Tess */
+.tess-grid{display:grid;grid-template-columns:2.7in 1fr;gap:28px;align-items:start}
+.tess-photo{height:3.6in;border-radius:16px;box-shadow:0 12px 30px rgba(19,40,79,.18)}
+.tess-sign{font-family:'Playfair Display',serif;font-style:italic;font-size:20px;color:var(--navy);margin-top:18px}
+.tess-cred{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.cred{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;color:var(--slate);line-height:1.5}
+.cred .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);margin-top:5px;flex-shrink:0}
+.pullquote{margin-top:20px;background:var(--cream);border-radius:14px;padding:18px 20px;border-left:4px solid var(--orange);font-family:'Playfair Display',serif;font-style:italic;font-size:15px;line-height:1.5;color:var(--navy)}
+
+/* Feature service pages */
+.svc-hero{height:2.5in;border-radius:16px;margin-bottom:24px;box-shadow:0 12px 30px rgba(19,40,79,.16)}
+.price-tag{display:inline-flex;align-items:baseline;gap:8px;background:linear-gradient(135deg,var(--navy2),var(--navy3));color:#fff;border-radius:12px;padding:12px 20px;margin:4px 0 18px}
+.price-tag .big{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--orange2)}
+.price-tag .small{font-size:12px;font-weight:300;color:rgba(255,255,255,.82)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:11px 22px;margin-top:6px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--slate)}
+.check .ic{width:19px;height:19px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.check .ic svg{width:11px;height:11px;color:var(--orange);stroke-width:3}
+.stat-row{display:flex;gap:14px;margin-top:22px}
+.stat{flex:1;background:#f7f9fc;border:1px solid var(--line);border-radius:13px;padding:15px 16px;text-align:center}
+.stat .n{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--navy)}
+.stat .l{font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* Other services grid */
+.svc-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+.svc-card{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;background:#fff;position:relative;overflow:hidden}
+.svc-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;background:linear-gradient(90deg,var(--orange),var(--gold))}
+.svc-card .ico{width:42px;height:42px;border-radius:11px;background:var(--cream);display:flex;align-items:center;justify-content:center;margin-bottom:11px}
+.svc-card .ico svg{width:22px;height:22px;color:var(--orange);stroke-width:1.8}
+.svc-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.svc-card p{font-size:11px;line-height:1.55;color:var(--muted);font-weight:300}
+
+/* At-a-glance list */
+.glance{columns:2;column-gap:30px;margin-top:8px}
+.gline{break-inside:avoid;display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line)}
+.gline .gic{width:8px;height:8px;border-radius:2px;background:var(--orange);margin-top:6px;flex-shrink:0;transform:rotate(45deg)}
+.gline b{font-size:12.5px;color:var(--ink);font-weight:600;display:block}
+.gline span{font-size:10.5px;color:var(--muted);font-weight:300;line-height:1.45}
+
+/* Team */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+.team-card{text-align:center}
+.team-photo{height:2in;border-radius:14px;box-shadow:0 8px 20px rgba(19,40,79,.14);margin-bottom:11px}
+.team-card .nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--navy)}
+.team-card .rl{font-size:10.5px;color:var(--orange);font-weight:600;letter-spacing:.04em;margin-top:2px}
+.team-card .bi{font-size:10px;color:var(--muted);font-weight:300;line-height:1.5;margin-top:6px}
+
+/* Office gallery */
+.gallery{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:2.3in 2.3in;gap:14px;margin-top:8px}
+.gallery .photo{border-radius:14px;box-shadow:0 8px 20px rgba(19,40,79,.12)}
+.gallery .wide{grid-column:1/-1;height:2.3in}
+
+/* Contact / closing */
+.contact{background:radial-gradient(120% 100% at 80% 0%,#27447e,var(--navy2) 45%,var(--navy));color:#fff}
+.contact .pg{color:#fff}
+.contact .eyebrow{color:var(--orange2)}
+.contact h2{color:#fff;font-size:34px;font-weight:700}
+.contact .lead{color:rgba(255,255,255,.82)}
+.ct-rows{margin-top:24px;display:flex;flex-direction:column;gap:2px}
+.ct-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.13)}
+.ct-row .cic{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ct-row .cic svg{width:21px;height:21px;color:var(--orange2);stroke-width:1.8}
+.ct-row .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:500}
+.ct-row .val{font-size:16px;font-weight:500;margin-top:2px}
+.ct-cta{margin-top:30px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:16px;padding:24px 26px;display:flex;align-items:center;justify-content:space-between}
+.ct-cta .t{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff}
+.ct-cta .s{font-size:12px;color:rgba(255,255,255,.9);font-weight:300;margin-top:4px}
+.ct-cta .web{background:#fff;color:var(--navy);border-radius:10px;padding:13px 20px;font-size:13px;font-weight:700;text-align:center;line-height:1.3}
+.ct-cta .web small{display:block;font-weight:400;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+
+/* ── Print ──────────────────────────────────────────────────── */
+@page{size:Letter;margin:0}
+@media print{
+  html,body{background:#fff}
+  .toolbar{display:none}
+  .book{padding:0}
+  .page{margin:0;box-shadow:none;width:8.5in;height:11in;min-height:11in;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center">
+    <div class="tb-title">Garcia <span>Family Medicine</span> · Services Booklet</div>
+    <div class="tb-note">10 pages · Print or “Save as PDF” for a print-ready booklet</div>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button>
+</div>
+
+<div class="book">
+
+<!-- ═══════════════ PAGE 1 · COVER ═══════════════ -->
+<section class="page cover">
+  <div class="cover-glow"></div>
+  <div class="cover-glow2"></div>
+  <div class="cover-rings"></div>
+  <div class="cover-inner">
+
+    <div class="cover-top">
+      <div class="crest">G</div>
+      <div class="brand">Garcia Family Medicine
+        <small>Blue Springs · Missouri</small>
+      </div>
+    </div>
+
+    <div class="cover-hero">
+      <div class="kicker">Healthcare the way it should be</div>
+      <h1>Real care.<br>Real time.<br>Real <span class="amp">you.</span></h1>
+      <div class="sub">Direct Primary Care that puts <b>you</b> back at the center — unhurried visits, your doctor a text away, and a whole practice of services under one roof.</div>
+
+      <div class="cover-photo photo">
+        <img src="images/cover-office.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="ph" style="display:flex">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg>
+          <div class="ph-cap">Welcoming photo of the GFM office / front desk</div>
+          <div class="ph-file">images/cover-office.jpg</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-badges">
+      <div class="cbadge">Memberships from <b>$99/mo</b></div>
+      <div class="cbadge">Weight loss from <b>$27</b></div>
+      <div class="cbadge"><b>20+</b> years caring for families</div>
+    </div>
+    <div class="cover-foot">
+      <div>A Guide to Our Services</div>
+      <div><b>garciafamilymedicine.care</b> · (816) 330-7575</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PAGE 2 · MEET DR. TESS ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Welcome</div>
+      <h2>Meet Dr. Tess Garcia</h2>
+    </div>
+
+    <div class="tess-grid">
+      <div>
+        <div class="tess-photo photo">
+          <img src="images/dr-tess.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ph" style="display:flex">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <div class="ph-cap">Portrait of Dr. Tess Garcia</div>
+            <div class="ph-file">images/dr-tess.jpg</div>
+          </div>
+        </div>
+        <div class="tess-sign">— Dr. Tess</div>
+        <div class="tess-cred">
+          <div class="cred"><div class="dot"></div><div>Board-certified in <b>Family Medicine</b></div></div>
+          <div class="cred"><div class="dot"></div><div>Board-certified in <b>Obesity Medicine</b> (DABOM)</div></div>
+          <div class="cred"><div class="dot"></div><div>Fellow, <b>American Academy of Family Physicians</b> (FAAFP)</div></div>
+          <div class="cred"><div class="dot"></div><div><b>20+ years</b> serving the Kansas City metro</div></div>
+        </div>
+      </div>
+
+      <div>
+        <p class="body" style="margin-bottom:13px">A former music teacher turned physician, <strong>Dr. Theresa “Tess” Garcia</strong> brings rare warmth, patience, and cultural understanding to medicine. As a Mexican-American and Native-American doctor — and the first woman physician in Grain Valley — she has spent her career caring for families, veterans, and the people too often overlooked by rushed, traditional healthcare.</p>
+        <p class="body" style="margin-bottom:13px">She built Garcia Family Medicine on a simple idea: <strong>healthcare should feel personal again.</strong> No phone trees. No gatekeepers. No ten-minute appointments. Just a doctor who knows your name, answers your text, and has the time to truly listen.</p>
+        <p class="body">Her commitment isn’t only professional — it’s personal. Dr. Tess lost <strong>80 pounds herself</strong> using the very same evidence-based approach she now offers her weight-management patients. She doesn’t just prescribe the journey; she’s walked it.</p>
+
+        <div class="pullquote">“You are not a number on a schedule. You are my patient, and your time with me is yours.”</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">Garcia Family Medicine</div>
+  <div class="pg-num">Page 02</div>
+</section>
+
+<!-- ═══════════════ PAGE 3 · THE DPC DIFFERENCE ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Our Model</div>
+      <h2>The Direct Primary Care Difference</h2>
+    </div>
+
+    <p class="lead" style="margin-bottom:22px">Direct Primary Care (DPC) removes insurance from the exam room. Instead of billing your visit, you pay one simple monthly membership — and in return you get your doctor’s time, attention, and direct line. It’s the modern version of the family doctor who actually knew you.</p>
+
+    <div class="stat-row" style="margin-top:4px;margin-bottom:24px">
+      <div class="stat"><div class="n">30–60</div><div class="l">Minutes per visit, not 10</div></div>
+      <div class="stat"><div class="n">$0</div><div class="l">Copays &amp; deductibles</div></div>
+      <div class="stat"><div class="n">∞</div><div class="l">Unlimited visits included</div></div>
+      <div class="stat"><div class="n">24/7</div><div class="l">Text, call &amp; email access</div></div>
+    </div>
+
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <h3>Reach Dr. Tess directly</h3>
+        <p>Text, call, or email your physician — no front-desk maze, no waiting on hold, no gatekeepers between you and your doctor.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Time to truly listen</h3>
+        <p>Appointments run 30–60 minutes. We dig into the “why,” not just the symptom — the way good medicine is meant to be practiced.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 17l-5.5 2.5 1-6.3L3 8.9 9 8z"/></svg></div>
+        <h3>Transparent pricing</h3>
+        <p>One flat monthly fee. Wholesale labs and medications at a fraction of retail. No surprise bills, ever.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>One doctor, the whole way</h3>
+        <p>The same physician every visit, coordinating every part of your care — so nothing about your health gets lost between providers.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">The DPC Difference</div>
+  <div class="pg-num">Page 03</div>
+</section>
+
+<!-- ═══════════════ PAGE 4 · MEMBERSHIP ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Service 01 · Foundation</div>
+      <h2>Direct Primary Care Membership</h2>
+    </div>
+
+    <div class="svc-hero photo">
+      <img src="images/dpc-visit.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:flex">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg>
+        <div class="ph-cap">Dr. Tess with a patient in an exam room</div>
+        <div class="ph-file">images/dpc-visit.jpg</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:30px;align-items:flex-start">
+      <div style="flex:0 0 2.1in">
+        <div class="price-tag" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div><span class="big">$99</span><span class="small"> / month</span></div>
+        </div>
+        <p class="body" style="font-size:11.5px">First visit <strong>$200</strong> — includes your first month plus a full comprehensive health assessment. Adults &amp; families welcome.</p>
+      </div>
+      <div style="flex:1">
+        <p class="body" style="margin-bottom:14px">Your membership is the foundation of everything we do — unlimited access to your physician for the care you need, when you need it.</p>
+        <div class="checks">
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited office visits — no per-visit charge</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Direct text, call &amp; email with Dr. Tess</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Same-day &amp; next-day appointments</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Chronic-disease management</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Annual physicals &amp; preventive care</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>In-office procedures &amp; minor care</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Wholesale-price labs &amp; medications</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Care coordination &amp; referrals</div>
+        </div>
+        <div class="pullquote" style="margin-top:18px;font-size:13px">Works beautifully alongside a high-deductible or catastrophic plan — keep insurance for the big stuff, use GFM for everyday care.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">Membership</div>
+  <div class="pg-num">Page 04</div>
+</section>
+
+<!-- ═══════════════ PAGE 5 · WEIGHT MANAGEMENT ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Service 02 · Transformation</div>
+      <h2>Medical Weight Management</h2>
+    </div>
+
+    <div class="svc-hero photo">
+      <img src="images/weight-management.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:flex">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l2 6 4-14 2 8h6"/></svg>
+        <div class="ph-cap">Consultation / healthy-living lifestyle photo</div>
+        <div class="ph-file">images/weight-management.jpg</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:30px;align-items:flex-start">
+      <div style="flex:1">
+        <p class="body" style="margin-bottom:13px">This isn’t a fad diet or a one-size-fits-all program. Dr. Tess is <strong>board-certified in Obesity Medicine</strong> and builds a personalized, physician-supervised plan around your body, your labs, and your life.</p>
+        <p class="body">When appropriate, that includes the latest <strong>FDA-approved medications (GLP-1s and more)</strong>, alongside nutrition, metabolic, and lifestyle coaching — all guided by a doctor who has personally lost <strong>80 pounds</strong> on this same approach.</p>
+        <div class="stat-row" style="margin-top:20px">
+          <div class="stat"><div class="n">$27</div><div class="l">First month to begin</div></div>
+          <div class="stat"><div class="n">80 lbs</div><div class="l">Dr. Tess’s own results</div></div>
+          <div class="stat"><div class="n">MD-led</div><div class="l">Every step supervised</div></div>
+        </div>
+      </div>
+      <div style="flex:0 0 2.2in">
+        <div style="background:var(--cream);border-radius:14px;padding:18px">
+          <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:15px;margin-bottom:12px">What's included</div>
+          <div class="check" style="margin-bottom:10px"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Metabolic &amp; body-composition assessment</div>
+          <div class="check" style="margin-bottom:10px"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Prescription medication when right for you</div>
+          <div class="check" style="margin-bottom:10px"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Nutrition &amp; lifestyle coaching</div>
+          <div class="check"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Ongoing progress tracking &amp; support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">Weight Management</div>
+  <div class="pg-num">Page 05</div>
+</section>
+
+<!-- ═══════════════ PAGE 6 · CORELIFT ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Service 03 · Pelvic Health</div>
+      <h2>CoreLift™ Pelvic Floor Therapy</h2>
+    </div>
+
+    <div class="svc-hero photo">
+      <img src="images/corelift.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:flex">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/></svg>
+        <div class="ph-cap">CoreLift / EMSELLA treatment room &amp; device</div>
+        <div class="ph-file">images/corelift.jpg</div>
+      </div>
+    </div>
+
+    <p class="lead" style="margin-bottom:20px">Bladder leaks and pelvic-floor weakness are common — and quietly life-limiting. <strong>CoreLift</strong> offers a comfortable, non-invasive way to rebuild that core strength, no surgery and no downtime.</p>
+
+    <div style="display:flex;gap:30px;align-items:flex-start">
+      <div style="flex:1">
+        <p class="body" style="margin-bottom:13px">CoreLift uses <strong>FDA-cleared EMSELLA technology</strong> to deliver <strong>thousands of pelvic-floor contractions</strong> in a single session — the equivalent of thousands of Kegels — while you sit comfortably and <strong>fully clothed</strong>.</p>
+        <p class="body">Each session is just <strong>28 minutes</strong>. The typical protocol is <strong>six sessions over three weeks</strong>, and <strong>95% of patients</strong> report meaningful improvement in bladder control and quality of life.</p>
+      </div>
+      <div style="flex:0 0 2in">
+        <div class="stat" style="margin-bottom:12px"><div class="n">28 min</div><div class="l">Per session, fully clothed</div></div>
+        <div class="stat" style="margin-bottom:12px"><div class="n">6 in 3</div><div class="l">Sessions over three weeks</div></div>
+        <div class="stat"><div class="n">95%</div><div class="l">Report real improvement</div></div>
+      </div>
+    </div>
+
+    <div class="pullquote" style="margin-top:22px;font-size:13px">Helpful for stress, urge &amp; mixed incontinence — and for women after childbirth or menopause, and men after prostate treatment.</div>
+  </div>
+  <div class="pg-foot">CoreLift Pelvic Health</div>
+  <div class="pg-num">Page 06</div>
+</section>
+
+<!-- ═══════════════ PAGE 7 · MORE SERVICES ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">More Ways We Care</div>
+      <h2 class="sm">Everything, Under One Roof</h2>
+    </div>
+    <p class="lead" style="margin-bottom:20px">Beyond your membership, GFM brings together the services families usually have to chase across town — coordinated by the doctor who already knows you.</p>
+
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/></svg></div>
+        <h3>Mental Health Care</h3>
+        <p>Compassionate, judgment-free support for anxiety, depression, stress and more — integrated with your whole-person care.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div>
+        <h3>Pelvic Health</h3>
+        <p>Comprehensive evaluation and treatment of pelvic-floor concerns, incontinence and related conditions — including CoreLift.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h3>DOT Physicals</h3>
+        <p>Certified commercial-driver medical exams done thoroughly and on your schedule — get back on the road with confidence.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h3>Independent Medical Exams</h3>
+        <p>Objective, detailed IMEs for employers, attorneys and insurers — handled with professionalism and care.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7l-9 9-4-4"/><path d="M3 12a9 9 0 109-9"/></svg></div>
+        <h3>Wellness Coaching</h3>
+        <p>Personalized guidance on nutrition, movement, sleep and habits — built to fit your real life, not a template.</p>
+      </div>
+      <div class="svc-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>Family &amp; Preventive Care</h3>
+        <p>Physicals, screenings, chronic-condition management, acute illness and ongoing primary care for the whole family.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">Our Services</div>
+  <div class="pg-num">Page 07</div>
+</section>
+
+<!-- ═══════════════ PAGE 8 · SERVICES AT A GLANCE ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">Reference</div>
+      <h2 class="sm">All Services at a Glance</h2>
+    </div>
+    <p class="lead" style="margin-bottom:14px">A quick checklist of everything Garcia Family Medicine offers.</p>
+
+    <div class="glance">
+      <div class="gline"><div class="gic"></div><div><b>Direct Primary Care Membership</b><span>Unlimited visits · $99/month</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Medical Weight Management</b><span>MD-supervised · GLP-1s · from $27</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>CoreLift Pelvic Floor Therapy</b><span>FDA-cleared EMSELLA · 28-min sessions</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Mental &amp; Behavioral Health</b><span>Anxiety, depression, stress support</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Pelvic Health Care</b><span>Evaluation &amp; treatment</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>DOT / CDL Physicals</b><span>Certified commercial-driver exams</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Independent Medical Exams</b><span>For employers, attorneys &amp; insurers</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Wellness &amp; Lifestyle Coaching</b><span>Nutrition, movement, sleep, habits</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Annual Physicals &amp; Preventive Care</b><span>Screenings &amp; wellness checks</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Chronic Disease Management</b><span>Diabetes, blood pressure &amp; more</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Acute &amp; Sick Visits</b><span>Same-day &amp; next-day care</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>In-Office Procedures</b><span>Minor procedures &amp; minor care</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Wholesale Labs &amp; Medications</b><span>At a fraction of retail price</span></div></div>
+      <div class="gline"><div class="gic"></div><div><b>Care Coordination &amp; Referrals</b><span>We guide your specialist care</span></div></div>
+    </div>
+
+    <div class="pullquote" style="margin-top:22px;font-size:14px;text-align:center">Coordinated. Personal. Affordable. <strong style="font-style:normal;color:var(--orange)">All under one roof.</strong></div>
+  </div>
+  <div class="pg-foot">Services at a Glance</div>
+  <div class="pg-num">Page 08</div>
+</section>
+
+<!-- ═══════════════ PAGE 9 · TEAM & OFFICE ═══════════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="pg-head">
+      <div class="eyebrow">The People &amp; The Place</div>
+      <h2 class="sm">Meet the Team</h2>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-photo photo">
+          <img src="images/team-1.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-1.jpg</div></div>
+        </div>
+        <div class="nm">Dr. Tess Garcia</div>
+        <div class="rl">Physician &amp; Founder</div>
+        <div class="bi">MD, FAAFP, DABOM — your doctor for every visit.</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo photo">
+          <img src="images/team-2.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-2.jpg</div></div>
+        </div>
+        <div class="nm">Team Member</div>
+        <div class="rl">Patient Care</div>
+        <div class="bi">Add a staff name &amp; role here.</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo photo">
+          <img src="images/team-3.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-3.jpg</div></div>
+        </div>
+        <div class="nm">Team Member</div>
+        <div class="rl">Front Office</div>
+        <div class="bi">Add a staff name &amp; role here.</div>
+      </div>
+    </div>
+
+    <div class="pg-head" style="margin-top:26px"><div class="eyebrow">Inside Our Office</div></div>
+    <div class="gallery" style="grid-template-rows:1.95in">
+      <div class="photo">
+        <img src="images/office-1.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg><div class="ph-cap">Waiting room / reception</div><div class="ph-file">images/office-1.jpg</div></div>
+      </div>
+      <div class="photo">
+        <img src="images/office-2.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg><div class="ph-cap">Exam room</div><div class="ph-file">images/office-2.jpg</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-foot">Our Team &amp; Office</div>
+  <div class="pg-num">Page 09</div>
+</section>
+
+<!-- ═══════════════ PAGE 10 · CONTACT ═══════════════ -->
+<section class="page contact">
+  <div class="cover-glow"></div>
+  <div class="pg" style="position:relative;z-index:2">
+    <div class="eyebrow">Come See Us</div>
+    <h2 style="margin-top:8px">Let’s start your care.</h2>
+    <p class="lead" style="margin-top:12px">Becoming a patient is simple — no insurance hoops, no waiting weeks for an appointment. Reach out and Dr. Tess will take it from there.</p>
+
+    <div class="ct-rows">
+      <div class="ct-row">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.1-8.7A2 2 0 013.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L7.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.8 2z"/></svg></div>
+        <div><div class="lbl">Call or Text</div><div class="val">(816) 330-7575</div></div>
+      </div>
+      <div class="ct-row">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+        <div><div class="lbl">Email</div><div class="val">info@garciafamilymedicine.care</div></div>
+      </div>
+      <div class="ct-row">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/><circle cx="12" cy="9" r="2"/></svg></div>
+        <div><div class="lbl">Visit</div><div class="val">801 NW Saint Mary’s Dr, Suite 209 · Blue Springs, MO</div></div>
+      </div>
+      <div class="ct-row">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><div class="lbl">Hours</div><div class="val">Tue – Fri · 11:00 am – 6:00 pm</div></div>
+      </div>
+    </div>
+
+    <div class="ct-cta">
+      <div>
+        <div class="t">Become a Patient</div>
+        <div class="s">Memberships from $99/mo · Weight loss from $27</div>
+      </div>
+      <div class="web"><small>Join online at</small>garciafamilymedicine.care</div>
+    </div>
+
+    <div style="text-align:center;margin-top:auto;padding-top:26px;font-size:11px;color:rgba(255,255,255,.5);font-weight:300">
+      Garcia Family Medicine · Dr. Theresa “Tess” Garcia, MD, FAAFP, DABOM · Blue Springs, Missouri
+    </div>
+  </div>
+  <div class="pg-num" style="color:rgba(255,255,255,.5)">Page 10</div>
+</section>
+
+</div>
+</body>
+</html>
