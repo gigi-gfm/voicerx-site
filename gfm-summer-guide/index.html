@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GFM Summer Guide · Health, Activities & Safety</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#13284f;--navy2:#1e3a8a;--navy3:#1e40af;--royal:#2547e0;--orange:#f97316;--orange2:#fb923c;
+  --cream:#fff7ed;--ink:#1a2535;--slate:#3a4a5c;--muted:#6b7a8d;--line:#e3e8f0;
+  --gold:#f6b35a;--sun:#fcd34d;--leaf:#16a34a;--red:#dc2626;--redlt:#fef2f2;--teal:#0891b2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#5a6b80;font-family:'Poppins',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+.toolbar{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.toolbar .tb-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700}
+.toolbar .tb-title span{color:var(--orange)}
+.toolbar .tb-note{font-size:11px;color:rgba(255,255,255,.55);margin-left:14px;font-weight:300}
+.print-btn{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif}
+
+.book{padding:26px 0 60px}
+.page{width:8.5in;height:11in;background:#fff;margin:0 auto 26px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.28);display:flex;flex-direction:column}
+
+h1,h2,h3,h4{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12}
+.pg-num{position:absolute;bottom:.34in;right:.5in;font-size:9px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.pg-foot{position:absolute;bottom:.33in;left:.5in;font-size:8.5px;letter-spacing:.14em;color:#aeb8c6;text-transform:uppercase;font-weight:500}
+
+/* Photo auto-swap */
+.photo{position:relative;overflow:hidden;background:#e7edf5}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── COVER (light) ───────────────────────────────────── */
+.cover{padding:0}
+.cover::before{content:"";position:absolute;top:0;left:0;right:0;height:9px;background:linear-gradient(90deg,var(--orange),var(--gold));z-index:3}
+.cover::after{content:"";position:absolute;right:-150px;top:-120px;width:360px;height:360px;border-radius:50%;border:16px solid var(--cream);z-index:0}
+.cv-ring2{position:absolute;width:260px;height:260px;border-radius:50%;border:13px solid var(--cream);bottom:2.2in;left:-130px;z-index:0}
+.cv-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:.8in .8in 0}
+.cv-top{display:flex;align-items:center;gap:13px}
+.crest{width:50px;height:50px;border-radius:13px;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:800;font-size:23px;color:#fff;box-shadow:0 8px 20px rgba(249,115,22,.45)}
+.cv-top .brand{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--navy)}
+.cv-top .brand small{display:block;font-family:'Poppins';font-size:9px;font-weight:300;letter-spacing:.32em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.cv-hero{margin-top:.5in}
+.cv-hero .kick{font-size:12px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--orange);margin-bottom:16px}
+.cv-hero h1{font-size:58px;font-weight:800;color:var(--navy);line-height:1.02;letter-spacing:-.01em}
+.cv-hero h1 .em{color:var(--orange);font-style:italic}
+.cv-hero .sub{font-size:15.5px;font-weight:300;color:var(--slate);margin-top:18px;line-height:1.6;max-width:5.4in}
+.cv-hero .sub b{font-weight:600;color:var(--navy)}
+.cv-photo{height:2.7in;border-radius:16px;margin-top:.32in;border:1px solid var(--line);box-shadow:0 16px 34px rgba(19,40,79,.16)}
+.cv-badges{display:flex;gap:9px;flex-wrap:wrap;margin-top:.26in}
+.cbadge{background:#fff;border:1px solid var(--line);border-radius:30px;padding:8px 15px;font-size:11px;font-weight:500;color:var(--slate);box-shadow:0 2px 8px rgba(19,40,79,.05)}
+.cbadge b{color:var(--orange);font-weight:700}
+.cv-foot{margin-top:auto;background:var(--navy);color:#fff;padding:13px .8in;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:300}
+.cv-foot b{color:#fff;font-weight:600}
+.cv-foot .r{color:var(--sun)}
+
+/* ── Interior scaffolding ────────────────────────────── */
+.pg{flex:1;display:flex;flex-direction:column;padding:.6in .65in .55in}
+.phead{border-left:4px solid var(--orange);padding-left:13px;margin-bottom:16px}
+.eyebrow{font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--orange)}
+.phead h2{font-size:27px;font-weight:700;margin-top:5px}
+.lead{font-size:12.5px;line-height:1.65;color:var(--slate);font-weight:300}
+.lead b{color:var(--ink);font-weight:600}
+.body{font-size:11px;line-height:1.6;color:var(--slate);font-weight:300}
+.body b{color:var(--ink);font-weight:600}
+
+.hero-band{height:2.2in;border-radius:14px;margin-bottom:16px;box-shadow:0 10px 26px rgba(19,40,79,.15)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+
+/* article card */
+.art{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.art-h{display:flex;align-items:center;gap:9px;padding:9px 13px;color:#fff}
+.art-h .ai{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.art-h .ai svg{width:19px;height:19px;color:#fff;stroke-width:1.9}
+.art-h h3{color:#fff;font-size:15px;font-weight:700;line-height:1}
+.art-h .tag{margin-left:auto;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.22);padding:3px 7px;border-radius:20px;font-weight:600;font-family:'Poppins'}
+.h-heat{background:linear-gradient(120deg,#ea580c,#f97316)}
+.h-cool{background:linear-gradient(120deg,#2547e0,#1e40af)}
+.h-bee{background:linear-gradient(120deg,#b45309,#d97706)}
+.h-skin{background:linear-gradient(120deg,#be185d,#db2777)}
+.h-water{background:linear-gradient(120deg,#0891b2,#0e7490)}
+.h-leaf{background:linear-gradient(120deg,#16a34a,#15803d)}
+.art-b{padding:11px 13px}
+.art-b p{font-size:10px;line-height:1.55;color:var(--slate);font-weight:300}
+.art-b p b{color:var(--ink);font-weight:600}
+.mini-h{font-size:8.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:8px 0 3px;color:var(--navy)}
+.signs{list-style:none;display:flex;flex-direction:column;gap:4px}
+.signs li{font-size:9.5px;line-height:1.4;color:var(--slate);display:flex;gap:6px;align-items:flex-start;font-weight:300}
+.signs li .b{width:5px;height:5px;border-radius:50%;background:var(--orange);margin-top:4px;flex-shrink:0}
+.alert{background:var(--redlt);border:1px solid #fca5a5;border-left:4px solid var(--red);border-radius:8px;padding:8px 10px;margin-top:9px}
+.alert .at{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--red)}
+.alert p{font-size:9.5px;line-height:1.45;color:#991b1b;font-weight:400;margin-top:3px}
+.tip{background:#ecfdf5;border:1px solid #a7f3d0;border-left:4px solid var(--leaf);border-radius:8px;padding:8px 10px;margin-top:9px}
+.tip .at{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#047857}
+.tip p{font-size:9.5px;line-height:1.45;color:#065f46;font-weight:400;margin-top:2px}
+
+/* checklist */
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px}
+.cl{display:flex;gap:9px;align-items:flex-start}
+.cl .ci{width:18px;height:18px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.cl .ci svg{width:11px;height:11px;color:var(--orange);stroke-width:3}
+.cl .ct{font-size:10px;line-height:1.4;color:var(--slate);font-weight:300}
+.cl .ct b{color:var(--ink);font-weight:600;display:block;font-size:11px}
+
+/* factoid cards */
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;position:relative;display:flex;gap:12px;align-items:flex-start}
+.fact::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(var(--orange),var(--gold))}
+.fact .n{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--orange);line-height:.9;flex-shrink:0;min-width:54px}
+.fact .n small{font-size:12px}
+.fact .ft b{font-size:11px;color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+.fact .ft p{font-size:9.5px;line-height:1.45;color:var(--muted);font-weight:300}
+
+/* activity tiles */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.act{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fff;position:relative;overflow:hidden}
+.act::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--orange),var(--gold))}
+.act .ah{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.act .ah .ico{width:30px;height:30px;border-radius:8px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act .ah .ico svg{width:17px;height:17px;color:var(--orange);stroke-width:1.8}
+.act .ah b{font-size:12.5px;color:var(--navy);font-weight:700;font-family:'Playfair Display',serif}
+.act p{font-size:9.5px;line-height:1.45;color:var(--muted);font-weight:300}
+.act p .s{color:var(--leaf);font-weight:600}
+
+/* GFM tie-in band */
+.gfm-band{background:linear-gradient(120deg,var(--cream),#fff);border:1px solid #f3d9bf;border-radius:12px;padding:12px 15px;display:flex;align-items:center;gap:14px;margin-top:auto}
+.gfm-band .gi{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-family:'Playfair Display',serif;font-weight:800;font-size:18px}
+.gfm-band .gt{font-size:10.5px;line-height:1.5;color:var(--slate);font-weight:300}
+.gfm-band .gt b{color:var(--navy);font-weight:700}
+
+/* services list (p10) */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.svc{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.svc .si{width:34px;height:34px;border-radius:9px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc .si svg{width:18px;height:18px;color:var(--orange);stroke-width:1.8}
+.svc b{font-size:11.5px;color:var(--navy);font-weight:700;display:block}
+.svc span{font-size:9.5px;color:var(--muted);font-weight:300;line-height:1.4}
+.contact-band{background:radial-gradient(120% 130% at 85% 0%,#27447e,var(--navy2) 50%,var(--navy));border-radius:14px;padding:18px 20px;color:#fff;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.contact-band .ct .lbl{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:7px}
+.contact-band .ct .v{font-size:13px;font-weight:500;margin-top:1px}
+.contact-band .cta{background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:11px;padding:14px 18px;text-align:center;flex-shrink:0}
+.contact-band .cta .t{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+.contact-band .cta .s{font-size:9px;color:rgba(255,255,255,.92);margin-top:3px;font-weight:300}
+
+.disc{margin-top:12px;background:#f7f9fc;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:8.5px;color:var(--muted);line-height:1.55;font-weight:300}
+.disc b{color:var(--slate);font-weight:600}
+
+@page{size:Letter;margin:0}
+@media print{
+  html,body{background:#fff}
+  .toolbar{display:none}
+  .book{padding:0}
+  .page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center">
+    <div class="tb-title">GFM <span>Summer Guide</span> · Health · Activities · Safety</div>
+    <div class="tb-note">10 pages · Print or “Save as PDF”</div>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button>
+</div>
+
+<div class="book">
+
+<!-- ═════════ PAGE 1 · COVER ═════════ -->
+<section class="page cover">
+  <div class="cv-ring2"></div>
+  <div class="cv-inner">
+    <div class="cv-top">
+      <div class="crest">G</div>
+      <div class="brand">Garcia Family Medicine<small>Blue Springs · Missouri</small></div>
+    </div>
+    <div class="cv-hero">
+      <div class="kick">Your Season-Long Wellness Companion</div>
+      <h1>The Summer<br>Health &amp; <span class="em">Safety</span><br>Guide</h1>
+      <div class="sub">Beat the heat, dodge the bugs, and make the most of every sunny day — <b>fun activity ideas and simple safety know-how</b>, brought to you by Dr. Tess and the GFM team.</div>
+      <div class="cv-photo photo">
+        <img src="images/garden.jpg" alt="Happy family enjoying a sunny summer day" onload="this.parentElement.style.background='none'">
+      </div>
+      <div class="cv-badges">
+        <div class="cbadge"><b>20+</b> summer-safety tips</div>
+        <div class="cbadge"><b>12</b> activity ideas</div>
+        <div class="cbadge">Your doctor a <b>text away</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="cv-foot">
+    <div>A Garcia Family Medicine Wellness Guide · Summer 2026</div>
+    <div class="r"><b>garciafamilymedicine.care</b> · (816) 330-7575</div>
+  </div>
+</section>
+
+<!-- ═════════ PAGE 2 · WELCOME ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">A Note From Your Doctor</div><h2>Make It a Healthy Summer</h2></div>
+    <div class="hero-band photo"><img src="images/beach.jpg" alt="Family enjoying summer" onload="this.parentElement.style.background='none'"></div>
+    <p class="lead" style="margin-bottom:12px">Summer in the Kansas City metro means pools, parks, ball games, and backyard cookouts — and a few seasonal hazards worth knowing. This little guide is our gift to you: the <b>practical stuff</b> that keeps summer fun, plus easy ideas to stay active as a family.</p>
+    <div class="two" style="margin-bottom:14px">
+      <div class="art"><div class="art-b">
+        <div class="mini-h" style="color:var(--orange)">Inside this guide</div>
+        <ul class="signs">
+          <li><span class="b"></span>Spotting &amp; preventing heat illness</li>
+          <li><span class="b"></span>Hydration &amp; sun protection</li>
+          <li><span class="b"></span>Bites, stings &amp; summer skin</li>
+          <li><span class="b"></span>12 family activity ideas</li>
+          <li><span class="b"></span>Water, travel &amp; cookout safety</li>
+          <li><span class="b"></span>Fun summer health factoids</li>
+        </ul>
+      </div></div>
+      <div class="art"><div class="art-b">
+        <div class="mini-h" style="color:var(--royal)">The GFM advantage</div>
+        <p>With a <b>Direct Primary Care</b> membership, you never have to wonder whether something’s “worth a visit.” A bad sting, a rash that won’t quit, a fever on a holiday weekend — <b>just text Dr. Tess.</b> No phone trees, no rushed appointments, often same-day answers from a doctor who knows your whole family.</p>
+      </div></div>
+    </div>
+    <div class="gfm-band">
+      <div class="gi">G</div>
+      <div class="gt"><b>Dr. Theresa “Tess” Garcia, MD, FAAFP, DABOM</b> — board-certified in Family &amp; Obesity Medicine, caring for Blue Springs families for 20+ years. <b>This guide is general wellness information, not a substitute for personal care.</b></div>
+    </div>
+  </div>
+  <div class="pg-foot">GFM Summer Guide</div><div class="pg-num">Page 02</div>
+</section>
+
+<!-- ═════════ PAGE 3 · BEAT THE HEAT ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Health · 01</div><h2>Beat the Heat</h2></div>
+    <p class="lead" style="margin-bottom:14px">When the body can’t cool itself, trouble builds fast. Knowing the two stages — and acting early — can prevent an emergency.</p>
+    <div class="two">
+      <div class="art">
+        <div class="art-h h-heat"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M12 3v3M5 7l2 2M19 7l-2 2M3 14h2M19 14h2"/></svg></div><h3>Heat Exhaustion</h3></div>
+        <div class="art-b">
+          <ul class="signs">
+            <li><span class="b"></span>Heavy sweating; cool, clammy, pale skin</li>
+            <li><span class="b"></span>Dizziness, headache, nausea</li>
+            <li><span class="b"></span>Weak, fast pulse; muscle cramps</li>
+          </ul>
+          <div class="tip"><div class="at">What to do</div><p>Move to shade/AC, sip water, loosen clothing, apply cool wet cloths. Rest until fully recovered.</p></div>
+        </div>
+      </div>
+      <div class="art">
+        <div class="art-h h-heat" style="background:linear-gradient(120deg,#b91c1c,#dc2626)"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2s5 5 5 10a5 5 0 01-10 0c0-5 5-10 5-10z"/></svg></div><h3>Heat Stroke</h3><span class="tag">Emergency</span></div>
+        <div class="art-b">
+          <ul class="signs">
+            <li><span class="b" style="background:#dc2626"></span>Temp 103°F+; hot, red, dry or damp skin</li>
+            <li><span class="b" style="background:#dc2626"></span>Confusion, slurred speech, fainting</li>
+            <li><span class="b" style="background:#dc2626"></span>Strong, racing pulse</li>
+          </ul>
+          <div class="alert"><div class="at">⚠ Call 911 immediately</div><p>Move to cool, cool aggressively (wet skin, fan, ice packs to neck/armpits). Don’t give fluids if not fully alert.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="three" style="margin-top:14px">
+      <div class="fact" style="padding:11px 12px"><div class="n">#1</div><div class="ft"><b>Top weather killer</b><p>Heat causes more U.S. deaths most years than floods, tornadoes or hurricanes.</p></div></div>
+      <div class="fact" style="padding:11px 12px"><div class="n">10<small>min</small></div><div class="ft"><b>Never leave anyone in a car</b><p>Interiors can climb ~20°F in 10 minutes — deadly for kids &amp; pets.</p></div></div>
+      <div class="fact" style="padding:11px 12px"><div class="n">★</div><div class="ft"><b>Higher-risk</b><p>Infants, older adults, athletes &amp; some meds raise heat risk. Check on neighbors.</p></div></div>
+    </div>
+    <div class="gfm-band"><div class="gi">G</div><div class="gt"><b>Not sure if it’s heat exhaustion?</b> GFM members can <b>text Dr. Tess</b> for same-day guidance — and we’ll tell you fast if it’s a 911 situation.</div></div>
+  </div>
+  <div class="pg-foot">Beat the Heat</div><div class="pg-num">Page 03</div>
+</section>
+
+<!-- ═════════ PAGE 4 · HYDRATION & SUN ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Health · 02</div><h2>Hydration &amp; Sun Safety</h2></div>
+    <div class="two" style="grid-template-columns:1.15fr 1fr;align-items:stretch;margin-bottom:14px">
+      <div class="art">
+        <div class="art-h h-cool"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z"/></svg></div><h3>Drink Before You’re Thirsty</h3></div>
+        <div class="art-b">
+          <p>Thirst lags behind your body’s needs, so sip steadily all day — don’t wait for the dry mouth.</p>
+          <div class="mini-h">Stay ahead of it</div>
+          <ul class="signs">
+            <li><span class="b"></span>Carry water; add fruit or a pinch of electrolytes on sweaty days</li>
+            <li><span class="b"></span>Limit sugary &amp; alcoholic drinks — they dry you out</li>
+            <li><span class="b"></span><b>Pee-check:</b> pale yellow = good; dark = drink up</li>
+            <li><span class="b"></span>“Eat your water”: watermelon, cucumber &amp; berries are ~90% water</li>
+          </ul>
+        </div>
+      </div>
+      <div class="photo" style="border-radius:12px;box-shadow:0 10px 24px rgba(19,40,79,.14)"><img src="images/sunscreen.jpg" alt="Applying sunscreen" onload="this.parentElement.style.background='none'"></div>
+    </div>
+    <div class="art" style="margin-bottom:14px">
+      <div class="art-h h-heat"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div><h3>Smart Sun Protection</h3></div>
+      <div class="art-b"><div class="checklist">
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>SPF 30+, broad-spectrum</b>Reapply every 2 hours &amp; after swimming or sweating.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Seek shade 10am–4pm</b>UV is strongest midday — hats &amp; sunglasses help too.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Don’t forget spots</b>Ears, nose, neck, scalp part &amp; tops of feet burn easily.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Burn? Cool &amp; moisturize</b>Cool bath, aloe, fluids; see us for blistering burns.</div></div>
+      </div></div>
+    </div>
+    <div class="two">
+      <div class="fact"><div class="n">15<small>min</small></div><div class="ft"><b>Sunburn starts fast</b><p>Unprotected skin can burn in as little as 15 minutes of midday sun.</p></div></div>
+      <div class="fact"><div class="n">1.5<small>L</small></div><div class="ft"><b>Sweat adds up</b><p>You can lose over a liter of fluid an hour in the heat — replace it.</p></div></div>
+    </div>
+    <div class="disc"><b>Heads-up:</b> some prescriptions increase sun &amp; heat sensitivity. Ask Dr. Tess whether any of yours do.</div>
+  </div>
+  <div class="pg-foot">Hydration &amp; Sun</div><div class="pg-num">Page 04</div>
+</section>
+
+<!-- ═════════ PAGE 5 · BITES & STINGS ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Health · 03</div><h2>Bites, Stings &amp; Bugs</h2></div>
+    <div class="two" style="margin-bottom:14px">
+      <div class="art">
+        <div class="art-h h-bee"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="14" rx="4" ry="6"/><path d="M8 12h8M8 15h8M9 5l-3-2M15 5l3-2"/></svg></div><h3>Bee &amp; Wasp Stings</h3></div>
+        <div class="art-b">
+          <p><b>Scrape</b> the stinger out sideways — don’t pinch (that pushes in more venom). Wash, then cold compress.</p>
+          <ul class="signs" style="margin-top:6px">
+            <li><span class="b"></span>Ice 10 min on/off for swelling</li>
+            <li><span class="b"></span>Antihistamine for itch, ibuprofen for pain</li>
+          </ul>
+          <div class="alert"><div class="at">⚠ Call 911 if</div><p>Lips/tongue/throat swell, hives spread, or breathing is hard — use an EpiPen if prescribed.</p></div>
+        </div>
+      </div>
+      <div class="art">
+        <div class="art-h h-leaf"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div><h3>Mosquitoes &amp; Ticks</h3></div>
+        <div class="art-b">
+          <div class="mini-h">Prevent</div>
+          <ul class="signs">
+            <li><span class="b"></span>EPA-approved repellent; cover skin at dusk</li>
+            <li><span class="b"></span>Dump standing water around the yard</li>
+            <li><span class="b"></span>Check for ticks after trails &amp; tall grass</li>
+          </ul>
+          <div class="tip"><div class="at">Tick found?</div><p>Pull straight out with tweezers at the skin. Watch for a spreading rash, fever or aches — and tell us.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="art" style="margin-bottom:14px">
+      <div class="art-h h-skin" style="background:linear-gradient(120deg,#7c3aed,#9333ea)"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/></svg></div><h3>Know the Warning Signs of a Serious Reaction</h3></div>
+      <div class="art-b"><div class="checklist">
+        <div class="cl"><div class="ci" style="background:var(--redlt)"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-linecap="round"><path d="M12 9v4M12 17h0"/><circle cx="12" cy="12" r="9"/></svg></div><div class="ct"><b>Trouble breathing or swallowing</b></div></div>
+        <div class="cl"><div class="ci" style="background:var(--redlt)"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-linecap="round"><path d="M12 9v4M12 17h0"/><circle cx="12" cy="12" r="9"/></svg></div><div class="ct"><b>Swelling of lips, tongue or throat</b></div></div>
+        <div class="cl"><div class="ci" style="background:var(--redlt)"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-linecap="round"><path d="M12 9v4M12 17h0"/><circle cx="12" cy="12" r="9"/></svg></div><div class="ct"><b>Dizziness or fainting</b></div></div>
+        <div class="cl"><div class="ci" style="background:var(--redlt)"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-linecap="round"><path d="M12 9v4M12 17h0"/><circle cx="12" cy="12" r="9"/></svg></div><div class="ct"><b>Hives spreading beyond the sting</b></div></div>
+      </div></div>
+    </div>
+    <div class="gfm-band"><div class="gi">G</div><div class="gt"><b>Nasty bite or sting that isn’t calming down?</b> GFM offers <b>same-day care</b> — text a photo and we’ll guide you on what’s normal and what needs to be seen.</div></div>
+  </div>
+  <div class="pg-foot">Bites &amp; Stings</div><div class="pg-num">Page 05</div>
+</section>
+
+<!-- ═════════ PAGE 6 · SUMMER SKIN ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Health · 04</div><h2>Summer Skin</h2></div>
+    <p class="lead" style="margin-bottom:14px">Heat, sweat, sun and plants all test your skin in summer. Most flare-ups are minor and settle quickly with simple care.</p>
+    <div class="two" style="margin-bottom:13px">
+      <div class="art">
+        <div class="art-h h-skin"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="9" r="1.3"/><circle cx="13" cy="7" r="1.3"/><circle cx="16" cy="11" r="1.3"/><circle cx="10" cy="13" r="1.3"/><circle cx="15" cy="15" r="1.3"/></svg></div><h3>Heat Rash</h3></div>
+        <div class="art-b">
+          <p>Trapped sweat plugs the skin’s ducts, leaving tiny red, prickly bumps — often in folds, on the neck or chest.</p>
+          <div class="tip"><div class="at">Soothe &amp; prevent</div><p>Cool down, keep skin <b>dry</b>, wear loose cotton, skip heavy creams. Usually clears in a few days.</p></div>
+        </div>
+      </div>
+      <div class="art">
+        <div class="art-h h-heat"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2"/></svg></div><h3>Sunburn Relief</h3></div>
+        <div class="art-b">
+          <ul class="signs">
+            <li><span class="b"></span>Cool bath/compress; aloe or fragrance-free lotion</li>
+            <li><span class="b"></span>Extra fluids; ibuprofen for pain</li>
+            <li><span class="b"></span>Leave blisters intact; don’t peel</li>
+          </ul>
+          <div class="alert"><div class="at">⚠ See a doctor for</div><p>Widespread blistering, fever, chills or signs of dehydration.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="art" style="margin-bottom:13px">
+      <div class="art-h h-leaf"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22c5-3 8-7 8-12a8 8 0 00-16 0c0 5 3 9 8 12z"/></svg></div><h3>Poison Ivy, Oak &amp; Sumac</h3><span class="tag">Leaves of 3</span></div>
+      <div class="art-b">
+        <p style="margin-bottom:5px"><b>“Leaves of three, let it be.”</b> The oil (urushiol) causes an itchy, blistering rash 12–72 hours after contact.</p>
+        <div class="two" style="gap:10px">
+          <div class="tip" style="margin-top:0"><div class="at">Right away</div><p>Rinse skin with soap &amp; cool water within the hour; wash clothes, tools &amp; pets that touched it.</p></div>
+          <div class="alert" style="margin-top:0"><div class="at">⚠ Get care if</div><p>Rash hits the face/eyes/groin, covers large areas, or oozes &amp; spreads — we can help calm it.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="gfm-band"><div class="gi">G</div><div class="gt"><b>Rashes are easy to misread.</b> Snap a photo and text it — Dr. Tess can often tell you what it is and what to do, no appointment needed.</div></div>
+  </div>
+  <div class="pg-foot">Summer Skin</div><div class="pg-num">Page 06</div>
+</section>
+
+<!-- ═════════ PAGE 7 · ACTIVITIES ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Get Moving</div><h2>12 Smart Summer Activities</h2></div>
+    <div class="hero-band photo" style="height:1.75in;margin-bottom:14px"><img src="images/biking.jpg" alt="Family biking outdoors" onload="this.parentElement.style.background='none'"></div>
+    <div class="acts">
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 16s2-1 4 0 4 1 6 0 4-1 6 0 4 1 4 1"/><circle cx="9" cy="6" r="2"/></svg></div><b>Swimming</b></div><p>Cool, low-impact, great for all ages. <span class="s">Swim with a buddy; watch kids closely.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-6h5l3 6M10 11l3-4"/></svg></div><b>Family Bike Rides</b></div><p>Explore the trails together. <span class="s">Helmets on; go early to beat the heat.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 20l6-14 4 9 3-5 5 10z"/></svg></div><b>Nature Walks &amp; Hikes</b></div><p>Free, easy, good for the heart. <span class="s">Water, sunscreen, bug spray; check for ticks.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M5 9c0 4 7 4 7 4s7 0 7-4"/></svg></div><b>Gardening</b></div><p>Gentle strength &amp; stress relief. <span class="s">Hat, gloves, shade breaks, hydrate.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 000 18"/></svg></div><b>Backyard Sports</b></div><p>Catch, soccer, frisbee. <span class="s">Warm up; take water &amp; shade timeouts.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20h16M6 20V8l6-4 6 4v12"/></svg></div><b>Farmers Markets</b></div><p>Walk &amp; shop fresh produce. <span class="s">Morning trips dodge midday heat.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18l4-8 4 4 3-6 4 10z"/></svg></div><b>Sunrise/Sunset Strolls</b></div><p>Beat the heat at the cool ends of day. <span class="s">Reflective gear after dark.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a4 4 0 018 0v2"/></svg></div><b>Picnics in the Park</b></div><p>Family time outdoors. <span class="s">Keep cold food cold; shade the spread.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 22V12l7-5 7 5v10"/><path d="M9 22v-5h6v5"/></svg></div><b>Sprinkler &amp; Water Play</b></div><p>Kid-favorite way to cool off. <span class="s">Non-slip surfaces; supervise always.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><b>Yoga / Stretch on the Lawn</b></div><p>Calm, flexible, joint-friendly. <span class="s">Early shade; mat &amp; water.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h18M12 3v18"/></svg></div><b>Splash Pads &amp; Pools</b></div><p>Great for little ones. <span class="s">Reapply sunscreen; rest in shade.</span></p></div>
+      <div class="act"><div class="ah"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l2.5 7H22l-6 4.5 2.3 7L12 16l-6.3 4.5L8 13.5 2 9h7.5z"/></svg></div><b>Evening Ball Games</b></div><p>Community fun &amp; cardio. <span class="s">Hydrate; bug spray at dusk.</span></p></div>
+    </div>
+    <div class="gfm-band" style="margin-top:13px"><div class="gi">G</div><div class="gt"><b>Want to get moving toward a healthier you?</b> Dr. Tess is <b>board-certified in Obesity Medicine</b> — ask about a personalized, doctor-led plan to make this summer a turning point.</div></div>
+  </div>
+  <div class="pg-foot">Summer Activities</div><div class="pg-num">Page 07</div>
+</section>
+
+<!-- ═════════ PAGE 8 · WATER & TRAVEL SAFETY ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Safety</div><h2>Water, Travel &amp; Cookout Safety</h2></div>
+    <div class="two" style="margin-bottom:13px">
+      <div class="photo" style="height:1.7in;border-radius:12px;box-shadow:0 10px 24px rgba(19,40,79,.14)"><img src="images/pool.jpg" alt="Family in pool" onload="this.parentElement.style.background='none'"></div>
+      <div class="photo" style="height:1.7in;border-radius:12px;box-shadow:0 10px 24px rgba(19,40,79,.14)"><img src="images/picnic.jpg" alt="Summer picnic with fresh juice" onload="this.parentElement.style.background='none'"></div>
+    </div>
+    <div class="two">
+      <div class="art">
+        <div class="art-h h-water"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 16s2-1 4 0 4 1 6 0 4-1 6 0 4 1 4 1M2 20s2-1 4 0 4 1 6 0 4-1 6 0 4 1 4 1"/></svg></div><h3>Water Safety</h3></div>
+        <div class="art-b"><ul class="signs">
+          <li><span class="b"></span>Never swim alone; actively watch kids — drowning is silent</li>
+          <li><span class="b"></span>Life jackets on boats &amp; open water (not floaties)</li>
+          <li><span class="b"></span>Enter feet-first in unknown water; know the depth</li>
+          <li><span class="b"></span>Learn the signs of “dry/quiet” drowning after a scare</li>
+        </ul></div>
+      </div>
+      <div class="art">
+        <div class="art-h h-leaf"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20h16M6 20V8l6-4 6 4v12"/></svg></div><h3>Cookout Food Safety</h3></div>
+        <div class="art-b"><ul class="signs">
+          <li><span class="b"></span>Keep cold food cold; don’t leave it out over 2 hrs (1 hr if 90°F+)</li>
+          <li><span class="b"></span>Separate raw &amp; cooked; use a meat thermometer</li>
+          <li><span class="b"></span>Wash hands &amp; surfaces; clean the cooler</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="art" style="margin-top:13px">
+      <div class="art-h h-cool"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10h3l1 3v3h-4"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></div><h3>Road-Trip Ready</h3></div>
+      <div class="art-b"><div class="checklist">
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Water &amp; snacks for everyone</b>Stretch &amp; hydrate every couple of hours.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Pack a basic first-aid kit</b>Bandages, antihistamine, pain reliever, sunscreen.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Bring your meds &amp; a list</b>Plus GFM’s number saved in your phone.</div></div>
+        <div class="cl"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ct"><b>Never leave kids/pets in the car</b>Not even for a quick errand.</div></div>
+      </div></div>
+    </div>
+    <div class="disc"><b>Traveling as a GFM member?</b> Your doctor is still a text away — handy for questions on the road when you’re far from home.</div>
+  </div>
+  <div class="pg-foot">Water &amp; Travel Safety</div><div class="pg-num">Page 08</div>
+</section>
+
+<!-- ═════════ PAGE 9 · FACTOIDS ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Did You Know?</div><h2>Summer Health Factoids</h2></div>
+    <p class="lead" style="margin-bottom:14px">A handful of surprising-but-true facts to share around the cooler.</p>
+    <div class="facts">
+      <div class="fact"><div class="n">🐝</div><div class="ft"><b>Bees sting once; wasps don’t</b><p>Honeybees die after stinging — wasps &amp; hornets can sting again and again. Back away calmly, don’t swat.</p></div></div>
+      <div class="fact"><div class="n">🌡️</div><div class="ft"><b>Humidity makes heat worse</b><p>In muggy air, sweat can’t evaporate — so your body’s main cooling system stalls.</p></div></div>
+      <div class="fact"><div class="n">🍉</div><div class="ft"><b>You can eat your water</b><p>Watermelon, cucumber &amp; strawberries are about 90% water — tasty hydration.</p></div></div>
+      <div class="fact"><div class="n">🐾</div><div class="ft"><b>Hooch’s tip</b><p>Dogs cool by panting, not sweating. Shade, water &amp; cool ground keep our Comfort Specialist happy.</p></div></div>
+      <div class="fact"><div class="n">☀️</div><div class="ft"><b>UV sneaks through clouds</b><p>Up to 80% of UV passes through clouds — you can burn on an overcast day.</p></div></div>
+      <div class="fact"><div class="n">💧</div><div class="ft"><b>Thirst is a late signal</b><p>By the time you feel thirsty you’re already mildly dehydrated — sip ahead of it.</p></div></div>
+      <div class="fact"><div class="n">🚗</div><div class="ft"><b>Cars heat up shockingly fast</b><p>On an 80°F day a car can pass 100°F in minutes — never leave kids or pets.</p></div></div>
+      <div class="fact"><div class="n">🦟</div><div class="ft"><b>Still water = mosquitoes</b><p>They breed in tiny amounts of standing water. Empty saucers, buckets &amp; gutters weekly.</p></div></div>
+    </div>
+    <div class="gfm-band" style="margin-top:14px"><div class="gi">G</div><div class="gt"><b>Health questions all summer long?</b> That’s exactly what your <b>GFM membership</b> is for — real answers from a doctor who knows you, whenever you need them.</div></div>
+  </div>
+  <div class="pg-foot">Summer Factoids</div><div class="pg-num">Page 09</div>
+</section>
+
+<!-- ═════════ PAGE 10 · GFM SERVICES + CONTACT ═════════ -->
+<section class="page">
+  <div class="pg">
+    <div class="phead"><div class="eyebrow">Your Summer Health Partner</div><h2>Garcia Family Medicine</h2></div>
+    <p class="lead" style="margin-bottom:14px">More than a guide — we’re your doctor. One simple membership covers everyday care for the whole family, with extra services all under one roof.</p>
+    <div class="svc-grid">
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div><b>Direct Primary Care · $99/mo</b><span>Unlimited visits, your doctor a text away</span></div></div>
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h4l2 6 4-14 2 8h6"/></svg></div><div><b>Medical Weight Management</b><span>Doctor-led, board-certified obesity medicine</span></div></div>
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/></svg></div><div><b>CoreLift Pelvic Health</b><span>FDA-cleared EMSELLA technology</span></div></div>
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><div><b>Mental Health Care</b><span>Compassionate, whole-person support</span></div></div>
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div><b>DOT Physicals &amp; IMEs</b><span>Certified driver exams &amp; independent exams</span></div></div>
+      <div class="svc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7l-9 9-4-4"/></svg></div><div><b>Wellness &amp; Preventive Care</b><span>Physicals, screenings, chronic-care &amp; more</span></div></div>
+    </div>
+    <div class="contact-band">
+      <div>
+        <div class="ct"><div class="lbl">Call or Text</div><div class="v">(816) 330-7575</div></div>
+        <div class="ct"><div class="lbl">Visit</div><div class="v">801 NW Saint Mary’s Dr, Ste 209 · Blue Springs, MO</div></div>
+        <div class="ct"><div class="lbl">Hours</div><div class="v">Tue – Fri · 11am – 6pm</div></div>
+      </div>
+      <div class="cta"><div class="t">Become a Patient</div><div class="s">garciafamilymedicine.care</div></div>
+    </div>
+    <div class="disc"><b>A note from GFM:</b> This guide shares general summer wellness information and is <b>not a substitute for personal medical advice, diagnosis, or treatment.</b> For heat stroke, a severe allergic reaction, or any emergency, <b>call 911</b>. Questions about your own health? Reach out to Dr. Tess anytime.</div>
+  </div>
+  <div class="pg-foot">Garcia Family Medicine · Blue Springs, MO</div><div class="pg-num">Page 10</div>
+</section>
+
+</div>
+</body>
+</html>
