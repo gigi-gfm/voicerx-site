@@ -15,8 +15,9 @@ frames; a vertical portrait is ideal for Dr. Tess and team headshots.
 | `weight-management.jpg`   | Weight Mgmt (pg 5)      | Consultation / healthy-lifestyle image       |
 | `corelift.jpg`            | CoreLift (pg 6)         | EMSELLA device / treatment room              |
 | `team-1.jpg`              | Team (pg 9)             | Dr. Tess headshot                            |
-| `team-2.jpg`              | Team (pg 9)             | Staff headshot                               |
-| `team-3.jpg`              | Team (pg 9)             | Staff headshot                               |
+| `team-2.jpg`              | Team (pg 9)             | Gigi (Practice Manager) headshot             |
+| `team-3.jpg`              | Team (pg 9)             | Jacenta (Assistant Manager) headshot         |
+| `team-4.jpg`              | Team (pg 9)             | Hooch (Comfort Specialist) photo             |
 | `office-1.jpg`            | Office gallery (pg 9)   | Waiting room / reception                     |
 | `office-2.jpg`            | Office gallery (pg 9)   | Exam room                                    |
 
