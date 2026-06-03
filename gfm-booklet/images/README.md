@@ -1,8 +1,16 @@
 # GFM Booklet — Photos
 
-Drop your real photos into this `images/` folder using the **exact filenames**
-below. The booklet picks them up automatically — each photo replaces its
-placeholder frame as soon as the file exists. No code editing needed.
+The **scene photos** (office, exam room, reception, care visit, weight
+management, CoreLift) are already filled with **licensed royalty-free Adobe
+Stock** images so the booklet looks complete.
+
+The **named-people photos** (Dr. Tess and the team) are intentionally left as
+placeholders — those must be your **real** photos, not stock. Drop them into
+this `images/` folder using the **exact filenames** below and they replace the
+placeholder automatically. No code editing needed.
+
+> Want to swap any stock scene for a real GFM photo? Just save your photo over
+> the matching filename below.
 
 Use JPGs (or PNGs renamed to `.jpg`). Landscape shots work best for the wide
 frames; a vertical portrait is ideal for Dr. Tess and team headshots.

@@ -50,33 +50,35 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
 /* ════════════════════════════════════════════════════════════
    PAGE 1 — COVER
    ════════════════════════════════════════════════════════════ */
-.cover{background:radial-gradient(120% 90% at 80% -10%,#27447e 0%,var(--navy2) 38%,var(--navy) 78%);color:#fff;padding:0}
-.cover-glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.38),transparent 65%);top:-160px;right:-120px;filter:blur(6px)}
-.cover-glow2{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(99,140,210,.35),transparent 68%);bottom:-120px;left:-110px}
-.cover-rings{position:absolute;inset:0;background-image:radial-gradient(circle at 18% 78%,rgba(255,255,255,.05) 0 1px,transparent 1px);background-size:26px 26px;opacity:.5}
+.cover{background:#fff;color:var(--ink);padding:0}
+.cover::before{content:"";position:absolute;top:0;left:0;right:0;height:9px;background:linear-gradient(90deg,var(--orange),var(--gold));z-index:3}
+.cover::after{content:"";position:absolute;right:-150px;top:-110px;width:360px;height:360px;border-radius:50%;border:16px solid var(--cream);z-index:0}
+.cover-glow{display:none}
+.cover-glow2{position:absolute;width:300px;height:300px;border-radius:50%;border:14px solid var(--cream);bottom:-150px;left:-120px;z-index:0}
+.cover-rings{position:absolute;inset:0;background-image:radial-gradient(circle at 16% 80%,rgba(30,58,138,.05) 0 1.5px,transparent 1.5px);background-size:30px 30px;opacity:.7}
 .cover-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:.85in .8in .7in}
 .cover-top{display:flex;align-items:center;gap:13px}
 .crest{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:800;font-size:24px;color:#fff;box-shadow:0 8px 22px rgba(249,115,22,.5)}
-.cover-top .brand{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;letter-spacing:.01em}
-.cover-top .brand small{display:block;font-family:'Poppins';font-size:9.5px;font-weight:300;letter-spacing:.34em;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:3px}
+.cover-top .brand{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;letter-spacing:.01em;color:var(--navy)}
+.cover-top .brand small{display:block;font-family:'Poppins';font-size:9.5px;font-weight:300;letter-spacing:.34em;color:var(--muted);text-transform:uppercase;margin-top:3px}
 
 .cover-hero{flex:1;display:flex;flex-direction:column;justify-content:center;margin:.3in 0}
 .cover-hero .kicker{font-size:12px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--orange2);margin-bottom:20px}
-.cover-hero h1{font-size:62px;font-weight:800;color:#fff;line-height:1.03;letter-spacing:-.01em}
+.cover-hero h1{font-size:62px;font-weight:800;color:var(--navy);line-height:1.03;letter-spacing:-.01em}
 .cover-hero h1 .amp{color:var(--orange);font-style:italic}
-.cover-hero .sub{font-size:17px;font-weight:300;color:rgba(255,255,255,.82);margin-top:22px;line-height:1.6;max-width:5.6in}
-.cover-hero .sub b{font-weight:600;color:#fff}
+.cover-hero .sub{font-size:17px;font-weight:300;color:var(--slate);margin-top:22px;line-height:1.6;max-width:5.6in}
+.cover-hero .sub b{font-weight:600;color:var(--navy)}
 
-.cover-photo{height:2.55in;border-radius:18px;margin:.18in 0 .3in;border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 44px rgba(0,0,0,.4)}
-.cover-photo .ph{background:repeating-linear-gradient(45deg,#21386a,#21386a 14px,#1d3360 14px,#1d3360 28px);color:rgba(255,255,255,.5)}
-.cover-photo .ph svg{opacity:.6}
-.cover-photo .ph .ph-cap,.cover-photo .ph .ph-file{color:rgba(255,255,255,.55)}
+.cover-photo{height:2.55in;border-radius:18px;margin:.18in 0 .3in;border:1px solid var(--line);box-shadow:0 16px 34px rgba(19,40,79,.14)}
+.cover-photo .ph{background:repeating-linear-gradient(45deg,#eef2f8,#eef2f8 14px,#e7edf5 14px,#e7edf5 28px);color:#9aa6b6}
+.cover-photo .ph svg{opacity:.55}
+.cover-photo .ph .ph-cap,.cover-photo .ph .ph-file{color:#7c899b}
 
 .cover-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
-.cbadge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:8px 16px;font-size:11.5px;font-weight:500;letter-spacing:.02em;backdrop-filter:blur(4px)}
-.cbadge b{color:var(--orange2);font-weight:700}
-.cover-foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:11.5px;font-weight:300;color:rgba(255,255,255,.72)}
-.cover-foot b{font-weight:600;color:#fff}
+.cbadge{background:#fff;border:1px solid var(--line);border-radius:30px;padding:8px 16px;font-size:11.5px;font-weight:500;letter-spacing:.02em;color:var(--slate);box-shadow:0 2px 8px rgba(19,40,79,.05)}
+.cbadge b{color:var(--orange);font-weight:700}
+.cover-foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:18px;border-top:1px solid var(--line);font-size:11.5px;font-weight:300;color:var(--muted)}
+.cover-foot b{font-weight:600;color:var(--navy)}
 
 /* ════════════════════════════════════════════════════════════
    Interior page scaffolding
@@ -200,7 +202,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
       <div class="sub">Direct Primary Care that puts <b>you</b> back at the center — unhurried visits, your doctor a text away, and a whole practice of services under one roof.</div>
 
       <div class="cover-photo photo">
-        <img src="images/cover-office.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="images/cover-office.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="ph" style="display:flex">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg>
           <div class="ph-cap">Welcoming photo of the GFM office / front desk</div>
@@ -232,7 +234,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     <div class="tess-grid">
       <div>
         <div class="tess-photo photo">
-          <img src="images/dr-tess.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="images/dr-tess.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ph" style="display:flex">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
             <div class="ph-cap">Portrait of Dr. Tess Garcia</div>
@@ -314,10 +316,10 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     </div>
 
     <div class="svc-hero photo">
-      <img src="images/dpc-visit.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="images/dpc-visit.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="ph" style="display:flex">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg>
-        <div class="ph-cap">Dr. Tess with a patient in an exam room</div>
+        <div class="ph-cap">Unhurried, one-on-one care in the exam room</div>
         <div class="ph-file">images/dpc-visit.jpg</div>
       </div>
     </div>
@@ -358,7 +360,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     </div>
 
     <div class="svc-hero photo">
-      <img src="images/weight-management.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="images/weight-management.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="ph" style="display:flex">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l2 6 4-14 2 8h6"/></svg>
         <div class="ph-cap">Consultation / healthy-living lifestyle photo</div>
@@ -400,7 +402,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     </div>
 
     <div class="svc-hero photo">
-      <img src="images/corelift.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="images/corelift.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="ph" style="display:flex">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 2.5C21 13 17 17 12 21z"/></svg>
         <div class="ph-cap">CoreLift / EMSELLA treatment room &amp; device</div>
@@ -517,7 +519,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     <div class="team-grid">
       <div class="team-card">
         <div class="team-photo photo">
-          <img src="images/team-1.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="images/team-1.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-1.jpg</div></div>
         </div>
         <div class="nm">Dr. Tess Garcia</div>
@@ -526,7 +528,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
       </div>
       <div class="team-card">
         <div class="team-photo photo">
-          <img src="images/team-2.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="images/team-2.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-2.jpg</div></div>
         </div>
         <div class="nm">Gigi</div>
@@ -535,7 +537,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
       </div>
       <div class="team-card">
         <div class="team-photo photo">
-          <img src="images/team-3.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="images/team-3.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div class="ph-file">images/team-3.jpg</div></div>
         </div>
         <div class="nm">Jacenta</div>
@@ -544,7 +546,7 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
       </div>
       <div class="team-card">
         <div class="team-photo photo">
-          <img src="images/team-4.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="images/team-4.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5.5" cy="11" r="1.8"/><circle cx="9.5" cy="7.5" r="1.8"/><circle cx="14.5" cy="7.5" r="1.8"/><circle cx="18.5" cy="11" r="1.8"/><path d="M12 12c-2.5 0-4.5 2-4.5 4.2 0 1.6 1.3 2.3 2.6 1.8 1.2-.5 2.6-.5 3.8 0 1.3.5 2.6-.2 2.6-1.8C16.5 14 14.5 12 12 12z"/></svg><div class="ph-file">images/team-4.jpg</div></div>
         </div>
         <div class="nm">Hooch</div>
@@ -556,11 +558,11 @@ h1,h2,h3{font-family:'Playfair Display',serif;color:var(--navy);line-height:1.12
     <div class="pg-head" style="margin-top:26px"><div class="eyebrow">Inside Our Office</div></div>
     <div class="gallery" style="grid-template-rows:1.95in">
       <div class="photo">
-        <img src="images/office-1.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="images/office-1.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg><div class="ph-cap">Waiting room / reception</div><div class="ph-file">images/office-1.jpg</div></div>
       </div>
       <div class="photo">
-        <img src="images/office-2.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="images/office-2.jpg" alt="" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="ph" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M3 17l5-4 4 3 3-2 6 5"/></svg><div class="ph-cap">Exam room</div><div class="ph-file">images/office-2.jpg</div></div>
       </div>
     </div>
