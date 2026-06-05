@@ -1,0 +1,10 @@
+name = "voicerx-weight-diary"
+compatibility_date = "2026-05-29"
+
+# voicerx-weight-diary is a static-assets Worker: it serves the weekly
+# weight-management diary (public/index.html). There is no server code —
+# just the HTML asset. The page is a self-contained meal / sleep / movement
+# tracker that saves to the browser's localStorage; no patient data ever
+# leaves the device.
+[assets]
+directory = "./public"
