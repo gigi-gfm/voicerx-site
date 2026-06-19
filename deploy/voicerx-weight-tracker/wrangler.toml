@@ -1,0 +1,9 @@
+name = "voicerx-weight-tracker"
+compatibility_date = "2026-05-29"
+
+# voicerx-weight-tracker is a static-assets Worker: it serves the clinician
+# Weight Tracker PWA (public/index.html + manifest + service worker + icon).
+# There is no server code. All patient records live in the browser's
+# localStorage on the clinician's device — nothing is uploaded.
+[assets]
+directory = "./public"

@@ -1,7 +1,7 @@
-/* VoiceRx Weight Diary — offline app shell.
-   Patient data lives in localStorage (not here); this only caches the
-   static files so the app opens with no network. */
-const CACHE = 'vrx-weight-diary-v2';
+/* VoiceRx Weight Tracker (clinician) — offline app shell.
+   Patient data lives in localStorage on this device, not in this cache;
+   this only caches the static files so the app opens with no network. */
+const CACHE = 'vrx-weight-tracker-v1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {

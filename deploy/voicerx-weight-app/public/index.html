@@ -259,7 +259,8 @@ textarea,input,select{font-family:inherit;color:var(--text)}
       <div class="pcard">
         <h2>📱 App</h2>
         <button class="bigbtn orange" id="installBtn" style="display:none">⬇ Add to home screen</button>
-        <button class="bigbtn primary" onclick="window.print()">🖨 Print / save this week as PDF</button>
+        <button class="bigbtn primary" onclick="shareWeek()">📤 Send my diary to the clinic</button>
+        <button class="bigbtn ghost" onclick="window.print()">🖨 Print / save this week as PDF</button>
         <button class="bigbtn ghost" onclick="exportData()">⬆ Export my data (backup)</button>
         <button class="bigbtn danger" onclick="wipe()">🗑 Erase all my data</button>
       </div>
@@ -474,13 +475,27 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 function flashSaved(){const e=$('#meSaved');e.textContent='✓ Saved';clearTimeout(e._t);e._t=setTimeout(()=>e.textContent='',1200);}
 
 /* ── data export / wipe ──────────────────── */
+function diaryFileName(){return `weight-diary-${(profile.patient||'patient').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.json`;}
+function diaryBlob(){return new Blob([JSON.stringify({profile,weeks:allWeeks(),exported:new Date().toISOString()},null,2)],{type:'application/json'});}
 function exportData(){
-  const dump={profile,weeks:allWeeks(),exported:new Date().toISOString()};
-  const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`weight-diary-${(profile.patient||'patient').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.json`;
+  a.href=URL.createObjectURL(diaryBlob());a.download=diaryFileName();
   a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+/* Send the whole diary to the clinic: native share sheet (email / message /
+   AirDrop) with the file when supported, otherwise just download it so the
+   patient can attach it to an email to the office. */
+async function shareWeek(){
+  const name=profile.patient?`${profile.patient}'s`:'My';
+  const file=new File([diaryBlob()],diaryFileName(),{type:'application/json'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:`${name} weight diary`,text:`${name} weight-management diary (meals, sleep, movement) for Garcia Family Medicine.`});
+      return;
+    }
+  }catch(e){ if(e&&e.name==='AbortError')return; }
+  exportData();
+  alert('Your diary was saved as a file. Attach it to an email or message to the clinic, or show it at your visit.');
 }
 function wipe(){
   if(!confirm('Erase ALL your saved weeks and profile from this device? This cannot be undone.'))return;
