@@ -1,8 +1,9 @@
 /* VoiceRx Weight Diary — offline app shell.
    Patient data lives in localStorage (not here); this only caches the
    static files so the app opens with no network. */
-const CACHE = 'vrx-weight-diary-v2';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'vrx-weight-diary-v3';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg',
+  './icon-192.png', './icon-512.png', './icon-512-maskable.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

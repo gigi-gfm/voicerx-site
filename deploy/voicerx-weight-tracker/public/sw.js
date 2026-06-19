@@ -2,7 +2,8 @@
    Patient data lives in localStorage on this device, not in this cache;
    this only caches the static files so the app opens with no network. */
 const CACHE = 'vrx-weight-tracker-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg',
+  './icon-192.png', './icon-512.png', './icon-512-maskable.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
