@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Weight Diary">
+<title>Weekly Weight-Management Diary · David Martin</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--orange:#f97316;--orange2:#fb923c;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d0d8e4;--bg:#f2f4f8;--white:#fff;
+  --green:#276749;--greenlt:#e8f5ee;--amber:#b7620a;--amberlt:#fef3e2;
+  --text:#1a2535;--ink:#0f1c30;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:920px;margin:0 auto;padding:0 0 60px}
+
+/* ── HEADER ─────────────────────────────── */
+.hdr{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-bottom:3px solid var(--orange);color:#fff;padding:18px 22px 20px}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-family:'Poppins',serif;font-size:22px;font-weight:600;letter-spacing:.01em}
+.logo span{color:var(--orange2)}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.09em;text-transform:uppercase;margin-top:2px}
+.phys{text-align:right;font-size:11px;line-height:1.5}
+.phys b{color:rgba(255,255,255,.92);font-weight:500;font-size:12px}
+.phys span{color:rgba(255,255,255,.5)}
+.title{font-size:20px;font-weight:600;margin-top:16px}
+.subtitle{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:2px}
+
+/* patient/meta strip */
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.meta-f{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 11px}
+.meta-l{font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.meta-f input{width:100%;background:transparent;border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;outline:none}
+.meta-f input::placeholder{color:rgba(255,255,255,.3)}
+
+/* ── TOOLBAR ─────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:13px 22px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.btn{font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:500;padding:8px 15px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--slate);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;border:none}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.orange{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border:none}
+.save-note{font-size:11px;color:var(--muted);margin-left:auto}
+.save-note.flash{color:var(--green);font-weight:500}
+
+/* ── GOALS ──────────────────────────────── */
+.goals{background:var(--amberlt);border:1px solid #f3d9a8;border-radius:11px;padding:14px 16px;margin:18px 22px 6px}
+.goals-h{font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.goal-f{display:flex;flex-direction:column;gap:3px}
+.goal-f label{font-size:10px;color:var(--amber);font-weight:500}
+.goal-f input{background:var(--white);border:1px solid #e8cfa0;border-radius:7px;padding:7px 9px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);outline:none}
+.goal-f input:focus{border-color:var(--orange)}
+
+/* ── DAY CARDS ──────────────────────────── */
+.days{padding:8px 22px 0}
+.day{background:var(--white);border:1px solid var(--border);border-radius:13px;margin-top:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,28,48,.04)}
+.day-hdr{background:linear-gradient(135deg,#eef2fb,#e6ecf8);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.day-name{font-size:14px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:9px}
+.day-num{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+.day-date input{background:var(--white);border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--slate);outline:none}
+.day-body{padding:14px 16px}
+
+.row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start;padding:9px 0;border-top:1px dashed #e4e9f1}
+.row:first-child{border-top:none;padding-top:2px}
+.row-label{font-size:11.5px;font-weight:600;color:var(--slate);display:flex;align-items:center;gap:6px;padding-top:7px}
+.row-label .ic{font-size:14px}
+.row textarea,.row input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);outline:none;resize:vertical}
+.row textarea:focus,.row input:focus{border-color:var(--navy2);background:var(--white)}
+.row textarea{min-height:38px;line-height:1.45}
+
+/* metric sub-grid (sleep + movement) */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px}
+.mfield{display:flex;flex-direction:column;gap:3px}
+.mfield label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+.mfield input,.mfield select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 9px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);outline:none}
+.mfield input:focus,.mfield select:focus{border-color:var(--navy2);background:var(--white)}
+.num{font-variant-numeric:tabular-nums}
+
+/* mood/weight inline */
+.inline-3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+
+/* ── WEEKLY TALLY ───────────────────────── */
+.tally{margin:22px 22px 0;background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:14px;color:#fff;overflow:hidden;border:3px solid var(--orange)}
+.tally-h{padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.13);display:flex;align-items:center;gap:9px}
+.tally-h h2{font-size:16px;font-weight:600}
+.tally-h .sub{font-size:11px;color:rgba(255,255,255,.55);margin-left:auto}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.1)}
+.stat{background:linear-gradient(135deg,#1e3a8a,#1e40af);padding:15px 16px}
+.stat-v{font-size:26px;font-weight:600;font-family:'DM Mono',monospace;line-height:1;color:#fff}
+.stat-v small{font-size:13px;color:rgba(255,255,255,.55);font-weight:400}
+.stat-l{font-size:10.5px;color:rgba(255,255,255,.6);margin-top:6px;text-transform:uppercase;letter-spacing:.05em}
+.stat-goal{font-size:10px;margin-top:4px;font-weight:500}
+.stat-goal.hit{color:#86efac}
+.stat-goal.miss{color:#fca5a5}
+.stat-goal.neutral{color:rgba(255,255,255,.4)}
+
+/* progress bars for daily logging consistency */
+.consistency{padding:14px 18px;border-top:1px solid rgba(255,255,255,.13)}
+.cons-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.cons-row:first-child{margin-top:0}
+.cons-lab{font-size:11px;color:rgba(255,255,255,.7);width:120px;flex-shrink:0}
+.cons-bar{flex:1;height:9px;background:rgba(255,255,255,.13);border-radius:5px;overflow:hidden}
+.cons-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:5px;transition:width .3s}
+.cons-pct{font-size:11px;color:rgba(255,255,255,.7);width:42px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* notes to clinician */
+.clin{margin:18px 22px 0;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.clin h3{font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}
+.clin textarea{width:100%;min-height:70px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);outline:none;resize:vertical;line-height:1.5}
+.clin textarea:focus{border-color:var(--navy2);background:var(--white)}
+
+.foot{text-align:center;font-size:10.5px;color:var(--muted);margin-top:24px;padding:0 22px;line-height:1.7}
+.foot b{color:var(--slate)}
+
+/* ── PRINT ──────────────────────────────── */
+@media print{
+  @page{margin:12mm}
+  body{background:#fff;font-size:11px}
+  .toolbar{display:none !important}
+  .wrap{max-width:none;padding:0}
+  .hdr{background:#1e3a8a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:12px 0;border-bottom:2px solid #f97316}
+  .meta-f,.goal-f input,.row textarea,.row input,.mfield input,.mfield select,.clin textarea,.day-date input{background:#fff !important}
+  .goals,.day,.tally,.clin{break-inside:avoid;box-shadow:none}
+  .day{margin:8px 0}
+  .days,.goals,.tally,.clin,.foot{margin-left:0;margin-right:0;padding-left:0;padding-right:0}
+  .tally,.stat{background:#1e3a8a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .day-hdr{background:#eef2fb !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  textarea{overflow:visible}
+  .foot{margin-top:14px}
+}
+@media(max-width:560px){
+  .row{grid-template-columns:1fr;gap:6px}
+  .row-label{padding-top:0}
+  .phys{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-top">
+      <div>
+        <div class="logo">Voice<span>Rx</span></div>
+        <div class="logo-sub">Garcia Family Medicine</div>
+      </div>
+      <div class="phys">
+        <b>Dr. Theresa "Tess" Garcia, MD, FAAFP, DABOM</b><br>
+        <span>Garcia Family Medicine · Blue Springs, Missouri</span><br>
+        <span>Board-Certified in Obesity Medicine</span>
+      </div>
+    </div>
+    <div class="title">Weekly Weight-Management Diary</div>
+    <div class="subtitle">Meals · Sleep · Movement &amp; Exercise — a 7-day log with a weekly tally</div>
+
+    <div class="meta">
+      <div class="meta-f"><div class="meta-l">Patient</div><input id="m_patient" value="David Martin" placeholder="Patient name"></div>
+      <div class="meta-f"><div class="meta-l">Week Of</div><input id="m_week" type="date"></div>
+      <div class="meta-f"><div class="meta-l">Start Weight</div><input id="m_wt_start" placeholder="lbs"></div>
+      <div class="meta-f"><div class="meta-l">End Weight</div><input id="m_wt_end" placeholder="lbs"></div>
+    </div>
+  </header>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <button class="btn primary" onclick="window.print()">🖨 Print / Save PDF</button>
+    <button class="btn orange" onclick="saveData(true)">💾 Save</button>
+    <button class="btn" onclick="loadToday()">📅 Fill in dates</button>
+    <button class="btn" onclick="clearAll()">↺ Clear week</button>
+    <span class="save-note" id="saveNote">Auto-saves on this device</span>
+  </div>
+
+  <!-- GOALS -->
+  <div class="goals">
+    <div class="goals-h">🎯 This Week's Goals <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">— set with Dr. Garcia</span></div>
+    <div class="goal-grid">
+      <div class="goal-f"><label>Daily calorie / portion target</label><input id="g_cal" placeholder="e.g. 1,800 kcal or plate method"></div>
+      <div class="goal-f"><label>Sleep target (hrs/night)</label><input id="g_sleep" type="number" step="0.5" min="0" max="14" value="7.5" oninput="recalc()"></div>
+      <div class="goal-f"><label>Movement target (min/day)</label><input id="g_move" type="number" min="0" max="600" value="30" oninput="recalc()"></div>
+      <div class="goal-f"><label>Water target (glasses/day)</label><input id="g_water" type="number" min="0" max="30" value="8" oninput="recalc()"></div>
+    </div>
+  </div>
+
+  <!-- DAY CARDS -->
+  <div class="days" id="days"></div>
+
+  <!-- WEEKLY TALLY -->
+  <div class="tally">
+    <div class="tally-h">
+      <span style="font-size:18px">📊</span>
+      <h2>Weekly Tally</h2>
+      <span class="sub" id="tallyDays">0 of 7 days logged</span>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="consistency" id="consistency"></div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="clin">
+    <h3>Notes &amp; Wins for Dr. Garcia</h3>
+    <textarea id="clinNotes" placeholder="Hunger, cravings, energy, barriers, victories, questions for your visit…"></textarea>
+  </div>
+
+  <div class="foot">
+    <b>How to use:</b> Fill in each day as you go — it saves automatically on this device. Bring the printed sheet (or PDF) to your visit.<br>
+    This diary is a self-tracking tool, not a medical record. Discuss any concerns with Dr. Garcia. · Garcia Family Medicine · Blue Springs, MO
+  </div>
+</div>
+
+<script>
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const QUALITY = ['','Poor','Fair','Good','Great'];
+const KEY = 'voicerx_weightdiary_dmartin_v1';
+
+/* Build the 7 day cards */
+function buildDays(){
+  const host = document.getElementById('days');
+  host.innerHTML = DAYS.map((d,i)=>`
+    <div class="day">
+      <div class="day-hdr">
+        <div class="day-name"><span class="day-num">${i+1}</span>${d}</div>
+        <div class="day-date"><input type="date" id="d${i}_date"></div>
+      </div>
+      <div class="day-body">
+        <div class="row">
+          <div class="row-label"><span class="ic">🍳</span>Breakfast</div>
+          <textarea id="d${i}_b" placeholder="What & roughly how much…"></textarea>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">🥗</span>Lunch</div>
+          <textarea id="d${i}_l" placeholder="What & roughly how much…"></textarea>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">🍽️</span>Dinner</div>
+          <textarea id="d${i}_d" placeholder="What & roughly how much…"></textarea>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">🍎</span>Snacks</div>
+          <textarea id="d${i}_s" placeholder="Snacks, drinks, treats…"></textarea>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">💧</span>Water</div>
+          <div class="mgrid">
+            <div class="mfield"><label>Glasses (8 oz)</label><input class="num" type="number" min="0" max="30" id="d${i}_water" oninput="recalc()" placeholder="0"></div>
+            <div class="mfield"><label>Mood / energy</label>
+              <select id="d${i}_mood">
+                <option value=""></option><option>Low</option><option>Okay</option><option>Good</option><option>Great</option>
+              </select>
+            </div>
+            <div class="mfield"><label>Weigh-in (optional)</label><input id="d${i}_wt" placeholder="lbs"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">😴</span>Sleep</div>
+          <div class="mgrid">
+            <div class="mfield"><label>Hours slept</label><input class="num" type="number" step="0.25" min="0" max="16" id="d${i}_sleeph" oninput="recalc()" placeholder="0"></div>
+            <div class="mfield"><label>Quality</label>
+              <select id="d${i}_sleepq">
+                ${QUALITY.map(q=>`<option value="${q}">${q}</option>`).join('')}
+              </select>
+            </div>
+            <div class="mfield"><label>Bed / wake time</label><input id="d${i}_sleept" placeholder="e.g. 11p–6:30a"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row-label"><span class="ic">🏃</span>Movement</div>
+          <div class="mgrid">
+            <div class="mfield"><label>Activity</label><input id="d${i}_movet" placeholder="Walk, gym, yard…"></div>
+            <div class="mfield"><label>Minutes</label><input class="num" type="number" min="0" max="600" id="d${i}_movem" oninput="recalc()" placeholder="0"></div>
+            <div class="mfield"><label>Steps (optional)</label><input class="num" type="number" min="0" max="100000" id="d${i}_steps" placeholder="0"></div>
+            <div class="mfield"><label>Intensity</label>
+              <select id="d${i}_movei">
+                <option value=""></option><option>Light</option><option>Moderate</option><option>Vigorous</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* All field ids that should persist */
+function fieldIds(){
+  const ids = ['m_patient','m_week','m_wt_start','m_wt_end','g_cal','g_sleep','g_move','g_water','clinNotes'];
+  for(let i=0;i<7;i++){
+    ['date','b','l','d','s','water','mood','wt','sleeph','sleepq','sleept','movet','movem','steps','movei']
+      .forEach(f=>ids.push(`d${i}_${f}`));
+  }
+  return ids;
+}
+
+const num = id => parseFloat(document.getElementById(id).value) || 0;
+const val = id => (document.getElementById(id).value || '').trim();
+
+/* Recalculate the weekly tally */
+function recalc(){
+  let sleepSum=0, sleepN=0, moveSum=0, stepSum=0, stepN=0, waterSum=0, waterN=0;
+  let daysLogged=0, mealCells=0, mealFilled=0;
+  let sleepGoalHit=0, moveGoalHit=0, waterGoalHit=0;
+
+  const gSleep = num('g_sleep'), gMove = num('g_move'), gWater = num('g_water');
+
+  for(let i=0;i<7;i++){
+    const sh = num(`d${i}_sleeph`);
+    const mm = num(`d${i}_movem`);
+    const st = num(`d${i}_steps`);
+    const wa = num(`d${i}_water`);
+    const meals = ['b','l','d','s'].map(f=>val(`d${i}_${f}`));
+    const anyMeal = meals.some(m=>m.length>0);
+
+    mealCells += 4; mealFilled += meals.filter(m=>m.length>0).length;
+
+    if(anyMeal || sh>0 || mm>0 || wa>0) daysLogged++;
+
+    if(sh>0){ sleepSum+=sh; sleepN++; if(gSleep>0 && sh>=gSleep) sleepGoalHit++; }
+    if(mm>0){ moveSum+=mm; if(gMove>0 && mm>=gMove) moveGoalHit++; }
+    if(st>0){ stepSum+=st; stepN++; }
+    if(wa>0){ waterSum+=wa; waterN++; if(gWater>0 && wa>=gWater) waterGoalHit++; }
+  }
+
+  const avgSleep = sleepN? (sleepSum/sleepN) : 0;
+  const avgWater = waterN? (waterSum/waterN) : 0;
+  const avgSteps = stepN? Math.round(stepSum/stepN) : 0;
+
+  document.getElementById('tallyDays').textContent = `${daysLogged} of 7 days logged`;
+
+  const goalTag = (hit, total, label) => {
+    if(total<=0) return `<div class="stat-goal neutral">no goal set</div>`;
+    const cls = hit>=Math.ceil(total*0.7)? 'hit' : (hit>0?'neutral':'miss');
+    return `<div class="stat-goal ${cls}">${hit}/7 days ${label}</div>`;
+  };
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat">
+      <div class="stat-v">${moveSum}<small> min</small></div>
+      <div class="stat-l">Total movement</div>
+      ${goalTag(moveGoalHit, gMove, 'hit goal')}
+    </div>
+    <div class="stat">
+      <div class="stat-v">${avgSleep? avgSleep.toFixed(1):'—'}<small> hr/night</small></div>
+      <div class="stat-l">Avg sleep</div>
+      ${goalTag(sleepGoalHit, gSleep, 'hit goal')}
+    </div>
+    <div class="stat">
+      <div class="stat-v">${avgWater? avgWater.toFixed(1):'—'}<small> /day</small></div>
+      <div class="stat-l">Avg water (glasses)</div>
+      ${goalTag(waterGoalHit, gWater, 'hit goal')}
+    </div>
+    <div class="stat">
+      <div class="stat-v">${avgSteps? avgSteps.toLocaleString():'—'}</div>
+      <div class="stat-l">Avg steps/day</div>
+      <div class="stat-goal neutral">${stepSum? stepSum.toLocaleString()+' total' : 'optional'}</div>
+    </div>`;
+
+  const mealPct = mealCells? Math.round(mealFilled/mealCells*100) : 0;
+  const dayPct = Math.round(daysLogged/7*100);
+  const bar = (label,pct) => `
+    <div class="cons-row">
+      <div class="cons-lab">${label}</div>
+      <div class="cons-bar"><div class="cons-fill" style="width:${pct}%"></div></div>
+      <div class="cons-pct">${pct}%</div>
+    </div>`;
+  document.getElementById('consistency').innerHTML =
+    bar('Days logged', dayPct) + bar('Meals recorded', mealPct);
+}
+
+/* Persistence */
+let saveTimer=null;
+function saveData(flash){
+  const data={};
+  fieldIds().forEach(id=>{const el=document.getElementById(id); if(el) data[id]=el.value;});
+  try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){}
+  if(flash){
+    const n=document.getElementById('saveNote');
+    n.textContent='✓ Saved'; n.classList.add('flash');
+    setTimeout(()=>{n.textContent='Auto-saves on this device'; n.classList.remove('flash');},1500);
+  }
+}
+function loadData(){
+  let data={};
+  try{ data=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
+  Object.keys(data).forEach(id=>{const el=document.getElementById(id); if(el) el.value=data[id];});
+}
+function clearAll(){
+  if(!confirm('Clear the whole week? This erases everything saved on this device.')) return;
+  localStorage.removeItem(KEY);
+  fieldIds().forEach(id=>{const el=document.getElementById(id); if(el && id!=='m_patient') el.value='';});
+  document.getElementById('g_sleep').value='7.5';
+  document.getElementById('g_move').value='30';
+  document.getElementById('g_water').value='8';
+  recalc();
+}
+/* Fill weekday dates from the "Week Of" date (or today's Monday) */
+function loadToday(){
+  let start = document.getElementById('m_week').value;
+  let base;
+  if(start){ base = new Date(start+'T00:00:00'); }
+  else {
+    base = new Date();
+    const dow = (base.getDay()+6)%7; // 0 = Monday
+    base.setDate(base.getDate()-dow);
+    document.getElementById('m_week').value = base.toISOString().slice(0,10);
+  }
+  for(let i=0;i<7;i++){
+    const dt = new Date(base); dt.setDate(base.getDate()+i);
+    document.getElementById(`d${i}_date`).value = dt.toISOString().slice(0,10);
+  }
+  saveData(true);
+}
+
+/* Init */
+buildDays();
+loadData();
+recalc();
+document.addEventListener('input', ()=>{ clearTimeout(saveTimer); saveTimer=setTimeout(saveData,600); });
+</script>
+</body>
+</html>
