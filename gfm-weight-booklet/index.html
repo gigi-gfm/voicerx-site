@@ -51,6 +51,16 @@ p{margin-bottom:9px;color:var(--slate)}
 .cover-title{font-family:'Playfair Display',serif;font-size:44px;line-height:1.05;font-weight:700}
 .cover-tag{font-size:16px;color:var(--orange2);margin-top:12px;font-weight:300}
 .cover-spacer{flex:1}
+.cover-badge{flex-shrink:0;width:78px;height:78px;border-radius:50%;border:2px solid var(--orange);
+  background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Playfair Display',serif;font-style:italic;font-size:13px;line-height:1.15;color:var(--orange2);
+  transform:rotate(-7deg)}
+.encourage{border-top:1px solid rgba(255,255,255,.16);padding-top:16px}
+.enc-quote{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;line-height:1.35;color:#fff;margin-bottom:12px}
+.enc-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+.enc-row span{font-size:11.5px;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);
+  border-radius:20px;padding:5px 12px}
+.enc-note{font-size:12px;color:rgba(255,255,255,.78);margin:0;max-width:92%}
 
 .split{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;flex:1;align-items:center;min-height:0}
 .stack{display:flex;flex-direction:column;justify-content:center}
@@ -148,12 +158,28 @@ table{width:100%;border-collapse:collapse;font-size:11px}
   <section class="page dark">
     <div class="dotgrid"></div>
     <div class="pad" style="position:relative">
-      <div><div class="cover-logo">Garcia <span>Family Medicine</span></div>
-        <div class="cover-sub">Medical Weight Management</div></div>
-      <div class="fig" style="aspect-ratio:16/9;margin:22px 0"><img src="images/p01-cover.jpg.svg" alt="A colorful, balanced plate of whole foods"></div>
-      <div class="cover-spacer"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="cover-logo">Garcia <span>Family Medicine</span></div>
+          <div class="cover-sub">Medical Weight Management</div></div>
+        <div class="cover-badge">You can<br>do this</div>
+      </div>
+      <div class="fig" style="aspect-ratio:16/8;margin:20px 0 18px"><img src="images/p01-cover.jpg.svg" alt="A colorful, balanced plate of whole foods"></div>
       <div class="cover-title">Healthy Weight,<br>One Week<br>at a Time</div>
       <div class="cover-tag">A 7-day plan of 100g carbs or less per day, with food &amp; exercise logs.</div>
+
+      <div class="cover-spacer"></div>
+
+      <div class="encourage">
+        <div class="enc-quote">“You don’t have to be perfect — you just have to keep going.”</div>
+        <div class="enc-row">
+          <span>🌱 Progress over perfection</span>
+          <span>👟 One step at a time</span>
+          <span>💪 You are not alone</span>
+        </div>
+        <p class="enc-note">Every glass of water, every walk, every balanced plate is a
+          win worth counting. Small choices, repeated, become big change — and we’re right
+          here with you for all of them.</p>
+      </div>
     </div>
     <div class="pagenum light">01</div>
   </section>
