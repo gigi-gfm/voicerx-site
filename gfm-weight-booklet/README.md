@@ -1,15 +1,17 @@
 # Healthy Weight Booklet — Garcia Family Medicine
 
 A 10-page, print-ready weight-management booklet built around a **100g-carb-
-or-less-per-day** week, with blank weekly food and exercise logs.
+or-less-per-day** week of **Venezuelan dishes** (comida criolla — perico,
+carne mechada, pabellón ligero, reina pepiada, pescado, sancocho), with blank
+weekly food and exercise logs.
 
 ## Pages
 1. Cover — *Healthy Weight, One Week at a Time*
 2. Start here — the lower-carb approach + safety note
 3. Build your plate (½ veg · ¼ protein · ¼ smart carbs)
-4. 7-day menu, Days 1–4 (with approx. carb counts)
-5. 7-day menu, Days 5–7 + grocery shortlist
-6. Carb counts at a glance (reference)
+4. 7-day Venezuelan menu, Days 1–4 (with approx. carb counts)
+5. 7-day Venezuelan menu, Days 5–7 + grocery shortlist (lista de mercado)
+6. Carb counts at a glance — Venezuelan staples (arepa, caraotas, tajadas…)
 7. **Weekly food log** (blank, fillable)
 8. **Weekly exercise log** (blank, fillable)
 9. A week of easy movement (plan + tips)

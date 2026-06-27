@@ -12,7 +12,8 @@
   --green:#276749;--greenlt:#e8f5ee;--amber:#b7620a;--amberlt:#fef3e2;--text:#1a2535;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:12.5px}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;font-size:13.5px}
+.tobottom{margin-top:auto}
 
 .toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
   gap:12px;padding:10px 18px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
@@ -32,7 +33,7 @@ body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(-
 .kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:9px}
 .kicker.light{color:var(--orange2)}
 h1,h2{font-family:'Playfair Display',serif;font-weight:600;line-height:1.16;color:var(--navy)}
-h2{font-size:26px;margin-bottom:10px}
+h2{font-size:29px;margin-bottom:12px}
 .rule{height:3px;width:50px;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;margin:0 0 16px}
 p{margin-bottom:9px;color:var(--slate)}
 .lead{font-size:15px;color:var(--slate)}
@@ -90,7 +91,7 @@ ul.checks li::after{content:"";position:absolute;left:4px;top:7.5px;width:4px;he
 
 /* Tables */
 table{width:100%;border-collapse:collapse;font-size:11px}
-.menu-tbl th,.menu-tbl td{border:1px solid var(--border);padding:6px 8px;vertical-align:top;text-align:left}
+.menu-tbl th,.menu-tbl td{border:1px solid var(--border);padding:11px 9px;vertical-align:top;text-align:left;font-size:11.8px;line-height:1.5}
 .menu-tbl thead th{background:var(--navy);color:#fff;font-weight:500;font-size:10.5px;letter-spacing:.02em}
 .menu-tbl tbody th{background:var(--orangelt);color:var(--navy);font-weight:600;white-space:nowrap;width:64px}
 .menu-tbl .carb{color:var(--orange);font-weight:600;font-family:'DM Mono',monospace;font-size:10px}
@@ -107,7 +108,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
 .log{width:100%;border-collapse:collapse;font-size:11px}
 .log th,.log td{border:1px solid var(--border);padding:0 8px}
 .log th{background:var(--navy);color:#fff;font-weight:500;font-size:10px;padding:7px 8px;text-align:left}
-.log tbody td{height:34px}
+.log tbody td{height:62px}
 .log tbody th{background:var(--orangelt);color:var(--navy);font-weight:600;text-align:left;padding:7px 9px;white-space:nowrap;width:74px}
 .log tbody tr:nth-child(even) td{background:#fafbfd}
 .log .totrow td,.log .totrow th{background:#eef3fb;font-weight:600;color:var(--navy);height:30px}
@@ -163,9 +164,9 @@ table{width:100%;border-collapse:collapse;font-size:11px}
           <div class="cover-sub">Medical Weight Management</div></div>
         <div class="cover-badge">You can<br>do this</div>
       </div>
-      <div class="fig" style="aspect-ratio:16/8;margin:20px 0 18px"><img src="images/p01-cover.jpg" alt="A colorful, balanced plate of whole foods"></div>
+      <div class="fig" style="aspect-ratio:16/9.5;margin:20px 0 18px"><img src="images/p01-cover.jpg" alt="A colorful, balanced plate of whole foods"></div>
       <div class="cover-title">Healthy Weight,<br>One Week<br>at a Time</div>
-      <div class="cover-tag">A 7-day plan of 100g carbs or less per day, with food &amp; exercise logs.</div>
+      <div class="cover-tag">A 7-day plan of 100g carbs or less per day — Venezuelan family favorites, with food &amp; exercise logs.</div>
 
       <div class="cover-spacer"></div>
 
@@ -188,7 +189,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
   <section class="page">
     <div class="pad">
       <div class="kicker">Start here</div>
-      <div class="split">
+      <div class="split" style="align-items:stretch">
         <div class="stack">
           <h2>A simpler week of eating.</h2>
           <div class="rule"></div>
@@ -205,8 +206,8 @@ table{width:100%;border-collapse:collapse;font-size:11px}
             pregnant or nursing, or have kidney disease. Lowering carbs can change how
             some medications affect you.</div>
         </div>
-        <div>
-          <div class="fig" style="aspect-ratio:6/7"><img src="images/p02-welcome.jpg" alt="A care-team member talking through goals with a patient"></div>
+        <div style="display:flex;flex-direction:column">
+          <div class="fig" style="flex:1;min-height:220px"><img src="images/p02-welcome.jpg" alt="A care-team member talking through goals with a patient"></div>
           <div class="cap">Your plan should fit you — let’s tailor it together.</div>
         </div>
       </div>
@@ -229,15 +230,15 @@ table{width:100%;border-collapse:collapse;font-size:11px}
         <div class="legend">
           <div class="li"><div class="sw" style="background:#38a169"></div><div><h4>½ plate — vegetables</h4><p>Leafy greens, broccoli, peppers, zucchini, green beans. Low-carb, high-fiber, fill up here.</p></div></div>
           <div class="li"><div class="sw" style="background:#dd6b20"></div><div><h4>¼ plate — protein</h4><p>Eggs, chicken, fish, beef, tofu, Greek yogurt, beans. Keeps you full and steady.</p></div></div>
-          <div class="li"><div class="sw" style="background:#3182ce"></div><div><h4>¼ plate — smart carbs</h4><p>½ cup quinoa, brown rice, sweet potato, beans, or a piece of fruit. This is where most of your 100g — or less — lives.</p></div></div>
+          <div class="li"><div class="sw" style="background:#3182ce"></div><div><h4>¼ plate — smart carbs</h4><p>½ arepa, ½ cup arroz, caraotas negras, tajadas, or a piece of fruit. This is where most of your 100g — or less — lives.</p></div></div>
         </div>
       </div>
-      <div class="fig" style="aspect-ratio:16/7;margin-bottom:10px"><img src="images/p03-plate.jpg" alt="A plate divided into vegetables, protein, and smart carbs"></div>
-      <ul class="checks">
+      <ul class="checks" style="margin:4px 0 14px">
         <li>Drink water or unsweetened drinks — liquid sugar adds up fastest</li>
         <li>Add healthy fats (olive oil, avocado, nuts) — they don’t count toward carbs</li>
         <li>Aim for 25–30g of protein per meal to stay satisfied</li>
       </ul>
+      <div class="fig tobottom" style="aspect-ratio:16/6.5"><img src="images/p03-plate.jpg" alt="A plate divided into vegetables, protein, and smart carbs"></div>
     </div>
     <div class="pagenum">03</div>
   </section>
@@ -245,39 +246,44 @@ table{width:100%;border-collapse:collapse;font-size:11px}
   <!-- 4 · MENU DAYS 1–4 -->
   <section class="page">
     <div class="pad">
-      <div class="kicker">7-day menu · part 1</div>
-      <h2>Your week — Days 1 to 4.</h2>
+      <div class="kicker">7-day Venezuelan menu · part 1</div>
+      <h2>Tu semana — Days 1 to 4.</h2>
       <div class="rule"></div>
+      <p style="margin-bottom:12px">Comida criolla, portioned to stay under 100g a day. Lean on protein and
+        vegetables; keep the starchy favorites — arepa, caraotas, tajadas — to the portions shown.</p>
       <table class="menu-tbl">
         <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snacks</th><th class="total" style="text-align:center">Carbs</th></tr></thead>
         <tbody>
           <tr><th>Mon</th>
-            <td>Veggie omelet (3 eggs, spinach, tomato), ½ avocado <span class="carb">12g</span></td>
-            <td>Grilled chicken salad + ½ cup chickpeas, olive-oil vinaigrette <span class="carb">28g</span></td>
-            <td>Baked salmon, roasted broccoli, ½ cup quinoa <span class="carb">30g</span></td>
-            <td>Plain Greek yogurt + ½ cup berries; 10 almonds <span class="carb">24g</span></td>
-            <td class="total">≈94g</td></tr>
-          <tr><th>Tue</th>
-            <td>Yogurt parfait — plain yogurt, ½ cup berries, 1 tbsp chia <span class="carb">15g</span></td>
-            <td>Turkey &amp; hummus lettuce wraps + 1 small apple <span class="carb">30g</span></td>
-            <td>Beef &amp; vegetable stir-fry over ½ cup brown rice <span class="carb">25g</span></td>
-            <td>Cottage cheese + ½ cup cantaloupe; baby carrots <span class="carb">28g</span></td>
-            <td class="total">≈98g</td></tr>
-          <tr><th>Wed</th>
-            <td>2 eggs, sautéed peppers &amp; onions, side of avocado <span class="carb">10g</span></td>
-            <td>Lentil soup (1 cup) + mixed green salad <span class="carb">30g</span></td>
-            <td>Grilled chicken, Brussels sprouts, ½ cup sweet potato <span class="carb">30g</span></td>
-            <td>1 orange + string cheese; handful of walnuts <span class="carb">28g</span></td>
-            <td class="total">≈98g</td></tr>
-          <tr><th>Thu</th>
-            <td>Smoothie — almond milk, ½ banana, spinach, protein powder <span class="carb">14g</span></td>
-            <td>Tuna salad over greens + 1 whole-grain crispbread <span class="carb">28g</span></td>
-            <td>Shrimp &amp; zucchini noodles + ½ cup chickpea pasta <span class="carb">30g</span></td>
-            <td>Plain yogurt + ⅓ cup blueberries; cucumber slices <span class="carb">24g</span></td>
+            <td><b>Perico</b> (eggs with tomato, onion &amp; ají dulce) + ½ arepa + avocado <span class="carb">22g</span></td>
+            <td><b>Carne mechada</b> (shredded beef) + ½ cup caraotas negras + ensalada rallada <span class="carb">28g</span></td>
+            <td><b>Pollo guisado</b> + calabacín + ½ cup arroz <span class="carb">27g</span></td>
+            <td>Plain yogurt + ½ cup lechosa (papaya); merey (cashews) <span class="carb">19g</span></td>
             <td class="total">≈96g</td></tr>
+          <tr><th>Tue</th>
+            <td><b>Reina pepiada</b> (chicken &amp; avocado) in ½ arepa <span class="carb">21g</span></td>
+            <td><b>Pescado a la plancha</b> + ensalada de aguacate + ½ cup arroz <span class="carb">28g</span></td>
+            <td><b>Carne guisada</b> + auyama (squash) + tajadas (3 small slices) <span class="carb">26g</span></td>
+            <td>Queso blanco + 1 mandarina; cucumber <span class="carb">16g</span></td>
+            <td class="total">≈91g</td></tr>
+          <tr><th>Wed</th>
+            <td><b>Perico</b> + ½ cup caraotas negras + avocado <span class="carb">26g</span></td>
+            <td><b>Pollo a la plancha</b> + ensalada rallada + ½ arepa <span class="carb">23g</span></td>
+            <td><b>Pabellón ligero</b> — carne mechada + ½ cup caraotas + tajadas (no rice) <span class="carb">38g</span></td>
+            <td>Plain yogurt + ½ cup melón <span class="carb">8g</span></td>
+            <td class="total">≈95g</td></tr>
+          <tr><th>Thu</th>
+            <td>Scrambled eggs + queso guayanés + ½ cup lechosa <span class="carb">13g</span></td>
+            <td><b>Sopa de pollo</b> (chicken &amp; vegetable soup) + ½ cup yuca <span class="carb">28g</span></td>
+            <td><b>Pescado al horno</b> (baked fish) + calabacín + ½ cup arroz <span class="carb">27g</span></td>
+            <td>Reina pepiada on cucumber + 1 guayaba <span class="carb">16g</span></td>
+            <td class="total">≈84g</td></tr>
         </tbody>
       </table>
-      <div class="note" style="margin-top:12px"><b>Carb counts are approximate</b> and based on the portions shown. “½ cup” cooked grains/beans ≈ a small handful. Continued on the next page →</div>
+      <div class="enc-row tobottom" style="margin:14px 0 10px">
+        <span>½ arepa ≈ 15g</span><span>½ taza caraotas ≈ 20g</span><span>Tajadas (½ plátano) ≈ 20g</span><span>Aguacate = grasa buena</span>
+      </div>
+      <div class="note"><b>Carb counts are approximate</b> and based on the portions shown. “½ cup” cooked rice/caraotas ≈ a small handful; a whole arepa ≈ 30g, so most days use ½. Continued on the next page →</div>
     </div>
     <div class="pagenum">04</div>
   </section>
@@ -292,36 +298,39 @@ table{width:100%;border-collapse:collapse;font-size:11px}
         <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snacks</th><th class="total" style="text-align:center">Carbs</th></tr></thead>
         <tbody>
           <tr><th>Fri</th>
-            <td>Chia pudding (almond milk, chia, cinnamon) + 6 strawberries <span class="carb">12g</span></td>
-            <td>Chicken &amp; black bean bowl (½ cup beans), salsa, lettuce <span class="carb">30g</span></td>
-            <td>Baked cod, green beans, ⅓ cup wild rice <span class="carb">20g</span></td>
-            <td>1 apple + 1 tbsp peanut butter; celery <span class="carb">30g</span></td>
-            <td class="total">≈92g</td></tr>
+            <td>½ <b>Cachapa</b> (sweet-corn pancake) with queso de mano <span class="carb">24g</span></td>
+            <td><b>Carne asada</b> + ensalada de aguacate + ½ cup caraotas <span class="carb">26g</span></td>
+            <td><b>Pollo guisado</b> + auyama purée (½ cup) + green salad <span class="carb">16g</span></td>
+            <td>Plain yogurt + ½ cup lechosa; merey <span class="carb">15g</span></td>
+            <td class="total">≈81g</td></tr>
           <tr><th>Sat</th>
-            <td>Veggie scramble + ½ cup roasted potatoes <span class="carb">15g</span></td>
-            <td>Big salad w/ grilled salmon, ¼ cup quinoa, olive oil <span class="carb">28g</span></td>
-            <td>Turkey meatballs, zucchini noodles, ½ cup marinara <span class="carb">30g</span></td>
-            <td>Greek yogurt + ⅓ cup raspberries; almonds <span class="carb">23g</span></td>
-            <td class="total">≈96g</td></tr>
+            <td><b>Perico</b> + ½ arepa + avocado <span class="carb">21g</span></td>
+            <td><b>Pabellón ligero</b> — carne mechada + ½ cup caraotas + ensalada rallada <span class="carb">28g</span></td>
+            <td><b>Pescado a la plancha</b> + tajadas (small) + tomato-onion salad <span class="carb">23g</span></td>
+            <td>Queso blanco + ½ mango <span class="carb">17g</span></td>
+            <td class="total">≈89g</td></tr>
           <tr><th>Sun</th>
-            <td>2 eggs, mushrooms &amp; spinach, ½ grapefruit <span class="carb">12g</span></td>
-            <td>Lettuce-wrap burgers + side salad + ½ cup squash <span class="carb">30g</span></td>
-            <td>Chicken fajita bowl (peppers, ½ cup beans, salsa, guac) <span class="carb">30g</span></td>
-            <td>Berries + cottage cheese; pumpkin seeds <span class="carb">26g</span></td>
-            <td class="total">≈98g</td></tr>
+            <td>Huevos <b>pericos</b> + queso + ½ cup lechosa <span class="carb">13g</span></td>
+            <td><b>Sancocho ligero</b> (chicken &amp; vegetable soup, small yuca) + avocado <span class="carb">26g</span></td>
+            <td><b>Pollo al horno</b> + ½ cup arroz + ensalada rallada <span class="carb">30g</span></td>
+            <td>Plain yogurt + ½ cup melón; merey <span class="carb">13g</span></td>
+            <td class="total">≈82g</td></tr>
         </tbody>
       </table>
-      <h2 style="font-size:16px;margin:14px 0 6px">Grocery shortlist</h2>
-      <div class="cheat" style="grid-template-columns:1fr 1fr 1fr;gap:0 18px;font-size:10.5px">
-        <table><tr class="hdr"><td colspan="2">Protein</td></tr>
-          <tr><td>Eggs, Greek yogurt</td><td></td></tr><tr><td>Chicken, turkey</td><td></td></tr>
-          <tr><td>Salmon, cod, shrimp, tuna</td><td></td></tr><tr><td>Lean beef, cottage cheese</td><td></td></tr></table>
-        <table><tr class="hdr"><td colspan="2">Produce</td></tr>
-          <tr><td>Greens, broccoli, peppers</td><td></td></tr><tr><td>Zucchini, green beans</td><td></td></tr>
-          <tr><td>Berries, apples, oranges</td><td></td></tr><tr><td>Avocado, cucumber, celery</td><td></td></tr></table>
-        <table><tr class="hdr"><td colspan="2">Pantry</td></tr>
-          <tr><td>Quinoa, brown/wild rice</td><td></td></tr><tr><td>Beans, lentils, chickpeas</td><td></td></tr>
-          <tr><td>Chia, almonds, walnuts</td><td></td></tr><tr><td>Olive oil, almond milk</td><td></td></tr></table>
+      <h2 style="font-size:18px;margin:18px 0 8px">Lista de mercado · grocery shortlist</h2>
+      <div class="cheat" style="grid-template-columns:1fr 1fr 1fr;gap:0 18px;font-size:11.5px">
+        <table><tr class="hdr"><td colspan="2">Proteína</td></tr>
+          <tr><td>Huevos (eggs)</td><td></td></tr><tr><td>Pollo (chicken)</td><td></td></tr>
+          <tr><td>Carne de res (beef)</td><td></td></tr><tr><td>Pescado blanco (white fish)</td><td></td></tr>
+          <tr><td>Queso blanco / guayanés</td><td></td></tr><tr><td>Yogurt natural</td><td></td></tr></table>
+        <table><tr class="hdr"><td colspan="2">Verduras y frutas</td></tr>
+          <tr><td>Tomate, cebolla, ají dulce</td><td></td></tr><tr><td>Cilantro, aguacate</td><td></td></tr>
+          <tr><td>Repollo &amp; zanahoria (slaw)</td><td></td></tr><tr><td>Calabacín, auyama</td><td></td></tr>
+          <tr><td>Lechosa, mango, melón</td><td></td></tr><tr><td>Lechuga, pepino</td><td></td></tr></table>
+        <table><tr class="hdr"><td colspan="2">Despensa</td></tr>
+          <tr><td>Harina de maíz (P.A.N.)</td><td></td></tr><tr><td>Caraotas negras</td><td></td></tr>
+          <tr><td>Arroz</td><td></td></tr><tr><td>Plátano, yuca</td><td></td></tr>
+          <tr><td>Merey (cashews)</td><td></td></tr><tr><td>Aceite, especias</td><td></td></tr></table>
       </div>
     </div>
     <div class="pagenum">05</div>
@@ -338,34 +347,35 @@ table{width:100%;border-collapse:collapse;font-size:11px}
         <div style="flex:1">
           <div class="cheat" style="grid-template-columns:1fr">
             <table>
-              <tr class="hdr"><td>Smart carbs (~½ cup unless noted)</td><td>Carbs</td></tr>
-              <tr><td>Cooked quinoa</td><td>20g</td></tr>
-              <tr><td>Brown / wild rice</td><td>22g</td></tr>
-              <tr><td>Sweet potato</td><td>13g</td></tr>
-              <tr><td>Black beans / chickpeas</td><td>20g</td></tr>
-              <tr><td>Lentils (cooked)</td><td>20g</td></tr>
-              <tr><td>Oats (cooked, ½ cup)</td><td>14g</td></tr>
-              <tr><td>Whole-grain bread (1 slice)</td><td>15g</td></tr>
+              <tr class="hdr"><td>Venezuelan staples</td><td>Carbs</td></tr>
+              <tr><td>Arepa (1 whole)</td><td>30g</td></tr>
+              <tr><td>Media arepa (½)</td><td>15g</td></tr>
+              <tr><td>Caraotas negras (½ cup)</td><td>20g</td></tr>
+              <tr><td>Arroz (½ cup)</td><td>22g</td></tr>
+              <tr><td>Tajadas (½ plátano)</td><td>20g</td></tr>
+              <tr><td>Yuca (½ cup)</td><td>20g</td></tr>
+              <tr><td>Cachapa (1 small)</td><td>38g</td></tr>
             </table>
           </div>
         </div>
         <div style="flex:1">
           <div class="cheat" style="grid-template-columns:1fr">
             <table>
-              <tr class="hdr"><td>Fruit &amp; dairy</td><td>Carbs</td></tr>
-              <tr><td>Berries (¾ cup)</td><td>12g</td></tr>
-              <tr><td>Apple / orange (1 small)</td><td>20g</td></tr>
-              <tr><td>Banana (1 medium)</td><td>27g</td></tr>
-              <tr><td>Plain Greek yogurt (¾ cup)</td><td>7g</td></tr>
-              <tr><td>Milk (1 cup)</td><td>12g</td></tr>
-              <tr class="hdr"><td>Near-zero carb</td><td></td></tr>
-              <tr><td>Eggs, meat, fish, oils</td><td>0–1g</td></tr>
-              <tr><td>Leafy greens, broccoli, zucchini</td><td>2–5g</td></tr>
+              <tr class="hdr"><td>Fruta y lácteos</td><td>Carbs</td></tr>
+              <tr><td>Lechosa / papaya (½ cup)</td><td>7g</td></tr>
+              <tr><td>Mango (½)</td><td>15g</td></tr>
+              <tr><td>Melón (½ cup)</td><td>6g</td></tr>
+              <tr><td>Guayaba (1)</td><td>10g</td></tr>
+              <tr><td>Yogurt natural (¾ cup)</td><td>7g</td></tr>
+              <tr><td>Queso blanco (1 oz)</td><td>1g</td></tr>
+              <tr class="hdr"><td>Casi sin carbohidratos</td><td></td></tr>
+              <tr><td>Huevos, carne, pescado, aguacate</td><td>0–2g</td></tr>
+              <tr><td>Tomate, calabacín, lechuga</td><td>2–5g</td></tr>
             </table>
           </div>
         </div>
       </div>
-      <div class="fig" style="aspect-ratio:16/6;margin-top:12px"><img src="images/p06-foods.jpg" alt="Carb-smart foods: beans, berries, whole grains"></div>
+      <div class="fig tobottom" style="aspect-ratio:16/8"><img src="images/p06-foods.jpg" alt="Carb-smart foods: beans, grains, legumes"></div>
     </div>
     <div class="pagenum">06</div>
   </section>
@@ -393,7 +403,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
           <tr><th>Sun</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         </tbody>
       </table>
-      <div class="note" style="margin-top:12px;font-size:11px">Tip: jot the carb total as you go — it’s easier than remembering at night. Aim to land within ~10g of your goal most days. Progress beats perfection.</div>
+      <div class="note tobottom" style="font-size:11.5px">Tip: jot the carb total as you go — it’s easier than remembering at night. Aim to land within ~10g of your goal most days. Progress beats perfection.</div>
     </div>
     <div class="pagenum">07</div>
   </section>
@@ -422,7 +432,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
           <tr class="totrow"><th>Total</th><td>Weekly minutes →</td><td></td><td>L · M · H</td><td></td><td></td></tr>
         </tbody>
       </table>
-      <div class="note" style="margin-top:12px;font-size:11px">Intensity: <b>L</b> = easy (can sing) · <b>M</b> = moderate (can talk) · <b>H</b> = hard (short of breath). Most weeks should be mostly moderate.</div>
+      <div class="note tobottom" style="font-size:11.5px">Intensity: <b>L</b> = easy (can sing) · <b>M</b> = moderate (can talk) · <b>H</b> = hard (short of breath). Most weeks should be mostly moderate.</div>
     </div>
     <div class="pagenum">08</div>
   </section>
