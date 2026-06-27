@@ -23,9 +23,25 @@ None, **Background graphics ON**) → exactly 10 pages. A pre-rendered
 `GFM-Healthy-Weight-Booklet.pdf` is included.
 
 ## Photos
-Pages 1, 2, 3, 4, 6, 9, 10 use branded placeholders in `images/`
-(`pNN-*.jpg.svg`). To use a real photo, drop `pNN-*.jpg` into `images/` and
-change that one `src` in `index.html` from `…jpg.svg` to `…jpg`.
+Pages 1, 2, 3, 6, and 9 use **licensed Adobe Stock photos** (free collection,
+royalty-free Standard license) stored as `pNN-*.jpg` in `images/`:
+
+| Slot | File | Adobe Stock ID |
+|------|------|----------------|
+| Cover — plated meal | `p01-cover.jpg` | 259101953 |
+| Doctor & patient | `p02-welcome.jpg` | 564639218 |
+| Build-your-plate bowl | `p03-plate.jpg` | 1230460119 |
+| Carb-smart foods | `p06-foods.jpg` | 314384961 |
+| Walking outdoors | `p09-move.jpg` | 357613659 |
+
+The back-cover **clinic art (`p10-clinic.jpg.svg`) is a custom illustration**
+showing "Garcia Family Medicine" — kept intentionally, since the only free
+stock "clinic" results were institutional hospitals. Swap in a real exterior
+photo of the practice any time by dropping `p10-clinic.jpg` into `images/` and
+changing that one `src` in `index.html` from `…jpg.svg` to `…jpg`.
+
+To replace any photo, overwrite the `pNN-*.jpg` file (keep the same name and a
+similar aspect ratio — frames use `object-fit: cover`).
 
 ## Important
 This booklet is **general education, not individualized medical or nutrition
