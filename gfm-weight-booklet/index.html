@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthy Weight, One Week at a Time · Garcia Family Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--orange:#f97316;--orange2:#fb923c;--orangelt:#fff7ed;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d0d8e4;--bg:#eef1f6;--white:#fff;
+  --green:#276749;--greenlt:#e8f5ee;--amber:#b7620a;--amberlt:#fef3e2;--text:#1a2535;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:12.5px}
+
+.toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:10px 18px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.toolbar .brand{font-family:'Playfair Display',serif;font-weight:600;font-size:16px}
+.toolbar .brand span{color:var(--orange)}
+.toolbar .hint{font-size:12px;color:rgba(255,255,255,.6)}
+.toolbar button{font-family:inherit;font-size:13px;font-weight:500;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border-radius:8px;padding:8px 16px}
+.deck{max-width:820px;margin:0 auto;padding:24px 16px 60px}
+
+.page{position:relative;background:var(--white);border-radius:12px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(20,40,80,.14);margin:0 auto 26px;width:100%;aspect-ratio:1/1.414;
+  display:flex;flex-direction:column}
+.pad{flex:1;display:flex;flex-direction:column;padding:30px 34px;min-height:0}
+.pagenum{position:absolute;bottom:14px;right:22px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.pagenum.light{color:rgba(255,255,255,.55)}
+.kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:9px}
+.kicker.light{color:var(--orange2)}
+h1,h2{font-family:'Playfair Display',serif;font-weight:600;line-height:1.16;color:var(--navy)}
+h2{font-size:26px;margin-bottom:10px}
+.rule{height:3px;width:50px;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;margin:0 0 16px}
+p{margin-bottom:9px;color:var(--slate)}
+.lead{font-size:15px;color:var(--slate)}
+.fig{width:100%;border-radius:11px;overflow:hidden;background:var(--navy)}
+.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.cap{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px}
+
+.page.dark{color:#fff;background:linear-gradient(135deg,var(--navy),var(--navy2))}
+.page.dark h1,.page.dark h2{color:#fff}
+.page.dark p,.page.dark .lead{color:rgba(255,255,255,.84)}
+.dotgrid{position:absolute;inset:0;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.07) 1.4px,transparent 1.4px);background-size:26px 26px}
+
+.cover-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:600}
+.cover-logo span{color:var(--orange)}
+.cover-sub{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:3px}
+.cover-title{font-family:'Playfair Display',serif;font-size:44px;line-height:1.05;font-weight:700}
+.cover-tag{font-size:16px;color:var(--orange2);margin-top:12px;font-weight:300}
+.cover-spacer{flex:1}
+
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;flex:1;align-items:center;min-height:0}
+.stack{display:flex;flex-direction:column;justify-content:center}
+ul.checks{list-style:none;margin:4px 0 0}
+ul.checks li{position:relative;padding-left:24px;margin-bottom:8px;font-size:13px;color:var(--slate)}
+ul.checks li::before{content:"";position:absolute;left:0;top:5px;width:13px;height:13px;border-radius:4px;background:linear-gradient(135deg,var(--orange),var(--orange2))}
+ul.checks li::after{content:"";position:absolute;left:4px;top:7.5px;width:4px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}
+
+.note{background:var(--amberlt);border:1px solid #f3d9ad;border-radius:10px;padding:12px 14px;font-size:11.5px;color:#7c4a08}
+.note b{color:var(--amber)}
+.note.light{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.85)}
+.note.light b{color:var(--orange2)}
+
+/* Plate diagram */
+.plate-wrap{display:flex;gap:22px;align-items:center}
+.plate{flex:0 0 200px;width:200px;height:200px;border-radius:50%;border:6px solid var(--border);overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;position:relative;box-shadow:0 6px 16px rgba(20,40,80,.12)}
+.plate div{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10.5px;font-weight:600;color:#fff;padding:6px;line-height:1.2}
+.q-veg{grid-row:1/3;background:linear-gradient(135deg,#2f855a,#38a169)}
+.q-pro{background:linear-gradient(135deg,#c05621,#dd6b20)}
+.q-carb{background:linear-gradient(135deg,#2b6cb0,#3182ce)}
+.legend{flex:1}
+.legend .li{display:flex;gap:10px;margin-bottom:11px}
+.legend .sw{flex:0 0 16px;height:16px;border-radius:4px;margin-top:2px}
+.legend h4{font-size:13px;color:var(--navy);margin-bottom:1px}
+.legend p{font-size:11.5px;margin:0}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:11px}
+.menu-tbl th,.menu-tbl td{border:1px solid var(--border);padding:6px 8px;vertical-align:top;text-align:left}
+.menu-tbl thead th{background:var(--navy);color:#fff;font-weight:500;font-size:10.5px;letter-spacing:.02em}
+.menu-tbl tbody th{background:var(--orangelt);color:var(--navy);font-weight:600;white-space:nowrap;width:64px}
+.menu-tbl .carb{color:var(--orange);font-weight:600;font-family:'DM Mono',monospace;font-size:10px}
+.menu-tbl .total{background:#eef3fb;font-weight:600;color:var(--navy);text-align:right}
+.menu-tbl tr:nth-child(even) td{background:#fafbfd}
+
+.cheat{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.cheat table{font-size:11px}
+.cheat td{padding:4.5px 4px;border-bottom:1px solid var(--border)}
+.cheat td:last-child{text-align:right;font-family:'DM Mono',monospace;color:var(--orange);font-weight:600;white-space:nowrap}
+.cheat .hdr td{font-weight:600;color:var(--navy);border-bottom:2px solid var(--navy);font-family:'Poppins'}
+
+/* Log sheets */
+.log{width:100%;border-collapse:collapse;font-size:11px}
+.log th,.log td{border:1px solid var(--border);padding:0 8px}
+.log th{background:var(--navy);color:#fff;font-weight:500;font-size:10px;padding:7px 8px;text-align:left}
+.log tbody td{height:34px}
+.log tbody th{background:var(--orangelt);color:var(--navy);font-weight:600;text-align:left;padding:7px 9px;white-space:nowrap;width:74px}
+.log tbody tr:nth-child(even) td{background:#fafbfd}
+.log .totrow td,.log .totrow th{background:#eef3fb;font-weight:600;color:var(--navy);height:30px}
+.fieldrow{display:flex;gap:16px;margin-bottom:12px;font-size:11.5px;color:var(--slate);flex-wrap:wrap}
+.fieldrow .f{flex:1;min-width:120px}
+.fieldrow .ln{display:inline-block;border-bottom:1.5px solid var(--border);min-width:70px;height:1em}
+
+.tips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.tip{background:#fafbfd;border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+.tip h4{font-size:12.5px;color:var(--navy);margin-bottom:2px}
+.tip p{font-size:11px;margin:0;color:var(--muted)}
+
+.weekplan{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.weekplan th,.weekplan td{border:1px solid var(--border);padding:6px 8px;text-align:left}
+.weekplan thead th{background:var(--navy);color:#fff;font-weight:500}
+.weekplan tbody th{background:var(--orangelt);color:var(--navy);font-weight:600;white-space:nowrap}
+.weekplan tr:nth-child(even) td{background:#fafbfd}
+
+.contact{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.contact .row{display:flex;gap:10px;align-items:baseline}
+.contact .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:rgba(255,255,255,.45);min-width:64px;text-transform:uppercase}
+.fillin{background:rgba(249,115,22,.2);color:var(--orange2);border-radius:3px;padding:0 6px;font-family:'DM Mono',monospace}
+
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body{background:#fff}
+  .toolbar{display:none}
+  .deck{max-width:none;margin:0;padding:0}
+  .page{width:100%;height:100vh;margin:0;border-radius:0;box-shadow:none;break-after:page;page-break-after:always;break-inside:avoid}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .pad{padding:12mm 13mm}
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media (max-width:640px){.split,.cheat,.tips{grid-template-columns:1fr}.plate-wrap{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="brand">Healthy Weight · <span>GFM</span></div>
+  <div class="hint">10-page weight-management booklet — “Print / Save as PDF” for a print-ready file</div>
+  <button onclick="window.print()">Print / Save&nbsp;PDF</button>
+</div>
+
+<div class="deck">
+
+  <!-- 1 · COVER -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div><div class="cover-logo">Garcia <span>Family Medicine</span></div>
+        <div class="cover-sub">Medical Weight Management</div></div>
+      <div class="fig" style="aspect-ratio:16/9;margin:22px 0"><img src="images/p01-cover.jpg.svg" alt="A colorful, balanced plate of whole foods"></div>
+      <div class="cover-spacer"></div>
+      <div class="cover-title">Healthy Weight,<br>One Week<br>at a Time</div>
+      <div class="cover-tag">A 7-day plan of 100g carbs or less per day, with food &amp; exercise logs.</div>
+    </div>
+    <div class="pagenum light">01</div>
+  </section>
+
+  <!-- 2 · WELCOME / THE APPROACH -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Start here</div>
+      <div class="split">
+        <div class="stack">
+          <h2>A simpler week of eating.</h2>
+          <div class="rule"></div>
+          <p>This booklet is a gentle, lower-carb starting point — <b>100 grams of
+            carbohydrate a day, or less</b>. That’s well under a typical Western diet, but
+            far from “no carbs.” It leaves room for vegetables, fruit, beans, yogurt, and a
+            modest serving of whole grains.</p>
+          <p>The goal isn’t perfection. It’s a steadier blood sugar, fewer spikes and
+            crashes, and meals you can actually repeat. Use the menu as written, or swap
+            meals you like — just keep an eye on the daily carb total.</p>
+          <div class="note"><b>Please read:</b> This is general education, not personal
+            medical or nutrition advice. Talk with Garcia Family Medicine before you
+            start — especially if you take medication for diabetes or blood pressure, are
+            pregnant or nursing, or have kidney disease. Lowering carbs can change how
+            some medications affect you.</div>
+        </div>
+        <div>
+          <div class="fig" style="aspect-ratio:6/7"><img src="images/p02-welcome.jpg.svg" alt="Dr. Tess Garcia discussing goals with a patient"></div>
+          <div class="cap">Your plan should fit you — let’s tailor it together.</div>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">02</div>
+  </section>
+
+  <!-- 3 · BUILD YOUR PLATE -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">The method</div>
+      <h2>Build your plate.</h2>
+      <div class="rule"></div>
+      <div class="plate-wrap" style="margin-bottom:16px">
+        <div class="plate">
+          <div class="q-veg">½ plate<br>Non-starchy<br>vegetables</div>
+          <div class="q-pro">¼ plate<br>Protein</div>
+          <div class="q-carb">¼ plate<br>Smart carbs</div>
+        </div>
+        <div class="legend">
+          <div class="li"><div class="sw" style="background:#38a169"></div><div><h4>½ plate — vegetables</h4><p>Leafy greens, broccoli, peppers, zucchini, green beans. Low-carb, high-fiber, fill up here.</p></div></div>
+          <div class="li"><div class="sw" style="background:#dd6b20"></div><div><h4>¼ plate — protein</h4><p>Eggs, chicken, fish, beef, tofu, Greek yogurt, beans. Keeps you full and steady.</p></div></div>
+          <div class="li"><div class="sw" style="background:#3182ce"></div><div><h4>¼ plate — smart carbs</h4><p>½ cup quinoa, brown rice, sweet potato, beans, or a piece of fruit. This is where most of your 100g — or less — lives.</p></div></div>
+        </div>
+      </div>
+      <div class="fig" style="aspect-ratio:16/7;margin-bottom:10px"><img src="images/p03-plate.jpg.svg" alt="A plate divided into vegetables, protein, and smart carbs"></div>
+      <ul class="checks">
+        <li>Drink water or unsweetened drinks — liquid sugar adds up fastest</li>
+        <li>Add healthy fats (olive oil, avocado, nuts) — they don’t count toward carbs</li>
+        <li>Aim for 25–30g of protein per meal to stay satisfied</li>
+      </ul>
+    </div>
+    <div class="pagenum">03</div>
+  </section>
+
+  <!-- 4 · MENU DAYS 1–4 -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">7-day menu · part 1</div>
+      <h2>Your week — Days 1 to 4.</h2>
+      <div class="rule"></div>
+      <table class="menu-tbl">
+        <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snacks</th><th class="total" style="text-align:center">Carbs</th></tr></thead>
+        <tbody>
+          <tr><th>Mon</th>
+            <td>Veggie omelet (3 eggs, spinach, tomato), ½ avocado <span class="carb">12g</span></td>
+            <td>Grilled chicken salad + ½ cup chickpeas, olive-oil vinaigrette <span class="carb">28g</span></td>
+            <td>Baked salmon, roasted broccoli, ½ cup quinoa <span class="carb">30g</span></td>
+            <td>Plain Greek yogurt + ½ cup berries; 10 almonds <span class="carb">24g</span></td>
+            <td class="total">≈94g</td></tr>
+          <tr><th>Tue</th>
+            <td>Yogurt parfait — plain yogurt, ½ cup berries, 1 tbsp chia <span class="carb">15g</span></td>
+            <td>Turkey &amp; hummus lettuce wraps + 1 small apple <span class="carb">30g</span></td>
+            <td>Beef &amp; vegetable stir-fry over ½ cup brown rice <span class="carb">25g</span></td>
+            <td>Cottage cheese + ½ cup cantaloupe; baby carrots <span class="carb">28g</span></td>
+            <td class="total">≈98g</td></tr>
+          <tr><th>Wed</th>
+            <td>2 eggs, sautéed peppers &amp; onions, side of avocado <span class="carb">10g</span></td>
+            <td>Lentil soup (1 cup) + mixed green salad <span class="carb">30g</span></td>
+            <td>Grilled chicken, Brussels sprouts, ½ cup sweet potato <span class="carb">30g</span></td>
+            <td>1 orange + string cheese; handful of walnuts <span class="carb">28g</span></td>
+            <td class="total">≈98g</td></tr>
+          <tr><th>Thu</th>
+            <td>Smoothie — almond milk, ½ banana, spinach, protein powder <span class="carb">14g</span></td>
+            <td>Tuna salad over greens + 1 whole-grain crispbread <span class="carb">28g</span></td>
+            <td>Shrimp &amp; zucchini noodles + ½ cup chickpea pasta <span class="carb">30g</span></td>
+            <td>Plain yogurt + ⅓ cup blueberries; cucumber slices <span class="carb">24g</span></td>
+            <td class="total">≈96g</td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px"><b>Carb counts are approximate</b> and based on the portions shown. “½ cup” cooked grains/beans ≈ a small handful. Continued on the next page →</div>
+    </div>
+    <div class="pagenum">04</div>
+  </section>
+
+  <!-- 5 · MENU DAYS 5–7 + GROCERY -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">7-day menu · part 2</div>
+      <h2>Days 5 to 7 + grocery list.</h2>
+      <div class="rule"></div>
+      <table class="menu-tbl">
+        <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snacks</th><th class="total" style="text-align:center">Carbs</th></tr></thead>
+        <tbody>
+          <tr><th>Fri</th>
+            <td>Chia pudding (almond milk, chia, cinnamon) + 6 strawberries <span class="carb">12g</span></td>
+            <td>Chicken &amp; black bean bowl (½ cup beans), salsa, lettuce <span class="carb">30g</span></td>
+            <td>Baked cod, green beans, ⅓ cup wild rice <span class="carb">20g</span></td>
+            <td>1 apple + 1 tbsp peanut butter; celery <span class="carb">30g</span></td>
+            <td class="total">≈92g</td></tr>
+          <tr><th>Sat</th>
+            <td>Veggie scramble + ½ cup roasted potatoes <span class="carb">15g</span></td>
+            <td>Big salad w/ grilled salmon, ¼ cup quinoa, olive oil <span class="carb">28g</span></td>
+            <td>Turkey meatballs, zucchini noodles, ½ cup marinara <span class="carb">30g</span></td>
+            <td>Greek yogurt + ⅓ cup raspberries; almonds <span class="carb">23g</span></td>
+            <td class="total">≈96g</td></tr>
+          <tr><th>Sun</th>
+            <td>2 eggs, mushrooms &amp; spinach, ½ grapefruit <span class="carb">12g</span></td>
+            <td>Lettuce-wrap burgers + side salad + ½ cup squash <span class="carb">30g</span></td>
+            <td>Chicken fajita bowl (peppers, ½ cup beans, salsa, guac) <span class="carb">30g</span></td>
+            <td>Berries + cottage cheese; pumpkin seeds <span class="carb">26g</span></td>
+            <td class="total">≈98g</td></tr>
+        </tbody>
+      </table>
+      <h2 style="font-size:16px;margin:14px 0 6px">Grocery shortlist</h2>
+      <div class="cheat" style="grid-template-columns:1fr 1fr 1fr;gap:0 18px;font-size:10.5px">
+        <table><tr class="hdr"><td colspan="2">Protein</td></tr>
+          <tr><td>Eggs, Greek yogurt</td><td></td></tr><tr><td>Chicken, turkey</td><td></td></tr>
+          <tr><td>Salmon, cod, shrimp, tuna</td><td></td></tr><tr><td>Lean beef, cottage cheese</td><td></td></tr></table>
+        <table><tr class="hdr"><td colspan="2">Produce</td></tr>
+          <tr><td>Greens, broccoli, peppers</td><td></td></tr><tr><td>Zucchini, green beans</td><td></td></tr>
+          <tr><td>Berries, apples, oranges</td><td></td></tr><tr><td>Avocado, cucumber, celery</td><td></td></tr></table>
+        <table><tr class="hdr"><td colspan="2">Pantry</td></tr>
+          <tr><td>Quinoa, brown/wild rice</td><td></td></tr><tr><td>Beans, lentils, chickpeas</td><td></td></tr>
+          <tr><td>Chia, almonds, walnuts</td><td></td></tr><tr><td>Olive oil, almond milk</td><td></td></tr></table>
+      </div>
+    </div>
+    <div class="pagenum">05</div>
+  </section>
+
+  <!-- 6 · CARB CHEAT SHEET -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Reference</div>
+      <h2>Carb counts at a glance.</h2>
+      <div class="rule"></div>
+      <p style="font-size:11.5px">Approximate carbohydrate per common serving. Use it to swap meals while keeping each day at 100g or less.</p>
+      <div class="split" style="align-items:start;gap:20px">
+        <div style="flex:1">
+          <div class="cheat" style="grid-template-columns:1fr">
+            <table>
+              <tr class="hdr"><td>Smart carbs (~½ cup unless noted)</td><td>Carbs</td></tr>
+              <tr><td>Cooked quinoa</td><td>20g</td></tr>
+              <tr><td>Brown / wild rice</td><td>22g</td></tr>
+              <tr><td>Sweet potato</td><td>13g</td></tr>
+              <tr><td>Black beans / chickpeas</td><td>20g</td></tr>
+              <tr><td>Lentils (cooked)</td><td>20g</td></tr>
+              <tr><td>Oats (cooked, ½ cup)</td><td>14g</td></tr>
+              <tr><td>Whole-grain bread (1 slice)</td><td>15g</td></tr>
+            </table>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="cheat" style="grid-template-columns:1fr">
+            <table>
+              <tr class="hdr"><td>Fruit &amp; dairy</td><td>Carbs</td></tr>
+              <tr><td>Berries (¾ cup)</td><td>12g</td></tr>
+              <tr><td>Apple / orange (1 small)</td><td>20g</td></tr>
+              <tr><td>Banana (1 medium)</td><td>27g</td></tr>
+              <tr><td>Plain Greek yogurt (¾ cup)</td><td>7g</td></tr>
+              <tr><td>Milk (1 cup)</td><td>12g</td></tr>
+              <tr class="hdr"><td>Near-zero carb</td><td></td></tr>
+              <tr><td>Eggs, meat, fish, oils</td><td>0–1g</td></tr>
+              <tr><td>Leafy greens, broccoli, zucchini</td><td>2–5g</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="fig" style="aspect-ratio:16/6;margin-top:12px"><img src="images/p06-foods.jpg.svg" alt="Carb-smart foods: beans, berries, whole grains"></div>
+    </div>
+    <div class="pagenum">06</div>
+  </section>
+
+  <!-- 7 · FOOD LOG -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Track it · food</div>
+      <h2>Weekly food log.</h2>
+      <div class="rule"></div>
+      <div class="fieldrow">
+        <span class="f">Name: <span class="ln" style="min-width:130px"></span></span>
+        <span class="f">Week of: <span class="ln"></span></span>
+        <span class="f">Daily carb goal: <span class="ln" style="min-width:50px"></span> g</span>
+      </div>
+      <table class="log">
+        <thead><tr><th style="width:74px">Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snacks</th><th style="width:52px">Water</th><th style="width:54px">Carbs g</th></tr></thead>
+        <tbody>
+          <tr><th>Mon</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Tue</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Wed</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Thu</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Fri</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Sat</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Sun</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px;font-size:11px">Tip: jot the carb total as you go — it’s easier than remembering at night. Aim to land within ~10g of your goal most days. Progress beats perfection.</div>
+    </div>
+    <div class="pagenum">07</div>
+  </section>
+
+  <!-- 8 · EXERCISE LOG -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Track it · movement</div>
+      <h2>Weekly exercise log.</h2>
+      <div class="rule"></div>
+      <div class="fieldrow">
+        <span class="f">Week of: <span class="ln"></span></span>
+        <span class="f">Minutes goal: <span class="ln" style="min-width:50px"></span> (aim 150)</span>
+        <span class="f">Steps goal: <span class="ln" style="min-width:60px"></span></span>
+      </div>
+      <table class="log">
+        <thead><tr><th style="width:74px">Day</th><th>Activity</th><th style="width:60px">Minutes</th><th style="width:78px">Intensity</th><th style="width:64px">Steps</th><th>How I felt</th></tr></thead>
+        <tbody>
+          <tr><th>Mon</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Tue</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Wed</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Thu</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Fri</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Sat</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Sun</th><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="totrow"><th>Total</th><td>Weekly minutes →</td><td></td><td>L · M · H</td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px;font-size:11px">Intensity: <b>L</b> = easy (can sing) · <b>M</b> = moderate (can talk) · <b>H</b> = hard (short of breath). Most weeks should be mostly moderate.</div>
+    </div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- 9 · MOVE MORE PLAN -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div class="kicker light">Move more</div>
+      <h2>A week of easy movement.</h2>
+      <div class="rule"></div>
+      <div class="fig" style="aspect-ratio:16/6;margin-bottom:12px"><img src="images/p09-move.jpg.svg" alt="A daily walk and light strength work"></div>
+      <table class="weekplan">
+        <thead><tr><th>Day</th><th>Focus</th><th>Simple option (20–30 min)</th></tr></thead>
+        <tbody>
+          <tr><th>Mon</th><td>Walk</td><td>Brisk 25-min walk after a meal</td></tr>
+          <tr><th>Tue</th><td>Strength</td><td>Bodyweight: squats, wall push-ups, rows ×2–3 sets</td></tr>
+          <tr><th>Wed</th><td>Walk</td><td>Walk + 5 min easy stretching</td></tr>
+          <tr><th>Thu</th><td>Strength</td><td>Repeat Tuesday; add a 20-sec plank</td></tr>
+          <tr><th>Fri</th><td>Walk</td><td>Longer 30–40 min walk if you can</td></tr>
+          <tr><th>Sat</th><td>Active fun</td><td>Bike, dance, yard work, swim — your choice</td></tr>
+          <tr><th>Sun</th><td>Recover</td><td>Gentle stretch or rest day</td></tr>
+        </tbody>
+      </table>
+      <div class="tips">
+        <div class="tip"><h4>Start where you are</h4><p>Two 10-minute walks count as much as one 20-minute walk.</p></div>
+        <div class="tip"><h4>Anchor to habits</h4><p>Walk after meals or pair strength with morning coffee.</p></div>
+        <div class="tip"><h4>Protect the joints</h4><p>Good shoes, warm up easy, stop if there’s sharp pain.</p></div>
+        <div class="tip"><h4>Sleep counts</h4><p>7+ hours supports appetite control and recovery.</p></div>
+      </div>
+    </div>
+    <div class="pagenum light">09</div>
+  </section>
+
+  <!-- 10 · BACK COVER -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">You’ve got this</div>
+      <h2>Small steps, every week.</h2>
+      <div class="rule"></div>
+      <div class="fig" style="aspect-ratio:16/8;margin-bottom:12px"><img src="images/p10-clinic.jpg.svg" alt="Garcia Family Medicine, Blue Springs, Missouri"></div>
+      <p style="font-size:13px">One steady week is a win. Repeat it, adjust what didn’t fit, and bring your
+        logs to your next visit — they tell us more than the scale alone. Weight is medical,
+        and you don’t have to figure it out by yourself.</p>
+      <ul class="checks" style="margin-bottom:12px">
+        <li>Check in with GFM before starting if you take medications or have a health condition</li>
+        <li>Bring this booklet and your logs to your appointment</li>
+        <li>Ask about board-certified medical weight management</li>
+      </ul>
+      <div class="page dark" style="aspect-ratio:auto;border-radius:12px;margin:0">
+        <div style="padding:16px 20px;position:relative">
+          <div class="dotgrid"></div>
+          <div style="position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+            <div>
+              <div class="cover-logo" style="font-size:20px">Garcia <span>Family Medicine</span></div>
+              <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.8)">Become a patient — new patients welcome.</p>
+            </div>
+            <div class="contact">
+              <div class="row"><span class="k">Call</span><span class="fillin">[ phone ]</span></div>
+              <div class="row"><span class="k">Online</span><span class="fillin">[ website ]</span></div>
+              <div class="row"><span class="k">Visit</span><span style="color:rgba(255,255,255,.85);font-size:12px">Blue Springs, Missouri</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:12px;font-size:10px">General educational information only — not medical or nutrition advice, and not a substitute for care from your physician. Individual needs vary. Talk with Garcia Family Medicine or your clinician before changing your diet or activity, particularly with diabetes, kidney disease, pregnancy, or prescription medications. In an emergency, call 911.</div>
+    </div>
+    <div class="pagenum">10</div>
+  </section>
+
+</div>
+</body>
+</html>
