@@ -45,22 +45,22 @@ p{margin-bottom:9px;color:var(--slate)}
 .page.dark p,.page.dark .lead{color:rgba(255,255,255,.84)}
 .dotgrid{position:absolute;inset:0;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.07) 1.4px,transparent 1.4px);background-size:26px 26px}
 
-.cover-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:600}
+.cover-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--navy)}
 .cover-logo span{color:var(--orange)}
-.cover-sub{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:3px}
-.cover-title{font-family:'Playfair Display',serif;font-size:44px;line-height:1.05;font-weight:700}
+.cover-sub{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.cover-title{font-family:'Playfair Display',serif;font-size:44px;line-height:1.05;font-weight:700;color:var(--navy)}
 .cover-tag{font-size:16px;color:var(--orange2);margin-top:12px;font-weight:300}
 .cover-spacer{flex:1}
 .cover-badge{flex-shrink:0;width:78px;height:78px;border-radius:50%;border:2px solid var(--orange);
   background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;text-align:center;
   font-family:'Playfair Display',serif;font-style:italic;font-size:13px;line-height:1.15;color:var(--orange2);
   transform:rotate(-7deg)}
-.encourage{border-top:1px solid rgba(255,255,255,.16);padding-top:16px}
-.enc-quote{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;line-height:1.35;color:#fff;margin-bottom:12px}
+.encourage{border-top:1px solid var(--border);padding-top:16px}
+.enc-quote{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;line-height:1.35;color:var(--navy);margin-bottom:12px}
 .enc-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px}
-.enc-row span{font-size:11.5px;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);
+.enc-row span{font-size:11.5px;color:var(--navy);background:var(--orangelt);border:1px solid #fde6cf;
   border-radius:20px;padding:5px 12px}
-.enc-note{font-size:12px;color:rgba(255,255,255,.78);margin:0;max-width:92%}
+.enc-note{font-size:12px;color:var(--slate);margin:0;max-width:92%}
 
 .split{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;flex:1;align-items:center;min-height:0}
 .stack{display:flex;flex-direction:column;justify-content:center}
@@ -128,8 +128,8 @@ table{width:100%;border-collapse:collapse;font-size:11px}
 
 .contact{display:flex;flex-direction:column;gap:5px;font-size:13px}
 .contact .row{display:flex;gap:10px;align-items:baseline}
-.contact .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:rgba(255,255,255,.45);min-width:64px;text-transform:uppercase}
-.fillin{background:rgba(249,115,22,.2);color:var(--orange2);border-radius:3px;padding:0 6px;font-family:'DM Mono',monospace}
+.contact .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--muted);min-width:64px;text-transform:uppercase}
+.fillin{background:var(--orangelt);color:#c2410c;border-radius:3px;padding:0 6px;font-family:'DM Mono',monospace}
 
 @media print{
   @page{size:A4 portrait;margin:0}
@@ -155,9 +155,9 @@ table{width:100%;border-collapse:collapse;font-size:11px}
 <div class="deck">
 
   <!-- 1 · COVER -->
-  <section class="page dark">
-    <div class="dotgrid"></div>
+  <section class="page">
     <div class="pad" style="position:relative">
+      <div style="height:4px;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;width:64px;margin-bottom:14px"></div>
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div><div class="cover-logo">Garcia <span>Family Medicine</span></div>
           <div class="cover-sub">Medical Weight Management</div></div>
@@ -181,7 +181,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
           here with you for all of them.</p>
       </div>
     </div>
-    <div class="pagenum light">01</div>
+    <div class="pagenum">01</div>
   </section>
 
   <!-- 2 · WELCOME / THE APPROACH -->
@@ -206,7 +206,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
             some medications affect you.</div>
         </div>
         <div>
-          <div class="fig" style="aspect-ratio:6/7"><img src="images/p02-welcome.jpg.svg" alt="Dr. Tess Garcia discussing goals with a patient"></div>
+          <div class="fig" style="aspect-ratio:6/7"><img src="images/p02-welcome.jpg.svg" alt="A care-team member talking through goals with a patient"></div>
           <div class="cap">Your plan should fit you — let’s tailor it together.</div>
         </div>
       </div>
@@ -428,10 +428,9 @@ table{width:100%;border-collapse:collapse;font-size:11px}
   </section>
 
   <!-- 9 · MOVE MORE PLAN -->
-  <section class="page dark">
-    <div class="dotgrid"></div>
-    <div class="pad" style="position:relative">
-      <div class="kicker light">Move more</div>
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Move more</div>
       <h2>A week of easy movement.</h2>
       <div class="rule"></div>
       <div class="fig" style="aspect-ratio:16/6;margin-bottom:12px"><img src="images/p09-move.jpg.svg" alt="A daily walk and light strength work"></div>
@@ -454,7 +453,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}
         <div class="tip"><h4>Sleep counts</h4><p>7+ hours supports appetite control and recovery.</p></div>
       </div>
     </div>
-    <div class="pagenum light">09</div>
+    <div class="pagenum">09</div>
   </section>
 
   <!-- 10 · BACK COVER -->
@@ -472,18 +471,17 @@ table{width:100%;border-collapse:collapse;font-size:11px}
         <li>Bring this booklet and your logs to your appointment</li>
         <li>Ask about board-certified medical weight management</li>
       </ul>
-      <div class="page dark" style="aspect-ratio:auto;border-radius:12px;margin:0">
-        <div style="padding:16px 20px;position:relative">
-          <div class="dotgrid"></div>
-          <div style="position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+      <div style="border:1px solid var(--border);border-left:5px solid var(--orange);border-radius:12px;margin:0;background:#fafbfd">
+        <div style="padding:16px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
             <div>
               <div class="cover-logo" style="font-size:20px">Garcia <span>Family Medicine</span></div>
-              <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.8)">Become a patient — new patients welcome.</p>
+              <p style="margin:6px 0 0;font-size:12px;color:var(--slate)">Become a patient — new patients welcome.</p>
             </div>
             <div class="contact">
               <div class="row"><span class="k">Call</span><span class="fillin">[ phone ]</span></div>
               <div class="row"><span class="k">Online</span><span class="fillin">[ website ]</span></div>
-              <div class="row"><span class="k">Visit</span><span style="color:rgba(255,255,255,.85);font-size:12px">Blue Springs, Missouri</span></div>
+              <div class="row"><span class="k">Visit</span><span style="color:var(--slate);font-size:12px">Blue Springs, Missouri</span></div>
             </div>
           </div>
         </div>
