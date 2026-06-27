@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" role="img" aria-label="A colorful, balanced plate of whole foods, viewed from above">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7ed"/><stop offset="1" stop-color="#ffedd5"/></linearGradient>
+    <radialGradient id="plate" cx="50%" cy="42%" r="60%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f1f5f9"/></radialGradient>
+  </defs>
+  <rect width="1600" height="800" fill="url(#bg)"/>
+  <g fill="#86c06c" opacity=".7"><circle cx="150" cy="120" r="9"/><circle cx="1460" cy="170" r="11"/><circle cx="240" cy="690" r="10"/><circle cx="1380" cy="660" r="8"/></g>
+  <circle cx="800" cy="400" r="312" fill="#e7ecf3"/>
+  <circle cx="800" cy="392" r="300" fill="url(#plate)"/>
+  <circle cx="800" cy="392" r="232" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+  <g fill="#3f9d4f"><circle cx="690" cy="300" r="30"/><circle cx="730" cy="278" r="26"/><circle cx="668" cy="338" r="24"/><circle cx="724" cy="330" r="28"/><circle cx="700" cy="356" r="20"/></g>
+  <g fill="#2f7d3c"><circle cx="690" cy="300" r="12" opacity=".5"/><circle cx="724" cy="330" r="11" opacity=".5"/></g>
+  <rect x="694" y="352" width="10" height="36" rx="5" fill="#8fce8a"/>
+  <g transform="rotate(18 930 320)"><rect x="852" y="280" width="170" height="92" rx="26" fill="#f08a5d"/><rect x="852" y="280" width="170" height="92" rx="26" fill="none" stroke="#e0744a" stroke-width="6"/><path d="M872 326 h130 M872 304 h130 M872 348 h130" stroke="#f6b89a" stroke-width="7" stroke-linecap="round"/></g>
+  <g fill="#e1503a"><circle cx="780" cy="520" r="34"/><circle cx="846" cy="540" r="28"/><circle cx="734" cy="548" r="24"/></g>
+  <g fill="#ff7a5c" opacity=".6"><circle cx="770" cy="508" r="9"/><circle cx="838" cy="530" r="7"/></g>
+  <g fill="#d9b771"><circle cx="660" cy="470" r="7"/><circle cx="678" cy="486" r="7"/><circle cx="648" cy="492" r="7"/><circle cx="672" cy="506" r="7"/><circle cx="694" cy="478" r="7"/><circle cx="700" cy="500" r="7"/><circle cx="640" cy="474" r="7"/><circle cx="686" cy="462" r="7"/></g>
+  <path d="M935 470 a70 70 0 0 1 120 0 z" fill="#f6d860"/>
+  <path d="M935 470 a70 70 0 0 1 120 0 z" fill="none" stroke="#e9c23f" stroke-width="6"/>
+  <path d="M955 470 a48 48 0 0 1 80 0" fill="none" stroke="#fff3c4" stroke-width="8"/>
+  <g fill="#cbd5e1">
+    <g transform="translate(330,392)"><rect x="-7" y="-150" width="14" height="300" rx="7"/><rect x="-34" y="-150" width="8" height="70" rx="4"/><rect x="-12" y="-150" width="8" height="70" rx="4"/><rect x="10" y="-150" width="8" height="70" rx="4"/><rect x="26" y="-150" width="8" height="70" rx="4"/></g>
+    <g transform="translate(1270,392)"><rect x="-7" y="-150" width="14" height="300" rx="7"/><path d="M-7 -150 q-34 10 -34 80 q0 30 34 30 z"/></g>
+  </g>
+</svg>
