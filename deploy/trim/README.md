@@ -46,6 +46,40 @@ then run `wrangler deploy` again.
   devices and is **not** visible to the clinic. If you need clinician-visible
   patient data, that requires a backend — this build intentionally has none.
 
+## Clinic workflow (viewing patient data)
+
+There is **no server** — the clinic sees a patient's data by importing the file
+the patient downloads. This keeps patient data off the public internet.
+
+1. **Patient:** opens the Trim app, enters their name in **Goals**, then taps
+   **Export** and sends the downloaded file to the clinic.
+2. **Clinic:** opens the tracker (`clinic/index.html`) and clicks
+   **Import patient file**. It auto-matches by name, so importing the same
+   patient again just **updates** them (no duplicates).
+3. Review the patient's status, trends, and charts in the roster / detail view.
+
+### Where to run the clinic tracker
+
+- **One clinic computer:** open `clinic/index.html` locally and bookmark it.
+  Nothing is exposed to the internet.
+- **Multiple staff machines / clean URL:** host it on Cloudflare **behind
+  Cloudflare Access** (Zero-Trust login) so only staff emails can open it.
+  Do **not** publish it without access control — it displays patient data.
+
+### Important: back up the roster
+
+The roster is stored **per-browser, per-device** (the no-server tradeoff). It
+does not sync between computers. So:
+
+- Nominate **one primary device** for the tracker.
+- Use **Back up** weekly, and before any browser/computer change. That backup
+  file is your portable, restorable copy (**Restore** loads it).
+
+### Try it with sample data
+
+`clinic/samples/` has five fictional patients. Fastest demo: open the tracker →
+**Restore** → pick `_demo-roster.json`. See `clinic/samples/README.md`.
+
 ## Features
 
 - Dashboard: current/goal weight, BMI + category, today's calories
