@@ -1,0 +1,249 @@
+{
+  "_type": "trim-export",
+  "_version": 1,
+  "_exportedAt": "2026-07-01",
+  "settings": {
+    "name": "Robert Smith",
+    "dob": "1971-09-30",
+    "unitWeight": "lb",
+    "unitHeight": "in",
+    "height": 180,
+    "startWeight": 104,
+    "goalWeight": 95,
+    "targetDate": "2026-10-01",
+    "calTarget": 2200
+  },
+  "weights": [
+    {
+      "id": "w0",
+      "date": "2026-05-11",
+      "val": 103.9
+    },
+    {
+      "id": "w1",
+      "date": "2026-05-18",
+      "val": 104.5
+    },
+    {
+      "id": "w2",
+      "date": "2026-05-25",
+      "val": 104.5
+    },
+    {
+      "id": "w3",
+      "date": "2026-06-01",
+      "val": 105.1
+    },
+    {
+      "id": "w4",
+      "date": "2026-06-08",
+      "val": 105.1
+    },
+    {
+      "id": "w5",
+      "date": "2026-06-15",
+      "val": 105.7
+    },
+    {
+      "id": "w6",
+      "date": "2026-06-22",
+      "val": 105.7
+    },
+    {
+      "id": "w7",
+      "date": "2026-06-29",
+      "val": 106.3
+    }
+  ],
+  "foods": [
+    {
+      "id": "f0_0",
+      "date": "2026-07-02",
+      "name": "Oatmeal",
+      "cal": 320,
+      "pro": 12,
+      "carb": 54,
+      "fat": 6
+    },
+    {
+      "id": "f0_1",
+      "date": "2026-07-02",
+      "name": "Eggs & toast",
+      "cal": 380,
+      "pro": 20,
+      "carb": 28,
+      "fat": 18
+    },
+    {
+      "id": "f0_2",
+      "date": "2026-07-02",
+      "name": "Chicken salad",
+      "cal": 450,
+      "pro": 40,
+      "carb": 20,
+      "fat": 22
+    },
+    {
+      "id": "f0_3",
+      "date": "2026-07-02",
+      "name": "Greek yogurt",
+      "cal": 180,
+      "pro": 17,
+      "carb": 14,
+      "fat": 5
+    },
+    {
+      "id": "f0_4",
+      "date": "2026-07-02",
+      "name": "Salmon & rice",
+      "cal": 600,
+      "pro": 42,
+      "carb": 55,
+      "fat": 20
+    },
+    {
+      "id": "f0_5",
+      "date": "2026-07-02",
+      "name": "Apple",
+      "cal": 95,
+      "pro": 0,
+      "carb": 25,
+      "fat": 0
+    },
+    {
+      "id": "f0_6",
+      "date": "2026-07-02",
+      "name": "Protein shake",
+      "cal": 210,
+      "pro": 30,
+      "carb": 8,
+      "fat": 4
+    },
+    {
+      "id": "f1_0",
+      "date": "2026-07-01",
+      "name": "Eggs & toast",
+      "cal": 380,
+      "pro": 20,
+      "carb": 28,
+      "fat": 18
+    },
+    {
+      "id": "f1_1",
+      "date": "2026-07-01",
+      "name": "Chicken salad",
+      "cal": 450,
+      "pro": 40,
+      "carb": 20,
+      "fat": 22
+    },
+    {
+      "id": "f1_2",
+      "date": "2026-07-01",
+      "name": "Greek yogurt",
+      "cal": 180,
+      "pro": 17,
+      "carb": 14,
+      "fat": 5
+    },
+    {
+      "id": "f1_3",
+      "date": "2026-07-01",
+      "name": "Salmon & rice",
+      "cal": 600,
+      "pro": 42,
+      "carb": 55,
+      "fat": 20
+    },
+    {
+      "id": "f1_4",
+      "date": "2026-07-01",
+      "name": "Apple",
+      "cal": 95,
+      "pro": 0,
+      "carb": 25,
+      "fat": 0
+    },
+    {
+      "id": "f1_5",
+      "date": "2026-07-01",
+      "name": "Protein shake",
+      "cal": 210,
+      "pro": 30,
+      "carb": 8,
+      "fat": 4
+    },
+    {
+      "id": "f1_6",
+      "date": "2026-07-01",
+      "name": "Oatmeal",
+      "cal": 320,
+      "pro": 12,
+      "carb": 54,
+      "fat": 6
+    },
+    {
+      "id": "f2_0",
+      "date": "2026-06-30",
+      "name": "Chicken salad",
+      "cal": 450,
+      "pro": 40,
+      "carb": 20,
+      "fat": 22
+    },
+    {
+      "id": "f2_1",
+      "date": "2026-06-30",
+      "name": "Greek yogurt",
+      "cal": 180,
+      "pro": 17,
+      "carb": 14,
+      "fat": 5
+    },
+    {
+      "id": "f2_2",
+      "date": "2026-06-30",
+      "name": "Salmon & rice",
+      "cal": 600,
+      "pro": 42,
+      "carb": 55,
+      "fat": 20
+    },
+    {
+      "id": "f2_3",
+      "date": "2026-06-30",
+      "name": "Apple",
+      "cal": 95,
+      "pro": 0,
+      "carb": 25,
+      "fat": 0
+    },
+    {
+      "id": "f2_4",
+      "date": "2026-06-30",
+      "name": "Protein shake",
+      "cal": 210,
+      "pro": 30,
+      "carb": 8,
+      "fat": 4
+    },
+    {
+      "id": "f2_5",
+      "date": "2026-06-30",
+      "name": "Oatmeal",
+      "cal": 320,
+      "pro": 12,
+      "carb": 54,
+      "fat": 6
+    },
+    {
+      "id": "f2_6",
+      "date": "2026-06-30",
+      "name": "Eggs & toast",
+      "cal": 380,
+      "pro": 20,
+      "carb": 28,
+      "fat": 18
+    }
+  ]
+}

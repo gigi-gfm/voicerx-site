@@ -248,6 +248,8 @@ a.link{color:var(--accent2);text-decoration:none;font-weight:600}
     <div class="grid two">
       <div class="card">
         <h2>Your profile &amp; goal</h2>
+        <div class="field"><label>Your full name <span style="color:var(--faint);font-weight:500">(so your clinic can identify your file)</span></label><input type="text" id="gName" placeholder="e.g. Jane Doe"></div>
+        <div class="field"><label>Date of birth <span style="color:var(--faint);font-weight:500">(optional)</span></label><input type="date" id="gDob"></div>
         <div class="row">
           <div class="field"><label>Units</label>
             <select id="gUnitWeight"><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option></select>
@@ -285,7 +287,7 @@ const KEY = "trim_weight_manager_v1";
 const todayISO = () => new Date().toISOString().slice(0,10);
 
 const defaultState = () => ({
-  settings:{ unitWeight:"kg", unitHeight:"cm", height:null,
+  settings:{ name:"", dob:null, unitWeight:"kg", unitHeight:"cm", height:null,
     startWeight:null, goalWeight:null, targetDate:null, calTarget:2000 },
   weights:[],  // {id,date,val,note}  val always stored in kg
   foods:[]     // {id,date,name,cal,pro,carb,fat}
@@ -532,6 +534,7 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<"
 function syncUnitLabels(){ $$(".uWeight").forEach(e=>e.textContent=wUnit()); $$(".uHeight").forEach(e=>e.textContent=hUnit()); }
 function loadGoalForm(){
   const st=S.settings;
+  $("#gName").value=st.name||""; $("#gDob").value=st.dob||"";
   $("#gUnitWeight").value=st.unitWeight; $("#gUnitHeight").value=st.unitHeight;
   $("#gHeight").value = st.height!=null? Math.round(toDisplayH(st.height)*10)/10 : "";
   $("#gStart").value = st.startWeight!=null? fmtW(st.startWeight) : "";
@@ -587,6 +590,8 @@ $("#fViewDate").addEventListener("change",renderFoodDay);
 
 // Goals save
 $("#gSave").addEventListener("click",()=>{
+  S.settings.name=$("#gName").value.trim();
+  S.settings.dob=$("#gDob").value||null;
   S.settings.unitWeight=$("#gUnitWeight").value;
   S.settings.unitHeight=$("#gUnitHeight").value;
   // read numeric fields using the NEW units
@@ -621,9 +626,12 @@ $("#gUnitHeight").addEventListener("change",()=>{
 
 // Export / Import
 $("#exportBtn").addEventListener("click",()=>{
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const out=Object.assign({_type:"trim-export",_version:1,_exportedAt:todayISO()},S);
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="trim-backup-"+todayISO()+".json"; a.click(); URL.revokeObjectURL(a.href); toast("Data exported");
+  const slug=(S.settings.name||"patient").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"patient";
+  a.download="trim-"+slug+"-"+todayISO()+".json"; a.click(); URL.revokeObjectURL(a.href);
+  toast(S.settings.name? "Data exported — send this file to your clinic" : "Data exported (tip: add your name in Goals first)");
 });
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());
 $("#importFile").addEventListener("change",e=>{
