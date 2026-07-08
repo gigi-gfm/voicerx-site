@@ -1,0 +1,8 @@
+name = "creditrise"
+compatibility_date = "2026-05-29"
+
+# creditrise is a static-assets Worker: it serves the DIY credit-repair app
+# (public/index.html). There is no server code — just the HTML asset.
+# This deploys completely separately from voicerx-tess.
+[assets]
+directory = "./public"
