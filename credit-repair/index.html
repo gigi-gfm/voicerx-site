@@ -177,6 +177,20 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradien
 .ucard-pct{font-weight:700;min-width:34px;text-align:right}
 .ucard-del{color:var(--muted);cursor:pointer;padding:0 2px;font-size:13px}
 
+/* Payment Planner */
+.pc-card{border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:9px}
+.pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pc-name{font-weight:600;font-size:13.5px}
+.pc-util{font-size:11.5px;font-weight:700}
+.pc-good{font-size:12px;color:var(--grn);background:var(--grnlt);border-radius:8px;padding:7px 9px}
+.pc-rows{display:flex;flex-direction:column;gap:6px}
+.pc-row{display:flex;align-items:center;gap:9px;font-size:12px}
+.pc-row .pc-d{flex-shrink:0;width:34px;height:26px;border-radius:7px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--slate)}
+.pc-row.hot .pc-d{background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;color:#fff}
+.pc-row .pc-a{flex:1;color:var(--text)}
+.pc-row .pc-w{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.pc-memo{text-align:center;font-size:12px;color:var(--slate);background:var(--goldlt);border-radius:8px;padding:8px;margin-top:4px}
+
 /* Dispute history */
 .hist-list{display:flex;flex-direction:column;gap:9px}
 .hist{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:11px 12px}
@@ -252,6 +266,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradien
     </div>
 
     <div id="utilCard"></div>
+    <div id="payChart"></div>
 
     <div class="card" style="padding:14px 15px">
       <div style="font-family:'Poppins';font-weight:600;font-size:14px;margin-bottom:3px">Get your reports &amp; scores</div>
@@ -403,7 +418,7 @@ function render(){
   document.getElementById('progSteps').textContent=`Plan ${stepsDone}/7`;
   document.getElementById('nextAction').textContent=nextAction();
 
-  renderItems(); renderLetters(); renderPlan(); renderEdu(); renderUtil();
+  renderItems(); renderLetters(); renderPlan(); renderEdu(); renderUtil(); renderPayChart();
 
   // FAB
   const pane=document.querySelector('.pane.active').id;
@@ -833,7 +848,7 @@ function renderUtil(){
   const col=util<10?'var(--grn)':util<30?'var(--emerald)':util<50?'var(--amber)':'var(--red)';
   const verdict=lim===0?'Add a card to see your ratio':util<10?'Excellent — under 10% is ideal for your score':util<30?'Good — keep it under 30%':util<50?'High — paying this down will lift your score':'Very high — this is likely dragging your score down';
   const rows=cards.map((c,i)=>{const cu=(parseFloat(c.limit)||0)>0?((parseFloat(c.balance)||0)/(parseFloat(c.limit))*100):0;
-    return `<div class="ucard-row"><span class="ucard-name">${esc(c.name||'Card')}</span><span class="ucard-nums">$${(parseFloat(c.balance)||0).toLocaleString()} / $${(parseFloat(c.limit)||0).toLocaleString()}</span><span class="ucard-pct" style="color:${cu<30?'var(--grn)':'var(--red)'}">${cu.toFixed(0)}%</span><span class="ucard-del" onclick="delCard(${i})">✕</span></div>`;}).join('');
+    return `<div class="ucard-row" onclick="openCard(${i})"><span class="ucard-name">${esc(c.name||'Card')}</span><span class="ucard-nums">$${(parseFloat(c.balance)||0).toLocaleString()} / $${(parseFloat(c.limit)||0).toLocaleString()}</span><span class="ucard-pct" style="color:${cu<30?'var(--grn)':'var(--red)'}">${cu.toFixed(0)}%</span><span class="ucard-del" onclick="event.stopPropagation();delCard(${i})">✕</span></div>`;}).join('');
   el.innerHTML=`<div class="card" style="padding:15px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
       <div style="font-family:'Poppins';font-weight:600;font-size:14px">Credit Utilization</div>
@@ -845,24 +860,76 @@ function renderUtil(){
     <button class="btn btn-ghost btn-sm btn-block" style="margin-top:9px" onclick="openCard()">+ Add a credit card</button>
   </div>`;
 }
-function openCard(){
-  mTitle.textContent='Add Credit Card';
-  mBody.innerHTML=`<div class="tip">Enter each revolving card's current balance and its credit limit. Utilization = balance ÷ limit — one of the biggest, fastest levers on your score.</div>
-    <div class="field"><label>Card name</label><input id="c_name" placeholder="Capital One Quicksilver"></div>
+function openCard(idx){
+  const editing=idx!=null;
+  const c=editing?S.cards[idx]:{name:'',balance:'',limit:'',closeDay:'',dueDay:''};
+  mTitle.textContent=editing?'Edit Card':'Add Credit Card';
+  mBody.innerHTML=`<div class="tip">Balance ÷ limit = utilization, one of the fastest levers on your score. Add your statement <b>closing</b> &amp; <b>due</b> days and CreditRise builds your pay-by chart.</div>
+    <div class="field"><label>Card name</label><input id="c_name" value="${esc(c.name)}" placeholder="Capital One"></div>
     <div class="field-row">
-      <div class="field"><label>Current balance ($)</label><input id="c_balance" type="number" inputmode="decimal" placeholder="0"></div>
-      <div class="field"><label>Credit limit ($)</label><input id="c_limit" type="number" inputmode="decimal" placeholder="0"></div>
+      <div class="field"><label>Current balance ($)</label><input id="c_balance" type="number" inputmode="decimal" value="${c.balance}" placeholder="0"></div>
+      <div class="field"><label>Credit limit ($)</label><input id="c_limit" type="number" inputmode="decimal" value="${c.limit}" placeholder="0"></div>
     </div>
-    <button class="btn btn-primary btn-block" onclick="saveCard()">Add card</button>`;
+    <div class="field-row">
+      <div class="field"><label>Closing day (1–31)</label><input id="c_close" type="number" inputmode="numeric" min="1" max="31" value="${c.closeDay||''}" placeholder="18"></div>
+      <div class="field"><label>Due day (1–31)</label><input id="c_due" type="number" inputmode="numeric" min="1" max="31" value="${c.dueDay||''}" placeholder="12"></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="saveCard(${editing?idx:'null'})">${editing?'Save card':'Add card'}</button>
+    ${editing?`<button class="btn btn-danger btn-block" style="margin-top:9px" onclick="delCard(${idx})">Remove card</button>`:''}`;
   openModal();
 }
-function saveCard(){
+function saveCard(idx){
   const name=val('c_name'),balance=val('c_balance'),limit=val('c_limit');
   if(!limit||parseFloat(limit)<=0){toast('Enter the credit limit');return;}
-  S.cards=S.cards||[];S.cards.push({name:name||'Card',balance:balance||'0',limit});
-  closeModal();render();toast('Card added');
+  const clampDay=v=>{const n=parseInt(v);return(n>=1&&n<=31)?n:'';};
+  const c={name:name||'Card',balance:balance||'0',limit,closeDay:clampDay(val('c_close')),dueDay:clampDay(val('c_due'))};
+  S.cards=S.cards||[];
+  if(idx===null||idx===undefined)S.cards.push(c);else S.cards[idx]=c;
+  closeModal();render();toast(idx==null?'Card added':'Card saved');
 }
-function delCard(i){S.cards.splice(i,1);render();toast('Card removed');}
+function delCard(i){S.cards.splice(i,1);closeModal();render();toast('Card removed');}
+
+/* ── Payment Planner (pay-by chart) ── */
+function ord(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+function nextDate(day){
+  // next occurrence of `day` (1-31) on/after today
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth(), d=now.getDate();
+  let mm=m, yy=y;
+  if(day<d){mm=m+1;if(mm>11){mm=0;yy++;}}
+  const dim=new Date(yy,mm+1,0).getDate();
+  return new Date(yy,mm,Math.min(day,dim));
+}
+function renderPayChart(){
+  const el=document.getElementById('payChart');if(!el)return;
+  const planCards=(S.cards||[]).map((c,i)=>({c,i})).filter(x=>x.c.closeDay);
+  if(!planCards.length){el.innerHTML='';return;}
+  const blocks=planCards.map(({c,i})=>{
+    const lim=parseFloat(c.limit)||0, bal=parseFloat(c.balance)||0;
+    const target=Math.max(0,Math.round(lim*0.09));
+    const payDown=Math.max(0,Math.round(bal-target));
+    const close=parseInt(c.closeDay), due=c.dueDay?parseInt(c.dueDay):null;
+    let payByDay=close-3; if(payByDay<1)payByDay+=30;
+    const closeDt=nextDate(close), payByDt=nextDate(payByDay);
+    const daysToPayBy=Math.ceil((payByDt-new Date())/86400000);
+    const cu=lim>0?(bal/lim*100):0;
+    const done=cu<10;
+    return `<div class="pc-card">
+      <div class="pc-head"><span class="pc-name">${esc(c.name||'Card')}</span><span class="pc-util" style="color:${cu<10?'var(--grn)':cu<30?'var(--amber)':'var(--red)'}">${cu.toFixed(0)}% now</span></div>
+      ${done?`<div class="pc-good">✅ Already under 10% — just keep it there before the ${ord(close)}.</div>`:`
+      <div class="pc-rows">
+        <div class="pc-row hot"><span class="pc-d">${ord(payByDay)}</span><span class="pc-a"><b>Pay ~$${payDown.toLocaleString()}</b> → down to $${target.toLocaleString()}</span><span class="pc-w">hit 9%${daysToPayBy>=0?` · in ${daysToPayBy}d`:''}</span></div>
+        <div class="pc-row"><span class="pc-d">${ord(close)}</span><span class="pc-a">Statement closes 📸</span><span class="pc-w">reports low</span></div>
+        ${due?`<div class="pc-row"><span class="pc-d">${ord(due)}</span><span class="pc-a">Pay remainder in full 💵</span><span class="pc-w">no interest</span></div>`:''}
+      </div>`}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="card" style="padding:15px">
+    <div style="font-family:'Poppins';font-weight:600;font-size:14px;margin-bottom:3px">📅 Payment Planner</div>
+    <div style="font-size:11.5px;color:var(--muted);margin-bottom:11px">Pay <b>down</b> before the closing day (for your score), pay <b>off</b> by the due day (for zero interest).</div>
+    ${blocks}
+    <div class="pc-memo">🧠 <b>Down before closing · Off by due date</b></div>
+  </div>`;
+}
 
 /* FAB */
 function fabAction(){const act=document.getElementById('fab').dataset.act;if(act==='item')openItem();}
