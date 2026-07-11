@@ -177,6 +177,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradien
 .ucard-pct{font-weight:700;min-width:34px;text-align:right}
 .ucard-del{color:var(--muted);cursor:pointer;padding:0 2px;font-size:13px}
 
+/* Score Journey */
+.sj-list{margin-top:11px;border-top:1px solid var(--border)}
+.sj-ms{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;opacity:.5}
+.sj-ms.done{opacity:1}
+.sj-ms.next{opacity:1;background:var(--goldlt);margin:0 -7px;padding:9px 7px;border-radius:9px;border-bottom:none}
+.sj-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.sj-ms.done .sj-dot{background:var(--emerald);border-color:var(--emerald)}
+.sj-score{font-weight:700;width:34px;flex-shrink:0}
+.sj-unlock{color:var(--slate);font-size:12.5px}
+
 /* Payment Planner */
 .pc-card{border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:9px}
 .pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -253,6 +263,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradien
     <div style="text-align:center;margin:-4px 0 14px"><button class="btn btn-ghost btn-sm" onclick="editScores()">✎ Update scores</button></div>
 
     <div class="summary" id="summary"></div>
+
+    <div id="scoreJourney"></div>
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -418,7 +430,7 @@ function render(){
   document.getElementById('progSteps').textContent=`Plan ${stepsDone}/7`;
   document.getElementById('nextAction').textContent=nextAction();
 
-  renderItems(); renderLetters(); renderPlan(); renderEdu(); renderUtil(); renderPayChart();
+  renderItems(); renderLetters(); renderPlan(); renderEdu(); renderUtil(); renderPayChart(); renderJourney();
 
   // FAB
   const pane=document.querySelector('.pane.active').id;
@@ -928,6 +940,54 @@ function renderPayChart(){
     <div style="font-size:11.5px;color:var(--muted);margin-bottom:11px">Pay <b>down</b> before the closing day (for your score), pay <b>off</b> by the due day (for zero interest).</div>
     ${blocks}
     <div class="pc-memo">🧠 <b>Down before closing · Off by due date</b></div>
+  </div>`;
+}
+
+/* ── Score Journey (milestone tracker) ── */
+const MILESTONES=[
+  {s:580,u:'Out of "Poor" → Fair'},
+  {s:620,u:'Better auto-loan rates 🚗'},
+  {s:660,u:'Good auto & consolidation rates'},
+  {s:700,u:'Prime rates begin'},
+  {s:740,u:'Best rates available'}
+];
+function renderJourney(){
+  const el=document.getElementById('scoreJourney');if(!el)return;
+  const vals=Object.keys(BUREAUS).map(k=>S.scores[k]).filter(v=>v!=null);
+  if(!vals.length){el.innerHTML='';return;}
+  const cur=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  const g=scoreGrade(cur);
+  const passed=MILESTONES.filter(m=>cur>=m.s);
+  const next=MILESTONES.find(m=>cur<m.s);
+  let bar;
+  if(next){
+    const lower=passed.length?passed[passed.length-1].s:500;
+    const pct=Math.max(4,Math.min(100,(cur-lower)/(next.s-lower)*100));
+    bar=`<div style="margin:11px 0 3px">
+      <div class="progress-track" style="height:9px"><div style="height:100%;border-radius:7px;width:${pct}%;background:linear-gradient(90deg,var(--emerald),var(--gold));transition:width .5s"></div></div>
+      <div style="font-size:12.5px;color:var(--slate);margin-top:8px"><b>${next.s-cur} points</b> to <b>${next.s}</b> — ${next.u}</div>
+    </div>`;
+  } else {
+    bar=`<div style="font-size:12.5px;color:var(--grn);margin-top:9px">🎉 You've reached every milestone — outstanding!</div>`;
+  }
+  const list=MILESTONES.map(m=>{const done=cur>=m.s;const isNext=next&&m.s===next.s;
+    return `<div class="sj-ms ${done?'done':''} ${isNext?'next':''}">
+      <span class="sj-dot">${done?'✓':''}</span>
+      <span class="sj-score">${m.s}</span>
+      <span class="sj-unlock">${m.u}</span>
+    </div>`;}).join('');
+  el.innerHTML=`<div class="card" style="padding:15px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div style="font-family:'Poppins';font-weight:600;font-size:14px">Score Journey</div>
+      <div style="font-size:12px;color:${g.col};font-weight:600">${g.txt}</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:3px">
+      <div style="font-family:'Poppins';font-weight:700;font-size:30px;color:${g.col};line-height:1">${cur}</div>
+      <div style="font-size:11px;color:var(--muted)">avg of your ${vals.length} score${vals.length>1?'s':''}</div>
+    </div>
+    ${bar}
+    <div class="sj-list">${list}</div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:9px;line-height:1.4">Estimates only — update your scores monthly to watch the climb.</div>
   </div>`;
 }
 
