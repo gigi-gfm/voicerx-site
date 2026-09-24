@@ -17,7 +17,7 @@ function setup({micError,requestError,saveError,pollError,emptySpeech,formatErro
     stop(){this.state='inactive';this.handlers.dataavailable({data:new Blob(['fictional audio'],{type:this.mimeType})});this.done=this.handlers.stop();}
   }
   const calls=[],saved=[],deleted=[];
-  const context=vm.createContext({console:{log(){},error(){},warn(){}},Blob,URL,URLSearchParams,AbortController,crypto:require('node:crypto').webcrypto,MediaRecorder:Recorder,
+  const context=vm.createContext({console:{log(){},error(){},warn(){}},Blob,URL,URLSearchParams,AbortController,TextEncoder,crypto:require('node:crypto').webcrypto,MediaRecorder:Recorder,
     localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(saveError&&k!=='vrx_token')throw Error('Storage full');storage.set(k,v);},removeItem:k=>storage.delete(k)},
     document:{getElementById:element,querySelector:()=>element('selected'),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element('created'),body:{appendChild(){}},visibilityState:'visible'},
     window:{isSecureContext:true,addEventListener(){}},location:{hash:''},navigator:{mediaDevices:{getUserMedia:async()=>{if(micError)throw Object.assign(Error(),{name:micError});return{getAudioTracks:()=>[track],getTracks:()=>[track]};}}},
@@ -27,7 +27,7 @@ function setup({micError,requestError,saveError,pollError,emptySpeech,formatErro
   });
   vm.runInContext(source,context);
   vm.runInContext('audioSave=testSave;audioDelete=testDelete;',context);
-  return {context,element,calls,saved,deleted,track,Recorder,run:code=>vm.runInContext(code,context)};
+  return {context,element,storage,calls,saved,deleted,track,Recorder,run:code=>vm.runInContext(code,context)};
 }
 test('inline application JavaScript parses',()=>new vm.Script(source));
 test('direct Record → Stop retains final chunk, transcribes and formats automatically',async()=>{
@@ -94,4 +94,62 @@ test('provider setup keeps credentials local and clears them on close',async()=>
   assert.doesNotMatch(html,/qrserver|autoLoginUrl|newprov_result_qr/);
   t.run('closeAddProvider()');
   assert.equal(t.element('newprov_result_token').textContent,'');
+});
+
+
+test('finished encounter autosaves transcript AND SOAP without Save Note',async()=>{
+  const t=setup(), writes=[];const original=t.context.fetch;
+  t.context.fetch=async(url,options)=>{if(url.endsWith('/notes'))writes.push(JSON.parse(options.body));return original(url,options);};
+  await t.run('startRecording()');t.run('stopRecording()');await t.Recorder.last.done;
+  assert.ok(writes.some(n=>n.transcript && !n.soap));
+  assert.match(writes.at(-1).soap,/Fictional/);
+  assert.match(t.element('cloudSaveStatus').textContent,/Saved to cloud/);
+});
+test('failed cloud save stays pending and never announces success',async()=>{
+  const t=setup();t.context.fetch=async()=>({ok:false,status:401,json:async()=>({})});
+  t.run("currentTranscript='Fictional offline note';currentNoteId='offline'");
+  await t.run('saveNote()');
+  assert.match(t.element('toast').textContent,/waiting to sync/);
+  assert.match(t.element('cloudSaveStatus').textContent,/Saved on this device/);
+  const c=await t.run('noteSyncContext()');
+  assert.equal(JSON.parse(t.storage.get(c.key)).offline.note.transcript,'Fictional offline note');
+  t.run("showTranscript(currentTranscript)");
+  assert.doesNotMatch(t.element('saveIndicator').textContent,/Saved to cloud/);
+});
+test('pending notes survive reload and an empty cloud list, then retry automatically',async()=>{
+  const t=setup();t.context.fetch=async()=>{throw Error('offline');};
+  t.run("currentTranscript='Fictional pending';currentNoteId='pending'");await t.run('autoSaveTranscript()');
+  const restored=setup();for(const [k,v] of t.storage)restored.storage.set(k,v);
+  restored.context.fetch=async()=>({ok:true,json:async()=>({notes:[]})});
+  await restored.run('renderNotesList()');
+  assert.equal(restored.run('notesCache[0].transcript'),'Fictional pending');
+  const writes=[];restored.context.fetch=async(url,opts)=>{writes.push(JSON.parse(opts.body));return{ok:true,json:async()=>({})};};
+  await restored.run('resumeNoteSync()');
+  assert.equal(writes[0].transcript,'Fictional pending');
+  const c=await restored.run('noteSyncContext()');assert.deepEqual(JSON.parse(restored.storage.get(c.key)),{});
+});
+test('edits during an in-flight save are sent in order and keep newest SOAP',async()=>{
+  const t=setup(), writes=[];let release;
+  t.context.fetch=async(url,options)=>{writes.push(JSON.parse(options.body));if(writes.length===1)await new Promise(r=>release=r);return{ok:true,json:async()=>({})};};
+  t.run("currentTranscript='Fictional';currentNoteId='serial'");const first=t.run('autoSaveTranscript()');
+  while(!release)await new Promise(setImmediate);
+  const second=t.run("currentSOAP='Latest SOAP';autoSaveTranscript()");
+  const c=await t.run('noteSyncContext()');
+  while(!JSON.parse(t.storage.get(c.key)).serial.note.soap)await new Promise(setImmediate);
+  release();await Promise.all([first,second]);
+  assert.equal(writes.length,2);assert.equal(writes[1].soap,'Latest SOAP');
+  assert.deepEqual(JSON.parse(t.storage.get(c.key)),{});
+});
+test('changing accounts never retries old pending notes with new credentials',async()=>{
+  const t=setup();t.context.fetch=async()=>{throw Error('offline');};
+  t.run("currentTranscript='Provider A fictional note';currentNoteId='private'");await t.run('autoSaveTranscript()');
+  const old=await t.run('noteSyncContext()');t.storage.set('vrx_token','different-fictional-provider');
+  let writes=0;t.context.fetch=async()=>{writes++;return {ok:true,json:async()=>({})};};
+  await t.run('resumeNoteSync()');assert.equal(writes,0);assert.ok(JSON.parse(t.storage.get(old.key)).private);
+});
+test('formatting an existing transcript with no note id still autosaves SOAP',async()=>{
+  const t=setup(), writes=[];const original=t.context.fetch;
+  t.context.fetch=async(url,options)=>{if(url.endsWith('/notes'))writes.push(JSON.parse(options.body));return original(url,options);};
+  t.run("currentTranscript='Fictional encounter'");await t.run('formatSOAP()');
+  assert.ok(writes.at(-1).id);assert.match(writes.at(-1).soap,/Fictional/);
 });
