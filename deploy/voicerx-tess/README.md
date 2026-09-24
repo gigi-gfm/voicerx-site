@@ -1,95 +1,53 @@
-# Deploying voicerx-tess (Dr. Tess's dictation page)
+# Deploying VoiceRx for Dr. Tess
 
-`voicerx-tess` is a **static-assets Cloudflare Worker** in the
-**Admin@garciafamilymedicine.care** account. It serves one file —
-`public/index.html` — at:
+This static Cloudflare Worker serves `public/index.html` at:
+https://voicerx-tess.winter-shadow-e82d.workers.dev
 
-> https://voicerx-tess.winter-shadow-e82d.workers.dev
-
-There is no server code. To ship a change you re-upload the HTML asset.
-
-## One-time setup
-
-```bash
-npm install -g wrangler   # or use: npx wrangler ...
-wrangler login            # opens a browser; log in as Admin@garciafamilymedicine.care
-```
+The Cloudflare account is Admin@garciafamilymedicine.care. The separate VoiceRx API handles transcription, note formatting, and cloud notes. Its source is not in this directory. Existing provider settings remain in browser storage; new devices need the provider's account setup. No default access token is embedded in this page.
 
 ## Deploy
 
+After authorized Cloudflare login:
+
 ```bash
 cd deploy/voicerx-tess
-wrangler deploy
+npx wrangler deploy
 ```
 
-That uploads `public/index.html` and keeps the same workers.dev URL, so the
-QR code and Dr. Tess's saved link keep working unchanged.
+A GitHub commit does not deploy this worker automatically. Keep the current production asset available for rollback before deploying. This directory's `public/index.html` is the frontend source to deploy.
 
-## Updating the page
+## Direct recording
 
-`public/index.html` is the **single source of truth** for Dr. Tess's
-dictation page. It is her real production page (provider login / Bearer-token
-auth, pronoun selection, multi-note types, after-visit summaries, and the
-existing IndexedDB audio snapshot + recovery). Edit it, then run
-`wrangler deploy` again.
+Record → Stop → transcription → draft note is the primary workflow. Audio upload is an optional fallback under Other ways to add audio.
 
-> History note: an older backup copy was briefly deployed by mistake and rolled
-> back. The live page was captured and patched directly, so this file now
-> matches what Dr. Tess actually uses.
+- Distinguishes microphone permission, missing-device, and startup errors.
+- Chooses a supported MediaRecorder format and requests screen wake lock.
+- Serializes device recovery snapshots and waits for the final audio chunk.
+- Offers playback, download, and retry after a failed transcription.
+- Retains recovery audio until the transcript is saved locally; attempts cloud saving too.
+- Preserves unfinished recovery sessions when recovery is declined.
+- Reuses a pending transcription job on retry to avoid unnecessary uploads.
+- Locks patient fields while recording or holding unfinished audio.
+- Contains no application recording-duration cutoff. Browser memory, storage, operating-system behavior, and transcription-service limits still apply.
 
-## Reliability features
+Keep the recording tab in the foreground. Wake lock cannot guarantee background recording or capture during operating-system interruptions.
 
-1. **Screen Wake Lock** *(added)* — while recording, the page holds the screen
-   on so the phone does not auto-lock. This is the fix for the "recording
-   stopped at ~2:30" bug: the screen was timing out and the OS suspended the
-   microphone. Re-acquired automatically when the tab regains focus.
-2. **No recording time limit** *(changed)* — recording continues until Stop is
-   tapped (the old 60-minute auto-stop was removed). A gentle "still recording"
-   reminder appears every 30 minutes.
-3. **Crash-safe recording** *(already in the page)* — audio is snapshotted to
-   IndexedDB every few seconds and on interruption (phone call, lost mic, OS
-   suspend), and offered for recovery on reopen.
-4. **Robust copy** *(added)* — the Copy buttons try the Clipboard API, fall back
-   to the legacy method, and as a last resort show the text pre-selected so it
-   can be copied by hand. Copy can no longer silently fail.
-5. **Upload a recording** *(added)* — an "Upload a recording" link feeds an
-   audio file straight into the transcribe/format pipeline.
-6. **Longer transcription window** *(changed)* — the completion poll now waits
-   up to 30 minutes instead of 2, so long visits don't fail with a false
-   "timed out" while AssemblyAI is still working.
+## Verification
 
-## Most reliable workflow for real encounters
+Run from the repository root:
 
-In-browser recording on a phone cannot be 100% guaranteed — mobile operating
-systems may suspend a browser tab's microphone when the screen turns off, on a
-phone call, under memory pressure, or in Battery Saver. The wake lock reduces
-this but cannot fully prevent it.
+```bash
+node --test tests/direct-recording.test.cjs
+```
 
-For important/long visits, record with the **phone's native Voice Recorder app**
-(built for hours of reliable background recording), then in VoiceRx tap
-**"Upload a recording"** and pick the file. VoiceRx transcribes and formats it
-exactly as if it had recorded it live. This removes every fragile dependency.
+These tests exercise application logic with simulated microphone events and API responses, using fictional content. They do not validate physical microphone capture or the deployed API.
 
-### Limits worth knowing
-- The wake lock prevents the *automatic* screen timeout. Pressing the power
-  button to blank the screen, or switching away from the browser tab, can
-  still let the OS suspend the mic. Leave the tab in the foreground, screen on.
-- **Battery Saver** mode can ignore wake locks. Keep it off during clinic, or
-  keep the phone on a charger.
-- Open the page in **Chrome / from the home-screen icon**, not from an in-app
-  browser inside Messages/WhatsApp/Gmail (those often break mic + wake lock).
+Before clinical use, verify on Dr. Tess's device with a fictional encounter:
 
-## Verify after deploy
+1. Confirm provider connection and microphone permission.
+2. Record 4–5 minutes without touching the screen; check the timer and stop.
+3. Listen to playback, confirm both speakers are audible, and review the transcript and draft note.
+4. Verify interruption/recovery and retry on a failed connection.
+5. Confirm the saved note belongs to the entered patient and copies into the chart correctly.
 
-Test on the device Dr. Tess actually uses (Android, in Chrome):
-
-1. **Loads:** open the URL / scan the QR — confirm the dictation page loads.
-2. **No cutoff:** record for **4–5 minutes** with the screen left untouched —
-   it should keep recording the whole time (Screen Wake Lock).
-3. **Recovery:** start a recording, talk ~30s, then **reload the tab** (or
-   swipe Chrome closed and reopen). You should get the "Recover unfinished
-   recording?" prompt → tap **Transcribe it** → the note appears.
-4. **Copy:** generate a note and tap **Copy** — confirm it copies (and that the
-   manual fallback box appears if the browser blocks programmatic copy).
-5. **Auth + pronouns:** stop a short recording and confirm a note is produced
-   (no "Unauthorized") and that it uses the pronouns selected for the patient.
+Deployment and device verification remain outstanding until explicitly recorded as completed.
