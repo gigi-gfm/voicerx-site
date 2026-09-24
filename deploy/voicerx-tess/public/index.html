@@ -610,6 +610,8 @@ body {
     <button class="section-tab" onclick="showSection('notes')">📋 Notes</button>
   </div>
 
+  <p id="cloudSaveStatus" role="status" aria-live="polite" style="font-size:13px;margin:0 0 16px;" hidden></p>
+
   <!-- RECORD SECTION -->
   <div class="section active" id="section-record">
 
@@ -704,7 +706,7 @@ body {
       <div class="card-header">
         <span class="card-title">Transcript</span>
         <div class="card-actions" style="flex-wrap:wrap;">
-          <div class="save-indicator" id="saveIndicator">💾 Auto-saved</div>
+          <div class="save-indicator" id="saveIndicator">Autosave enabled</div>
           <button class="action-btn outline" id="editTranscriptBtn" onclick="enableTranscriptEditing()">Edit</button>
           <button class="action-btn primary" id="saveTranscriptBtn" onclick="saveTranscriptEdit()" style="display:none;">Save Edit</button>
           <button class="action-btn outline" id="cancelEditTranscriptBtn" onclick="cancelTranscriptEdit()" style="display:none;">Cancel</button>
@@ -1079,6 +1081,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  resumeNoteSync();
+  window.addEventListener('online', resumeNoteSync);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      resumeNoteSync();
+      if (document.getElementById('section-notes').classList.contains('active')) renderNotesList();
+    }
+  });
+  for (const id of ['patientName', 'visitDate', 'pronounsSelect', 'noteLang', 'noteTypeSelect']) {
+    document.getElementById(id).addEventListener('change', () => {
+      autoSaveTranscript(true).catch(() => {});
+    });
+  }
   renderNotesList();
   cleanExpiredNotes();
 });
@@ -1268,6 +1283,7 @@ function saveSettings() {
   closeSettings();
   showToast('Settings saved', 'success');
   refreshProviderBadge();
+  resumeNoteSync();
 }
 
 function openSettings() {
@@ -1558,8 +1574,7 @@ function showTranscript(text, translationEn = '') {
 
   document.getElementById('transcriptText').innerHTML = html;
   document.getElementById('transcriptCard').classList.add('visible');
-  document.getElementById('saveIndicator').textContent = '💾 Auto-saved';
-  document.getElementById('saveIndicator').className = 'save-indicator saved';
+  // Rendering a transcript is not proof that the cloud accepted it.
 }
 
 async function fetchEnglishTranslation(spanishText) {
@@ -1654,7 +1669,7 @@ async function formatSOAP() {
     showToast((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note formatted!', 'success');
 
     // Update saved note with SOAP
-    if (currentNoteId) await updateSavedNote(currentNoteId, { soap: soapText });
+    await autoSaveTranscript();
 
   } catch (err) {
     console.error(err);
@@ -2033,8 +2048,8 @@ function getApiAuth() {
   return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 }
 
-async function cloudSaveNote(note) {
-  const base = getApiBase();
+async function cloudSaveNote(note, connection = { base: getApiBase(), token: localStorage.getItem('vrx_token') || '' }) {
+  const base = connection.base;
   if (!base) throw new Error('Worker URL not set');
   // Map browser camelCase → server snake_case
   const payload = {
@@ -2052,7 +2067,7 @@ async function cloudSaveNote(note) {
   };
   const res = await audioRequest(base + '/notes', {
     method: 'POST',
-    headers: getApiAuth(),
+    headers: { 'Authorization': 'Bearer ' + connection.token, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Cloud save failed: ' + res.status);
@@ -2084,11 +2099,14 @@ async function cloudListNotes() {
 
 async function cloudDeleteNote(id) {
   const base = getApiBase();
-  if (!base) return;
-  await fetch(base + '/notes/' + encodeURIComponent(id), {
+  if (!base) throw new Error('Not connected');
+  const connection = await noteSyncContext();
+  if (!await flushPendingNotes(connection)) throw new Error('Wait for cloud sync before deleting');
+  const res = await fetch(base + '/notes/' + encodeURIComponent(id), {
     method: 'DELETE',
     headers: getApiAuth(),
   });
+  if (!res.ok) throw new Error('Delete failed: ' + res.status);
 }
 
 // --- Local cache (offline-friendly fallback) ---
@@ -2118,47 +2136,128 @@ function buildCurrentNoteEntry() {
   };
 }
 
-async function autoSaveTranscript() {
-  const entry = buildCurrentNoteEntry();
-  // Local cache first (instant), then push to cloud
-  notesCache = notesCache.filter(n => n.id !== entry.id);
-  notesCache.unshift(entry);
-  saveCachedNotes(notesCache);
-  try {
-    await cloudSaveNote(entry);
-  } catch (err) {
-    console.error('Cloud save failed (kept local copy):', err);
-    showToast('Saved locally — cloud sync failed', 'warning');
+// Pending writes survive reloads and are isolated by API/account. Never retry a
+// previous provider's notes with the credentials currently entered in Settings.
+const PENDING_NOTES_PREFIX = 'vrx_pending_notes_v1_';
+const noteSyncJobs = new Map();
+let noteRetryTimer = null;
+let noteRetryDelay = 15000;
+let noteQueueRevision = 0;
+
+async function noteSyncContext() {
+  const base = getApiBase(), token = localStorage.getItem('vrx_token') || '';
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base + '\n' + token));
+  const key = PENDING_NOTES_PREFIX + Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
+  return { base, token, key };
+}
+function readPendingNotes(key) {
+  return JSON.parse(localStorage.getItem(key) || '{}');
+}
+function savePendingNotes(key, pending) {
+  localStorage.setItem(key, JSON.stringify(pending));
+}
+function showNoteSyncStatus(message, saved = false) {
+  for (const id of ['saveIndicator', 'cloudSaveStatus']) {
+    const el = document.getElementById(id);
+    el.hidden = false;
+    el.textContent = message;
+    el.style.color = saved ? 'var(--success)' : 'var(--gray-600)';
   }
 }
-
-async function updateSavedNote(id, updates) {
-  const idx = notesCache.findIndex(n => n.id === id);
-  if (idx >= 0) {
-    notesCache[idx] = { ...notesCache[idx], ...updates };
-    saveCachedNotes(notesCache);
-    try {
-      await cloudSaveNote(notesCache[idx]);
-    } catch (err) {
-      console.error('Cloud update failed:', err);
+function retryNoteSyncLater(delay = noteRetryDelay) {
+  clearTimeout(noteRetryTimer);
+  noteRetryTimer = setTimeout(() => { noteRetryTimer = null; resumeNoteSync(); }, delay);
+}
+function resumeNoteSync() {
+  return flushPendingNotes().catch(() => {
+    showNoteSyncStatus('Could not save on this device. Keep this tab open and copy the note.');
+  });
+}
+async function flushPendingNotes(connection) {
+  connection = connection || await noteSyncContext();
+  if (noteSyncJobs.has(connection.key)) {
+    const synced = await noteSyncJobs.get(connection.key);
+    if (synced && Object.keys(readPendingNotes(connection.key)).length) return flushPendingNotes(connection);
+    return synced;
+  }
+  const task = (async () => {
+    let didSave = false;
+    while (true) {
+      const pending = readPendingNotes(connection.key);
+      const next = Object.values(pending)[0];
+      if (!next) {
+        if (didSave) showNoteSyncStatus('Saved to cloud ✓ — available on your other devices', true);
+        noteRetryDelay = 15000;
+        return true;
+      }
+      showNoteSyncStatus('Saving to cloud…');
+      try {
+        if (!connection.base || !connection.token) throw new Error('Not connected');
+        await cloudSaveNote(next.note, connection);
+      } catch (error) {
+        showNoteSyncStatus('Saved on this device — waiting to sync. Keep VoiceRx open; it will retry automatically.');
+        retryNoteSyncLater();
+        noteRetryDelay = Math.min(noteRetryDelay * 2, 60000);
+        return false;
+      }
+      // An edit may have arrived during the request. Remove only the version
+      // actually accepted, then send the latest version in order.
+      const latest = readPendingNotes(connection.key);
+      if (latest[next.note.id]?.revision === next.revision) delete latest[next.note.id];
+      savePendingNotes(connection.key, latest);
+      didSave = true;
     }
-  } else {
-    // Not in cache — build from current state and save
-    const entry = { ...buildCurrentNoteEntry(), ...updates, id };
+  })();
+  noteSyncJobs.set(connection.key, task);
+  try { return await task; }
+  finally { noteSyncJobs.delete(connection.key); }
+}
+async function queueNoteSave(entry, defer = false) {
+  const revision = ++noteQueueRevision;
+  const connectionPromise = noteSyncContext();
+  try {
+    notesCache = notesCache.filter(n => n.id !== entry.id);
     notesCache.unshift(entry);
     saveCachedNotes(notesCache);
-    try { await cloudSaveNote(entry); } catch (err) { console.error(err); }
+    const connection = await connectionPromise;
+    const pending = readPendingNotes(connection.key);
+    // Keep the most recent edit if hashing completes out of order.
+    const prior = pending[entry.id];
+    if (!prior || prior.session !== noteQueueSession || prior.order < revision) {
+      pending[entry.id] = { note: entry, revision: crypto.randomUUID(), session: noteQueueSession, order: revision };
+      savePendingNotes(connection.key, pending);
+    }
+    showNoteSyncStatus('Saved on this device — saving to cloud…');
+    if (defer) { retryNoteSyncLater(600); return false; }
+    return await flushPendingNotes(connection);
+  } catch (error) {
+    showNoteSyncStatus('Could not save on this device. Keep this tab open and copy the note.');
+    throw error;
   }
 }
-
+const noteQueueSession = crypto.randomUUID();
+async function autoSaveTranscript(defer = false) {
+  if (!currentTranscript && !currentSOAP) return false;
+  currentNoteId = currentNoteId || 'vrx_' + crypto.randomUUID();
+  const existing = notesCache.find(n => n.id === currentNoteId) || {};
+  return queueNoteSave({ ...existing, ...buildCurrentNoteEntry() }, defer);
+}
+async function updateSavedNote(id, updates) {
+  const existing = notesCache.find(n => n.id === id) || loadCachedNotes().find(n => n.id === id);
+  const entry = existing || { ...buildCurrentNoteEntry(), id };
+  return queueNoteSave({ ...entry, ...updates });
+}
 async function saveNote() {
   if (!currentTranscript && !currentSOAP) {
     showToast('Nothing to save', 'error');
     return;
   }
-  await autoSaveTranscript();
-  if (currentSOAP) await updateSavedNote(currentNoteId, { soap: currentSOAP });
-  showToast('Note saved to cloud ✓', 'success');
+  try {
+    const synced = await autoSaveTranscript();
+    showToast(synced ? 'Note saved to cloud ✓' : 'Saved on this device — waiting to sync', synced ? 'success' : 'warning');
+  } catch (error) {
+    showToast('Could not save. Keep this tab open and copy the note.', 'error');
+  }
 }
 
 // kept for compatibility — no longer needed since server doesn't expire
@@ -2171,6 +2270,9 @@ async function renderNotesList() {
   let notes = [];
   try {
     notes = await cloudListNotes();
+    const connection = await noteSyncContext();
+    const pending = Object.values(readPendingNotes(connection.key)).map(item => item.note);
+    notes = [...pending, ...notes.filter(n => !pending.some(p => p.id === n.id))];
     notesCache = notes;
     saveCachedNotes(notes);
   } catch (err) {
@@ -2249,8 +2351,8 @@ async function toggleViewedNoteCharted() {
   note.charted = newCharted;
   saveCachedNotes(notesCache);
   try {
-    await cloudSaveNote(note);
-    showToast(newCharted ? 'Marked as charted ✓' : 'Unmarked charted', 'success');
+    const synced = await updateSavedNote(note.id, { charted: newCharted });
+    showToast(synced ? (newCharted ? 'Marked as charted ✓' : 'Unmarked charted') : 'Saved on this device — waiting to sync', synced ? 'success' : 'warning');
     // Refresh modal display
     viewNote(viewedNoteId);
     // Refresh background list (if on Notes tab)
@@ -2355,7 +2457,7 @@ async function clearAllNotes() {
   if (!confirm('Clear ALL saved notes from the cloud? This cannot be undone.')) return;
   const notes = notesCache.length ? notesCache : loadCachedNotes();
   for (const n of notes) {
-    try { await cloudDeleteNote(n.id); } catch (e) { console.error(e); }
+    try { await cloudDeleteNote(n.id); } catch (e) { showToast('Could not delete all notes — local copies kept', 'error'); return; }
   }
   notesCache = [];
   localStorage.removeItem(NOTES_CACHE_KEY);
