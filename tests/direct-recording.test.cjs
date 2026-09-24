@@ -19,7 +19,7 @@ function setup({micError,requestError,saveError,pollError,emptySpeech,formatErro
   const calls=[],saved=[],deleted=[];
   const context=vm.createContext({console:{log(){},error(){},warn(){}},Blob,URL,URLSearchParams,AbortController,crypto:require('node:crypto').webcrypto,MediaRecorder:Recorder,
     localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(saveError&&k!=='vrx_token')throw Error('Storage full');storage.set(k,v);},removeItem:k=>storage.delete(k)},
-    document:{getElementById:element,querySelectorAll:()=>[],addEventListener(){},createElement:()=>element('created'),body:{appendChild(){}},visibilityState:'visible'},
+    document:{getElementById:element,querySelector:()=>element('selected'),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element('created'),body:{appendChild(){}},visibilityState:'visible'},
     window:{isSecureContext:true,addEventListener(){}},location:{hash:''},navigator:{mediaDevices:{getUserMedia:async()=>{if(micError)throw Object.assign(Error(),{name:micError});return{getAudioTracks:()=>[track],getTracks:()=>[track]};}}},
     setInterval:()=>1,clearInterval(){},setTimeout:(fn,ms)=>ms===2000?setImmediate(fn):1,clearTimeout(){},confirm:()=>true,
     fetch:async(url,options)=>{calls.push(url);if(requestError&&url.includes('/transcribe'))throw Error('Network unavailable');if(pollError&&url.includes('/poll/'))throw Error('Network unavailable');return {ok:!(formatError&&url.includes('/format')),status:formatError?500:200,json:async()=>url.includes('/transcribe')?{id:'fictional-job'}:url.includes('/poll/')?{status:'completed',text:emptySpeech?'':'Fictional encounter transcript.'}:url.includes('/format')&&formatMessage?{error:formatMessage}:url.includes('/format')?{note:'Subjective: Fictional encounter.\nAssessment: Test only.'}:{}};},
@@ -80,4 +80,18 @@ test('formatting normalizes a saved API URL with a trailing slash',async()=>{
   t.run("currentTranscript='Fictional brief encounter.'");await t.run('formatSOAP()');
   assert.ok(t.calls.some(url=>url.startsWith('https://example.test/format?')));
   assert.ok(t.calls.every(url=>!url.includes('test//')));
+});
+
+test('provider setup keeps credentials local and clears them on close',async()=>{
+  const t=setup();
+  t.element('newprov_id').value='test';t.element('newprov_display_name').value='Test Provider';
+  const requests=[];
+  t.context.fetch=async(url)=>{requests.push(url);return {ok:true,json:async()=>({display_name:'Test Provider',token:'fictional-new-token'})};};
+  await t.run('submitAddProvider()');
+  assert.deepEqual(requests,['https://example.test/admin/providers']);
+  assert.equal(t.element('newprov_result_token').textContent,'fictional-new-token');
+  assert.equal(t.element('newprov_result').style.display,'block');
+  assert.doesNotMatch(html,/qrserver|autoLoginUrl|newprov_result_qr/);
+  t.run('closeAddProvider()');
+  assert.equal(t.element('newprov_result_token').textContent,'');
 });
