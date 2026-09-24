@@ -610,6 +610,8 @@ body {
     <button class="section-tab" onclick="showSection('notes')">📋 Notes</button>
   </div>
 
+  <p id="cloudSaveStatus" role="status" aria-live="polite" style="font-size:13px;margin:0 0 16px;" hidden></p>
+
   <!-- RECORD SECTION -->
   <div class="section active" id="section-record">
 
@@ -676,19 +678,26 @@ body {
         <div class="waveform-bar"></div>
       </div>
       <div class="timer" id="timer">0:00</div>
-      <div class="status-text" id="statusText">Ready to record</div>
+      <div class="status-text" id="statusText" role="status" aria-live="polite">Ready to record</div>
       <div id="langBadge" style="font-size:12px; color:var(--gray-400); margin-bottom:16px; margin-top:-10px;"></div>
-      <button class="record-btn" id="recordBtn" onclick="toggleRecording()">🎙</button>
+      <button class="record-btn" id="recordBtn" aria-label="Start encounter recording" onclick="toggleRecording()">🎙</button>
+      <p id="recordActionLabel" style="font-weight:600; margin:8px 0;">Record encounter</p>
+      <p style="font-size:14px; color:var(--gray-600);">Tap Record, allow the microphone, then tap Stop to transcribe and prepare your note. Keep this tab open while recording.</p>
+      <div id="recordingRecovery" hidden style="margin:16px auto;max-width:480px;text-align:left;">
+        <strong>Encounter recording</strong>
+        <audio id="recordingPlayback" aria-label="Play encounter recording" controls style="width:100%;margin:8px 0;"></audio>
+        <p id="recordingStorageStatus" style="font-size:13px;"></p>
+        <button id="retryAudioBtn" class="action-btn amber" onclick="processAudio()">Retry transcription</button>
+        <button class="action-btn outline" onclick="downloadEncounterAudio()">Download recording</button>
+      </div>
       <div style="margin-top:8px;">
         <a href="javascript:void(0)" onclick="openPasteTranscript()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">…or paste an existing transcript</a>
       </div>
-      <div style="margin-top:8px;">
-        <a href="javascript:void(0)" onclick="document.getElementById('audioFileInput').click()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">⬆ Upload a recording (most reliable for long visits)</a>
+      <details style="margin-top:12px;"><summary style="font-size:13px;cursor:pointer;">Other ways to add audio</summary><div style="margin-top:8px;">
+        <a href="javascript:void(0)" onclick="document.getElementById('audioFileInput').click()" style="font-size:12px; color:var(--gray-600); text-decoration:underline; cursor:pointer;">Upload an existing recording</a>
         <input type="file" id="audioFileInput" accept="audio/*,video/mp4,.m4a,.mp3,.wav,.aac,.amr,.3gp,.ogg,.opus,.flac,.mp4" style="display:none" onchange="handleAudioUpload(event)">
       </div>
-      <div style="margin:12px auto 0; max-width:340px; font-size:11px; line-height:1.45; color:var(--gray-500); background:var(--gray-100, #f1f5f9); border-radius:8px; padding:8px 12px;">
-        💡 <strong>Long visit?</strong> Record it in your phone's Voice Recorder app, then tap <strong>Upload a recording</strong>. The mic button above can stop if the screen sleeps; uploading a file always works.
-      </div>
+      </details>
       <div class="note-type-row" id="noteChips"></div>
     </div>
 
@@ -697,7 +706,7 @@ body {
       <div class="card-header">
         <span class="card-title">Transcript</span>
         <div class="card-actions" style="flex-wrap:wrap;">
-          <div class="save-indicator" id="saveIndicator">💾 Auto-saved</div>
+          <div class="save-indicator" id="saveIndicator">Autosave enabled</div>
           <button class="action-btn outline" id="editTranscriptBtn" onclick="enableTranscriptEditing()">Edit</button>
           <button class="action-btn primary" id="saveTranscriptBtn" onclick="saveTranscriptEdit()" style="display:none;">Save Edit</button>
           <button class="action-btn outline" id="cancelEditTranscriptBtn" onclick="cancelTranscriptEdit()" style="display:none;">Cancel</button>
@@ -829,9 +838,9 @@ body {
       <p style="font-size:13px; margin-bottom:10px;"><strong>Access token:</strong></p>
       <code id="newprov_result_token" style="display:block; padding:8px; background:#fff; border:1px solid var(--gray-200); border-radius:6px; font-size:11px; word-break:break-all; margin-bottom:14px;"></code>
       <p style="font-size:12px; color:var(--gray-600); margin-bottom:10px;">
-        Save this token in Bitwarden NOW — it won't be shown again. Share the QR code below with the provider for one-tap setup.
+        Save this token in Bitwarden. On the provider’s device, open VoiceRx Settings and enter the API address and this token privately.
       </p>
-      <div id="newprov_result_qr" style="text-align:center; padding:14px 0;"></div>
+
       <button class="modal-btn confirm" onclick="closeAddProvider()" style="width:100%;">Done</button>
     </div>
   </div>
@@ -951,14 +960,16 @@ function audioDbOpen() {
   });
 }
 async function audioSave(id, blob, meta) {
+  let db;
   try {
-    const db = await audioDbOpen();
-    await new Promise((res, rej) => {
-      const tx = db.transaction([AUDIO_STORE], 'readwrite');
-      tx.objectStore(AUDIO_STORE).put({ id, blob, meta, savedAt: Date.now() });
-      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    db = await audioDbOpen();
+    await new Promise((resolve,reject) => {
+      const tx=db.transaction([AUDIO_STORE], 'readwrite');
+      tx.objectStore(AUDIO_STORE).put({id,blob,meta,savedAt:Date.now()});
+      tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
     });
-  } catch (e) { console.warn('audioSave failed:', e); }
+    return true;
+  } catch { return false; } finally { if(db)db.close(); }
 }
 async function audioDelete(id) {
   try {
@@ -983,31 +994,19 @@ async function audioListAll() {
 }
 
 async function checkForRecoverableAudio() {
-  const sessions = await audioListAll();
-  // Filter out sessions older than 24h
-  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-  const recoverable = sessions.filter(s => s.savedAt > dayAgo);
-  if (!recoverable.length) return;
-  const s = recoverable[0];
-  const ageMin = Math.round((Date.now() - s.savedAt) / 60000);
-  const ok = confirm(`Found an interrupted recording from ${ageMin} min ago (patient: ${s.meta?.patientName || 'unknown'}). Recover and transcribe it now?`);
-  if (ok) {
-    audioChunks = [s.blob];
-    // Restore patient context if available
-    if (s.meta?.patientName) document.getElementById('patientName').value = s.meta.patientName;
-    if (s.meta?.visitDate) document.getElementById('visitDate').value = s.meta.visitDate;
-    if (s.meta?.lang) document.getElementById('noteLang').value = s.meta.lang;
-    if (s.meta?.pronouns) document.getElementById('pronounsSelect').value = s.meta.pronouns;
-    // Process the saved blob
-    setStatus('Recovering audio…', 'processing');
-    document.getElementById('recordBtn').disabled = true;
-    document.getElementById('recordBtn').textContent = '⏳';
-    // Fake mediaRecorder.mimeType for the blob.type
-    if (!mediaRecorder) mediaRecorder = { mimeType: s.blob.type || 'audio/webm' };
-    processAudio().then(() => audioDelete(s.id));
-  } else {
-    audioDelete(s.id);
+  const sessions=await audioListAll();
+  const s=sessions.filter(item=>item.blob?.size).sort((a,b)=>b.savedAt-a.savedAt)[0];
+  if(!s || encounterBusy())return;
+  if(!confirm('An unfinished VoiceRx recording is saved on this device. Restore it for playback or transcription?'))return;
+  audioChunks=[s.blob];mediaRecorder={mimeType:s.blob.type||'audio/webm'};
+  currentAudioSessionId=s.id;recordingContext=s.meta||{};
+  pendingTranscriptId=s.meta?.transcriptId||null;pendingTranscriptBase=s.meta?.transcriptBase||null;
+  hasUntranscribedAudio=true;lastAudioSaveSucceeded=true;
+  for(const [id,key] of [['patientName','patientName'],['chiefComplaint','chiefComplaint'],['visitDate','visitDate'],['noteLang','lang'],['pronounsSelect','pronouns']]){
+    if(s.meta?.[key])document.getElementById(id).value=s.meta[key];
   }
+  if(s.meta?.noteType)selectNoteType(s.meta.noteType);
+  setEncounterLocked(false);exposeRecording(s.blob);setStatus('Recording restored. Review the audio, then choose Retry transcription.','warning');
 }
 
 // =====================
@@ -1076,12 +1075,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Before unload warning
   window.addEventListener('beforeunload', (e) => {
-    if (isRecording || currentTranscript) {
+    if (encounterBusy() || hasUntranscribedAudio || currentTranscript) {
       e.preventDefault();
       e.returnValue = 'You have unsaved recording data. Are you sure you want to leave?';
     }
   });
 
+  resumeNoteSync();
+  window.addEventListener('online', resumeNoteSync);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      resumeNoteSync();
+      if (document.getElementById('section-notes').classList.contains('active')) renderNotesList();
+    }
+  });
+  for (const id of ['patientName', 'visitDate', 'pronounsSelect', 'noteLang', 'noteTypeSelect']) {
+    document.getElementById(id).addEventListener('change', () => {
+      autoSaveTranscript(true).catch(() => {});
+    });
+  }
   renderNotesList();
   cleanExpiredNotes();
 });
@@ -1227,6 +1239,7 @@ async function saveProviderSettings() {
 }
 
 function selectNoteType(type) {
+  if(encounterBusy())return;
   selectedNoteType = type;
   document.querySelectorAll('.note-chip').forEach(c => {
     c.classList.toggle('selected', c.textContent === type);
@@ -1259,7 +1272,7 @@ function showSection(name) {
 // =====================
 function loadSettings() {
   document.getElementById('workerUrl').value = localStorage.getItem('vrx_worker_url') || '';
-  document.getElementById('accessToken').value = localStorage.getItem('vrx_token') || 'b9f6e257341c0a8d';
+  document.getElementById('accessToken').value = localStorage.getItem('vrx_token') || '';
   document.getElementById('assemblyKey').value = localStorage.getItem('vrx_assembly_key') || '';
 }
 
@@ -1270,6 +1283,7 @@ function saveSettings() {
   closeSettings();
   showToast('Settings saved', 'success');
   refreshProviderBadge();
+  resumeNoteSync();
 }
 
 function openSettings() {
@@ -1283,286 +1297,249 @@ function closeSettings() {
 // =====================
 // RECORDING
 // =====================
-async function toggleRecording() {
-  if (isRecording) {
-    stopRecording();
-  } else {
-    await startRecording();
-  }
-}
+// Direct encounter recording. Final audio is retained until a transcript is saved.
+let recordingStarting = false;
+let recordingStopping = false;
+let processingAudio = false;
+let finalizingAudio = false;
+let recordingStartedAt = 0;
+let recordingContext = null;
+let interruptionMessage = '';
+let pendingTranscriptId = null;
+let pendingTranscriptBase = null;
+let hasUntranscribedAudio = false;
+let audioObjectUrl = null;
+let audioSaveQueue = Promise.resolve(true);
+let lastAudioSaveSucceeded = false;
 
-// Screen Wake Lock — keeps the screen on while recording so the phone does
-// not auto-lock. Without this, the screen times out, the OS suspends the
-// microphone, and recording stops early (the "cut off at ~2:30" problem).
+function encounterBusy() { return isRecording || recordingStarting || recordingStopping || processingAudio || finalizingAudio; }
+function currentRecordingMeta() {
+  return { ...(recordingContext || {
+    patientName: document.getElementById('patientName').value,
+    chiefComplaint: document.getElementById('chiefComplaint').value,
+    visitDate: document.getElementById('visitDate').value,
+    pronouns: getPronouns(), lang: getLang(), noteType: selectedNoteType,
+  }), transcriptId: pendingTranscriptId, transcriptBase: pendingTranscriptBase };
+}
+function setEncounterLocked(locked) {
+  for (const id of ['patientName','chiefComplaint','visitDate','pronounsSelect','noteLang','noteTypeSelect','audioFileInput']) {
+    document.getElementById(id).disabled = locked || hasUntranscribedAudio;
+  }
+  document.querySelectorAll('.note-chip').forEach(button => { button.disabled = locked || hasUntranscribedAudio; });
+  document.getElementById('retryAudioBtn').disabled = locked;
+}
+function setRecordButton(recording, disabled = false) {
+  const button = document.getElementById('recordBtn');
+  button.disabled = disabled;
+  button.textContent = recording ? '⏹' : disabled ? '⏳' : '🎙';
+  button.setAttribute('aria-label', recording ? 'Stop encounter recording' : 'Start encounter recording');
+  button.classList.toggle('recording', recording);
+  document.getElementById('waveform').classList.toggle('active', recording);
+  document.getElementById('recordActionLabel').textContent = recording ? 'Stop recording' : disabled ? 'Please wait…' : 'Record encounter';
+}
+function currentAudioBlob() { return new Blob(audioChunks, {type:mediaRecorder?.mimeType || audioChunks[0]?.type || 'audio/webm'}); }
+function queueAudioSnapshot() {
+  const id = currentAudioSessionId, blob = currentAudioBlob(), meta = currentRecordingMeta();
+  if (!id || !blob.size) return Promise.resolve(false);
+  // Serialize writes so an older snapshot cannot overwrite the final chunk.
+  audioSaveQueue = audioSaveQueue.then(() => audioSave(id, blob, meta), () => audioSave(id, blob, meta));
+  return audioSaveQueue;
+}
+function exposeRecording(blob) {
+  if (audioObjectUrl) URL.revokeObjectURL(audioObjectUrl);
+  audioObjectUrl = URL.createObjectURL(blob);
+  document.getElementById('recordingPlayback').src = audioObjectUrl;
+  document.getElementById('recordingRecovery').hidden = false;
+  document.getElementById('retryAudioBtn').hidden = !hasUntranscribedAudio;
+  document.getElementById('recordingStorageStatus').textContent = lastAudioSaveSucceeded
+    ? 'A recovery copy is saved on this device.'
+    : 'Audio is in this tab only. Keep it open or download the recording.';
+}
+function downloadEncounterAudio() {
+  if (!audioChunks.length) return;
+  const blob=currentAudioBlob();
+  const ext=blob.type.includes('mp4')?'m4a':blob.type.includes('ogg')?'ogg':blob.type.includes('wav')?'wav':'webm';
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);
+  link.download='VoiceRx-recording-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+ext;
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),30000);
+}
+function microphoneErrorMessage(error) {
+  const messages = {
+    NotAllowedError: 'Microphone permission is blocked. Allow Microphone in this site’s browser settings, then try Record again.',
+    SecurityError: 'The browser is blocking microphone access. Open VoiceRx directly in an HTTPS browser tab.',
+    NotFoundError: 'No microphone was found. Connect or select a microphone, then try Record again.',
+    NotReadableError: 'The microphone could not start. Close other apps using it and check your device’s microphone settings.',
+    OverconstrainedError: 'This microphone does not support the requested recording settings. Try another microphone.',
+    NotSupportedError: 'This browser cannot record a supported audio format. Open VoiceRx in an updated Chrome, Edge, or Safari browser.',
+    AbortError: 'The microphone was interrupted before recording began. Try Record again.',
+  };
+  return messages[error?.name] || 'Recording could not start. Check the microphone and browser, then try again.';
+}
+async function toggleRecording() {
+  if (recordingStarting || recordingStopping || processingAudio || finalizingAudio) return;
+  if (isRecording) stopRecording(); else await startRecording();
+}
 async function acquireWakeLock() {
   try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    if ('wakeLock' in navigator && !wakeLock) {
+      const lock=await navigator.wakeLock.request('screen');
+      if (!isRecording) { await lock.release(); return; }
+      wakeLock=lock;
+      lock.addEventListener('release',()=>{if(wakeLock===lock)wakeLock=null;});
     }
-  } catch (e) { /* not supported / blocked — recording still works if screen stays on */ }
+  } catch { /* The visible instruction still asks the user to keep this tab open. */ }
 }
 function releaseWakeLock() {
-  try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) {}
+  const lock=wakeLock;wakeLock=null;
+  if(lock)lock.release().catch(()=>{});
 }
-// Browsers drop the wake lock when the tab is hidden; re-request it on return.
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && isRecording) acquireWakeLock();
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&isRecording)acquireWakeLock();
 });
-
+function clearRecordingTimers() {
+  clearInterval(recordingTimer);clearInterval(audioSnapshotTimer);
+  recordingTimer=null;audioSnapshotTimer=null;releaseWakeLock();
+}
 async function startRecording() {
+  if(encounterBusy())return;
+  if(hasUntranscribedAudio){showToast('Retry the current recording, or choose + New to start another encounter.','warning');return;}
+  if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder==='undefined') {
+    setStatus('Recording is unavailable here. Open VoiceRx directly in an updated browser using its HTTPS link.','error');return;
+  }
+  if(!getApiBase() || !localStorage.getItem('vrx_token')) {
+    setStatus('Connect Dr. Tess’s VoiceRx account in Settings before recording.','error');openSettings();return;
+  }
+  recordingStarting=true;setEncounterLocked(true);setRecordButton(false,true);
+  setStatus('Allow microphone access when your browser asks…','processing');
+  let stream;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        sampleRate: 16000,
-        channelCount: 1
-      }
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const mimeType=['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(type=>MediaRecorder.isTypeSupported(type));
+    const recorder=new MediaRecorder(stream,mimeType?{mimeType}:undefined);
+    mediaRecorder=recorder;audioChunks=[];interruptionMessage='';pendingTranscriptId=null;pendingTranscriptBase=null;
+    recordingContext=null;recordingContext=currentRecordingMeta();
+    currentAudioSessionId='audio_'+crypto.randomUUID();lastAudioSaveSucceeded=false;
+    recorder.addEventListener('dataavailable',event=>{if(event.data.size)audioChunks.push(event.data);});
+    recorder.addEventListener('error',()=>handleRecordingInterrupted('Recording was interrupted. Review the captured audio before retrying.'));
+    stream.getAudioTracks().forEach(track=>{
+      track.addEventListener('ended',()=>{if(isRecording)handleRecordingInterrupted('Microphone disconnected. Review the captured audio before retrying.');});
+      track.addEventListener('mute',()=>{if(isRecording)setStatus('Microphone signal paused — check the microphone and keep VoiceRx open.','warning');});
+      track.addEventListener('unmute',()=>{if(isRecording)setStatus('Recording encounter — tap Stop when finished.','active');});
     });
-    audioChunks = [];
-    mediaRecorder = new MediaRecorder(stream);
-    
-    mediaRecorder.addEventListener('dataavailable', e => {
-      if (e.data.size > 0) audioChunks.push(e.data);
+    recorder.addEventListener('stop',async()=>{
+      if(finalizingAudio)return;
+      finalizingAudio=true;recordingStopping=false;isRecording=false;clearRecordingTimers();
+      stream.getTracks().forEach(track=>track.stop());setRecordButton(false,true);
+      try {
+        const blob=currentAudioBlob();
+        if(!blob.size){setStatus('No audio was captured. Check your microphone and try again.','error');return;}
+        hasUntranscribedAudio=true;
+        lastAudioSaveSucceeded=await queueAudioSnapshot();exposeRecording(blob);
+        finalizingAudio=false;
+        if(interruptionMessage){setStatus(interruptionMessage,'warning');showToast('Your captured audio is available below.','warning');}
+        else await processAudio();
+      } catch {setStatus('Audio could not be processed. Keep this tab open and download the recording.','error');exposeRecording(currentAudioBlob());}
+      finally {finalizingAudio=false;setRecordButton(false);setEncounterLocked(false);}
     });
-
-    mediaRecorder.addEventListener('stop', () => {
-      stream.getTracks().forEach(t => t.stop());
-      processAudio();
-    });
-
-    // Recording-interrupted detection: phone calls, lost mic access, OS suspend
-    mediaRecorder.addEventListener('error', (e) => {
-      console.error('MediaRecorder error:', e);
-      handleRecordingInterrupted('Recording was interrupted — your audio so far has been saved. When you come back, VoiceRx will offer to recover it.');
-    });
-
-    // If the audio track ends unexpectedly (call took the mic, OS revoked permission)
-    stream.getAudioTracks().forEach(t => {
-      t.addEventListener('ended', () => {
-        if (isRecording) {
-          handleRecordingInterrupted('Microphone access was lost (likely a phone call) — your audio so far has been saved. Reopen VoiceRx to recover it.');
-        }
-      });
-    });
-
-    mediaRecorder.start(1000);
-    isRecording = true;
-    acquireWakeLock(); // keep the screen on for the whole encounter
-    seconds = 0;
-    currentAudioSessionId = 'audio_' + Date.now();
-
-    // Snapshot to IndexedDB every 5 seconds so a crash/network blip doesn't lose this recording
-    audioSnapshotTimer = setInterval(() => {
-      if (audioChunks.length) {
-        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-        const meta = {
-          patientName: document.getElementById('patientName').value,
-          visitDate: document.getElementById('visitDate').value,
-          pronouns: getPronouns(),
-          lang: getLang(),
-          noteType: selectedNoteType,
-        };
-        audioSave(currentAudioSessionId, blob, meta);
-      }
-    }, AUDIO_SNAPSHOT_INTERVAL_MS);
-
-    document.getElementById('recordBtn').classList.add('recording');
-    document.getElementById('recordBtn').textContent = '⏹';
-    document.getElementById('waveform').classList.add('active');
-    setStatus('Recording… click to stop', 'active');
-
-    recordingTimer = setInterval(() => {
-      seconds++;
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-
-      // No auto-stop — records until the user taps stop. Show a gentle
-      // reminder every 30 minutes so a long recording isn't left running by
-      // accident. Audio is snapshotted to storage as it goes.
-      if (seconds > 0 && seconds % (30 * 60) === 0) {
-        const mins = Math.floor(seconds / 60);
-        showToast(`Still recording — ${mins} min. Audio is being saved automatically.`, 'warning');
-      }
-    }, 1000);
-
-  } catch (err) {
-    setStatus('Microphone access denied', 'error');
-    showToast('Please allow microphone access', 'error');
-  }
+    recorder.start(1000);document.getElementById('timer').textContent='0:00';isRecording=true;recordingStarting=false;recordingStartedAt=Date.now();seconds=0;
+    // A fresh encounter must not inherit a previous SOAP note or patient summary.
+    currentTranscript='';currentSOAP='';currentTranslationEn='';currentNoteId=null;currentPatientSummary='';
+    document.getElementById('transcriptCard').classList.remove('visible');document.getElementById('soapCard').classList.remove('visible');
+    document.getElementById('summaryCard').style.display='none';document.getElementById('recordingRecovery').hidden=true;
+    acquireWakeLock();setRecordButton(true);setStatus('Recording encounter — tap Stop when finished.','active');
+    audioSnapshotTimer=setInterval(async()=>{
+      const saved=await queueAudioSnapshot();lastAudioSaveSucceeded=saved;
+      if(!saved&&isRecording)setStatus('Recording — recovery storage is unavailable. Keep this tab open.','warning');
+    },AUDIO_SNAPSHOT_INTERVAL_MS);
+    recordingTimer=setInterval(()=>{
+      seconds=Math.floor((Date.now()-recordingStartedAt)/1000);
+      document.getElementById('timer').textContent=`${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
+    },1000);
+  } catch(error) {
+    stream?.getTracks().forEach(track=>track.stop());isRecording=false;clearRecordingTimers();
+    setStatus(microphoneErrorMessage(error),'error');setRecordButton(false);setEncounterLocked(false);
+  } finally {recordingStarting=false;}
 }
-
-// Called when something OUTSIDE the user stops the recording (phone call, lost mic, error).
-// Saves current audio to IndexedDB so it can be recovered later, then resets UI cleanly.
-async function handleRecordingInterrupted(message) {
-  if (!isRecording) return;
-  clearInterval(recordingTimer);
-  if (audioSnapshotTimer) { clearInterval(audioSnapshotTimer); audioSnapshotTimer = null; }
-  isRecording = false;
-  releaseWakeLock();
-
-  // Snapshot whatever we have to IndexedDB so it survives a page close
-  if (audioChunks.length && currentAudioSessionId) {
-    try {
-      const blob = new Blob(audioChunks, { type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm' });
-      const meta = {
-        patientName: document.getElementById('patientName').value,
-        visitDate: document.getElementById('visitDate').value,
-        pronouns: getPronouns(),
-        lang: getLang(),
-        noteType: selectedNoteType,
-      };
-      await audioSave(currentAudioSessionId, blob, meta);
-    } catch (e) { console.error('Final snapshot failed:', e); }
-  }
-
-  document.getElementById('recordBtn').classList.remove('recording');
-  document.getElementById('recordBtn').textContent = '🎙';
-  document.getElementById('recordBtn').disabled = false;
-  document.getElementById('waveform').classList.remove('active');
-  setStatus('Recording interrupted — audio preserved', 'warning');
-  showToast(message, 'warning');
+function handleRecordingInterrupted(message) {
+  if(!isRecording)return;
+  interruptionMessage=message;recordingStopping=true;isRecording=false;clearRecordingTimers();setRecordButton(false,true);
+  // stop emits the final dataavailable event before the stop event saves the audio.
+  if(mediaRecorder?.state!=='inactive')mediaRecorder.stop();
 }
-
 function stopRecording() {
-  if (mediaRecorder && isRecording) {
-    clearInterval(recordingTimer);
-    if (audioSnapshotTimer) { clearInterval(audioSnapshotTimer); audioSnapshotTimer = null; }
-    isRecording = false;
-    releaseWakeLock();
-    mediaRecorder.stop();
-    document.getElementById('recordBtn').classList.remove('recording');
-    document.getElementById('recordBtn').disabled = true;
-    document.getElementById('recordBtn').textContent = '⏳';
-    document.getElementById('waveform').classList.remove('active');
-    setStatus('Processing audio…', 'processing');
-  }
+  if(!isRecording || !mediaRecorder)return;
+  recordingStopping=true;isRecording=false;clearRecordingTimers();setRecordButton(false,true);setStatus('Saving recording…','processing');
+  if(mediaRecorder.state!=='inactive')mediaRecorder.stop();
 }
-
-// Upload an audio file recorded elsewhere (e.g. the phone's native Voice
-// Recorder app — the most reliable way to capture a long encounter, since the
-// OS handles background recording instead of a fragile browser tab). The file
-// is fed straight into the same transcribe/format pipeline.
 async function handleAudioUpload(event) {
-  const file = event.target.files && event.target.files[0];
-  event.target.value = ''; // allow re-selecting the same file later
-  if (!file) return;
-  if (isRecording) { showToast('Stop the current recording first', 'error'); return; }
-  const workerUrl = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
-  const token = localStorage.getItem('vrx_token') || '';
-  if (!workerUrl || !token) { showToast('Set Worker URL and Access Token in Settings first', 'error'); return; }
-
-  // Feed the uploaded file into the existing pipeline (a File is a Blob).
-  audioChunks = [file];
-  mediaRecorder = { mimeType: file.type || 'audio/m4a' };
-  currentAudioSessionId = null;
-  const mb = (file.size / (1024 * 1024)).toFixed(1);
-  showToast(`Uploading recording (${mb} MB)…`);
-  document.getElementById('recordBtn').disabled = true;
-  document.getElementById('recordBtn').textContent = '⏳';
+  const file=event.target.files?.[0];event.target.value='';
+  if(!file)return;
+  if(encounterBusy()||hasUntranscribedAudio){showToast('Finish the current recording first.','warning');return;}
+  audioChunks=[file];mediaRecorder={mimeType:file.type||'audio/m4a'};
+  recordingContext=null;recordingContext=currentRecordingMeta();
+  currentAudioSessionId='audio_'+crypto.randomUUID();pendingTranscriptId=null;pendingTranscriptBase=null;
+  currentTranscript='';currentSOAP='';currentNoteId=null;currentTranslationEn='';currentPatientSummary='';
+  document.getElementById('transcriptCard').classList.remove('visible');document.getElementById('soapCard').classList.remove('visible');document.getElementById('summaryCard').style.display='none';
+  hasUntranscribedAudio=true;setEncounterLocked(true);lastAudioSaveSucceeded=await queueAudioSnapshot();exposeRecording(file);
   await processAudio();
 }
-
-async function processAudio() {
-  const workerUrl = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
-  const token = localStorage.getItem('vrx_token') || '';
-  if (!workerUrl || !token) {
-    showToast('Worker URL or Access Token not set — go to Settings', 'error');
-    resetRecorder();
-    return;
-  }
-
-  try {
-    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-
-    // Step 1: send audio to Worker (Worker forwards to AssemblyAI using its server-side key)
-    setStatus('Uploading audio…', 'processing');
-    const lang = getLang() === 'es' ? 'es' : 'en';
-    const transcribeRes = await fetch(`${workerUrl}/transcribe?language_code=${lang}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/octet-stream',
-      },
-      body: audioBlob,
-    });
-    if (!transcribeRes.ok) {
-      const err = await transcribeRes.text();
-      throw new Error('Transcribe failed (' + transcribeRes.status + '): ' + err);
-    }
-    const { id: transcriptId } = await transcribeRes.json();
-    if (!transcriptId) throw new Error('No transcript id returned');
-
-    // Step 2: poll Worker for completion (Worker proxies AssemblyAI)
-    setStatus('Transcribing…', 'processing');
-    let transcript = null;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 900; // 900 × 2s = 30 minutes — long visits take time to transcribe
-    while (transcript === null && attempts < MAX_ATTEMPTS) {
-      await new Promise(r => setTimeout(r, 2000));
-      attempts++;
-      // Keep the user informed on longer transcripts
-      if (attempts === 60) setStatus('Transcribing… (long recording, this can take a few minutes)', 'processing');
-      const pollRes = await fetch(`${workerUrl}/poll/${transcriptId}`, {
-        headers: { 'Authorization': 'Bearer ' + token },
-      });
-      if (!pollRes.ok) {
-        console.warn('Poll attempt failed', pollRes.status);
-        continue;
-      }
-      const pollData = await pollRes.json();
-      if (pollData.status === 'completed') {
-        transcript = pollData.text || '';
-      } else if (pollData.status === 'error') {
-        throw new Error(pollData.error || 'Transcription error');
-      }
-    }
-    if (transcript === null) throw new Error('Transcription timed out after 30 minutes');
-
-    currentTranscript = transcript;
-    currentNoteId = 'vrx_' + Date.now();
-
-    // Auto-save transcript immediately
-    autoSaveTranscript();
-
-    // Transcription succeeded — clean up the IndexedDB audio snapshot
-    if (currentAudioSessionId) {
-      audioDelete(currentAudioSessionId);
-      currentAudioSessionId = null;
-    }
-    // Refresh patient autocomplete now that we have a new patient saved
-    refreshPatientAutocomplete();
-
-    setStatus('Transcription complete ✓', 'done');
-    showTranscript(transcript);
-    resetRecorder(false);
-
-    // If Spanish — automatically fetch English translation
-    if (getLang() === 'es') {
-      fetchEnglishTranslation(transcript);
-    }
-
-  } catch (err) {
-    console.error(err);
-    setStatus('Transcription failed', 'error');
-    showToast('Transcription error: ' + err.message, 'error');
-    resetRecorder();
-  }
+async function audioRequest(url,options={},timeout=30000) {
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);
+  try {return await fetch(url,{...options,signal:controller.signal});}
+  catch(error){if(error.name==='AbortError')throw new Error('Connection timed out. Your recording is still available; retry transcription.');throw error;}
+  finally{clearTimeout(timer);}
 }
-
-function resetRecorder(fullReset = true) {
-  document.getElementById('recordBtn').disabled = false;
-  document.getElementById('recordBtn').textContent = '🎙';
-  document.getElementById('recordBtn').classList.remove('recording');
-  if (fullReset) {
-    document.getElementById('timer').textContent = '0:00';
-    setStatus('Ready to record', '');
-    currentTranscript = '';
-    currentNoteId = null;
-  }
+function transcriptionResponseError(response) {
+  if(response.status===401||response.status===403)return new Error('VoiceRx connection was not authorized. Check Dr. Tess’s account settings.');
+  if(response.status===413)return new Error('The transcription service rejected this recording’s size. Your audio is still available to download.');
+  if(response.status===429)return new Error('The transcription service is busy or its allowance is exhausted. Your audio is still available to retry.');
+  return new Error(`Transcription service returned ${response.status}. Your recording is still available.`);
+}
+async function processAudio() {
+  if(processingAudio||isRecording||recordingStarting||recordingStopping)return false;
+  const workerUrl=getApiBase(),token=localStorage.getItem('vrx_token')||'';
+  if(!workerUrl||!token){setStatus('Audio retained. Connect Dr. Tess’s account in Settings, then choose Retry transcription.','warning');resetRecorder(false);return false;}
+  const blob=currentAudioBlob();if(!blob.size){setStatus('No audio to transcribe.','error');return false;}
+  processingAudio=true;setEncounterLocked(true);setRecordButton(false,true);
+  try {
+    if(!pendingTranscriptId || pendingTranscriptBase!==workerUrl) {
+      setStatus('Transcribing your encounter…','processing');
+      const response=await audioRequest(`${workerUrl}/transcribe?language_code=${getLang()==='es'?'es':'en'}`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/octet-stream'},body:blob},120000);
+      if(!response.ok)throw transcriptionResponseError(response);
+      const data=await response.json();if(!data.id)throw new Error('The transcription service did not return a recording ID.');
+      pendingTranscriptId=data.id;pendingTranscriptBase=workerUrl;
+      lastAudioSaveSucceeded=await queueAudioSnapshot();
+    }
+    let transcript=null;
+    for(let attempt=0;attempt<900;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,2000));
+      const response=await audioRequest(`${workerUrl}/poll/${encodeURIComponent(pendingTranscriptId)}`,{headers:{Authorization:'Bearer '+token}});
+      if(!response.ok)throw transcriptionResponseError(response);
+      const data=await response.json();
+      if(data.status==='error'){pendingTranscriptId=null;pendingTranscriptBase=null;await queueAudioSnapshot();throw new Error('The transcription service could not process the recording. Play it back and retry.');}
+      if(data.status==='completed'){transcript=(data.text||'').trim();break;}
+    }
+    if(transcript===null)throw new Error('Transcription is still pending. Retry to check the same recording again.');
+    if(!transcript){pendingTranscriptId=null;pendingTranscriptBase=null;await queueAudioSnapshot();throw new Error('No speech was detected. Play the recording below to check microphone audio.');}
+    currentTranscript=transcript;currentNoteId=currentNoteId||'vrx_'+Date.now();
+    // Keep audio until the transcript is actually saved, not merely received.
+    await autoSaveTranscript();
+    hasUntranscribedAudio=false;pendingTranscriptId=null;pendingTranscriptBase=null;
+    if(currentAudioSessionId){await audioSaveQueue;await audioDelete(currentAudioSessionId);currentAudioSessionId=null;}
+    document.getElementById('retryAudioBtn').hidden=true;
+    document.getElementById('recordingStorageStatus').textContent='Transcript saved. Audio playback remains available in this tab.';
+    showTranscript(transcript);setStatus('Transcript ready — preparing the note…','processing');
+    await formatSOAP();
+    if(getLang()==='es')fetchEnglishTranslation(transcript);
+    return true;
+  }catch(error){
+    setStatus(error.message||'Transcription failed. Retry or download your recording.','error');
+    exposeRecording(blob);return false;
+  }finally{processingAudio=false;setRecordButton(false);setEncounterLocked(false);}
+}
+function resetRecorder(fullReset=true) {
+  setRecordButton(false);
+  if(fullReset&&!hasUntranscribedAudio){document.getElementById('timer').textContent='0:00';setStatus('Ready to record','');}
 }
 
 function setStatus(msg, type) {
@@ -1597,8 +1574,7 @@ function showTranscript(text, translationEn = '') {
 
   document.getElementById('transcriptText').innerHTML = html;
   document.getElementById('transcriptCard').classList.add('visible');
-  document.getElementById('saveIndicator').textContent = '💾 Auto-saved';
-  document.getElementById('saveIndicator').className = 'save-indicator saved';
+  // Rendering a transcript is not proof that the cloud accepted it.
 }
 
 async function fetchEnglishTranslation(spanishText) {
@@ -1608,7 +1584,7 @@ async function fetchEnglishTranslation(spanishText) {
 
   try {
     const params = new URLSearchParams({ mode: 'translate' });
-    const res = await fetch(`${workerUrl}/format?${params}`, {
+    const res = await audioRequest(`${workerUrl}/format?${params}`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -1639,7 +1615,7 @@ function copyTranscript() {
 }
 
 async function formatSOAP() {
-  const workerUrl = localStorage.getItem('vrx_worker_url');
+  const workerUrl = getApiBase();
   const token = localStorage.getItem('vrx_token');
   const patientName = document.getElementById('patientName').value.trim() || 'Patient';
   const visitDate = document.getElementById('visitDate').value;
@@ -1668,18 +1644,23 @@ async function formatSOAP() {
       chiefComplaint: document.getElementById('chiefComplaint').value.trim(),
     });
 
-    const res = await fetch(`${workerUrl}/format?${params}`, {
+    const res = await audioRequest(`${workerUrl}/format?${params}`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ transcript: currentTranscript })
-    });
+    }, 90000);
 
-    if (!res.ok) throw new Error('Worker returned ' + res.status);
+    if (!res.ok) {
+      let failure = {};
+      try { failure = await res.json(); } catch (_) {}
+      throw new Error(typeof failure.error === 'string' ? failure.error : 'Note service returned HTTP ' + res.status + '. Your transcript is unchanged.');
+    }
     const data = await res.json();
     const soapText = data.note || data.text || data.content || '';
+    if(typeof soapText!=='string'||!soapText.trim())throw new Error('The service returned an empty note. Your transcript is available; retry Format.');
 
     currentSOAP = soapText;
     renderSOAP(soapText);
@@ -1688,11 +1669,14 @@ async function formatSOAP() {
     showToast((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note formatted!', 'success');
 
     // Update saved note with SOAP
-    if (currentNoteId) updateSavedNote(currentNoteId, { soap: soapText });
+    await autoSaveTranscript();
 
   } catch (err) {
     console.error(err);
-    setStatus('Formatting failed', 'error');
+    const message = err.message === 'Failed to fetch'
+      ? 'Could not connect to the note service. Your transcript is unchanged. Check the connection or contact support.'
+      : err.message;
+    setStatus(message + ' Choose Format to retry after resolving the issue.', 'error');
     showToast('Could not format note: ' + err.message, 'error');
   } finally {
     document.getElementById('formatBtn').disabled = false;
@@ -1787,6 +1771,7 @@ function openAddProvider() {
   document.getElementById('addProviderModal').classList.add('open');
 }
 function closeAddProvider() {
+  document.getElementById('newprov_result_token').textContent = '';
   document.getElementById('addProviderModal').classList.remove('open');
 }
 async function submitAddProvider() {
@@ -1817,16 +1802,9 @@ async function submitAddProvider() {
       throw new Error(err.error || 'HTTP ' + res.status);
     }
     const data = await res.json();
-    // Show success view with token + QR code
+    // Display credentials locally; never send them to an external QR service.
     document.getElementById('newprov_result_name').textContent = data.display_name;
     document.getElementById('newprov_result_token').textContent = data.token;
-    const frontendUrl = location.origin + location.pathname;
-    const autoLoginUrl = frontendUrl + '#w=' + encodeURIComponent(base) + '&t=' + data.token;
-    const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=' + encodeURIComponent(autoLoginUrl);
-    document.getElementById('newprov_result_qr').innerHTML = `
-      <img src="${qrApi}" alt="Auto-login QR for ${data.display_name}" style="max-width:240px; border:8px solid #fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
-      <div style="font-size:11px; color:var(--gray-600); margin-top:6px;">Scan with phone camera to set up ${data.display_name}'s device</div>
-    `;
     // Hide the form, show the result
     document.querySelectorAll('#addProviderModal .settings-field').forEach(f => f.style.display = 'none');
     document.querySelector('#addProviderModal .modal-actions').style.display = 'none';
@@ -1839,6 +1817,7 @@ async function submitAddProvider() {
 
 // ---- Paste / Type Transcript flow ----
 function openPasteTranscript() {
+  if(encounterBusy()||hasUntranscribedAudio){showToast('Finish the current recording first.','warning');return;}
   document.getElementById('paste_patient_name').value = document.getElementById('patientName').value || '';
   document.getElementById('paste_transcript_text').value = '';
   document.getElementById('pasteTranscriptModal').classList.add('open');
@@ -2069,8 +2048,8 @@ function getApiAuth() {
   return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 }
 
-async function cloudSaveNote(note) {
-  const base = getApiBase();
+async function cloudSaveNote(note, connection = { base: getApiBase(), token: localStorage.getItem('vrx_token') || '' }) {
+  const base = connection.base;
   if (!base) throw new Error('Worker URL not set');
   // Map browser camelCase → server snake_case
   const payload = {
@@ -2086,9 +2065,9 @@ async function cloudSaveNote(note) {
     charted: note.charted ? 1 : 0,
     saved_at: note.savedAt || note.saved_at || Date.now(),
   };
-  const res = await fetch(base + '/notes', {
+  const res = await audioRequest(base + '/notes', {
     method: 'POST',
-    headers: getApiAuth(),
+    headers: { 'Authorization': 'Bearer ' + connection.token, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Cloud save failed: ' + res.status);
@@ -2120,11 +2099,14 @@ async function cloudListNotes() {
 
 async function cloudDeleteNote(id) {
   const base = getApiBase();
-  if (!base) return;
-  await fetch(base + '/notes/' + encodeURIComponent(id), {
+  if (!base) throw new Error('Not connected');
+  const connection = await noteSyncContext();
+  if (!await flushPendingNotes(connection)) throw new Error('Wait for cloud sync before deleting');
+  const res = await fetch(base + '/notes/' + encodeURIComponent(id), {
     method: 'DELETE',
     headers: getApiAuth(),
   });
+  if (!res.ok) throw new Error('Delete failed: ' + res.status);
 }
 
 // --- Local cache (offline-friendly fallback) ---
@@ -2133,7 +2115,7 @@ function loadCachedNotes() {
   catch { return []; }
 }
 function saveCachedNotes(notes) {
-  try { localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(notes)); } catch {}
+  localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(notes));
 }
 
 // --- Save / update flows ---
@@ -2154,47 +2136,128 @@ function buildCurrentNoteEntry() {
   };
 }
 
-async function autoSaveTranscript() {
-  const entry = buildCurrentNoteEntry();
-  // Local cache first (instant), then push to cloud
-  notesCache = notesCache.filter(n => n.id !== entry.id);
-  notesCache.unshift(entry);
-  saveCachedNotes(notesCache);
-  try {
-    await cloudSaveNote(entry);
-  } catch (err) {
-    console.error('Cloud save failed (kept local copy):', err);
-    showToast('Saved locally — cloud sync failed', 'warning');
+// Pending writes survive reloads and are isolated by API/account. Never retry a
+// previous provider's notes with the credentials currently entered in Settings.
+const PENDING_NOTES_PREFIX = 'vrx_pending_notes_v1_';
+const noteSyncJobs = new Map();
+let noteRetryTimer = null;
+let noteRetryDelay = 15000;
+let noteQueueRevision = 0;
+
+async function noteSyncContext() {
+  const base = getApiBase(), token = localStorage.getItem('vrx_token') || '';
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base + '\n' + token));
+  const key = PENDING_NOTES_PREFIX + Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
+  return { base, token, key };
+}
+function readPendingNotes(key) {
+  return JSON.parse(localStorage.getItem(key) || '{}');
+}
+function savePendingNotes(key, pending) {
+  localStorage.setItem(key, JSON.stringify(pending));
+}
+function showNoteSyncStatus(message, saved = false) {
+  for (const id of ['saveIndicator', 'cloudSaveStatus']) {
+    const el = document.getElementById(id);
+    el.hidden = false;
+    el.textContent = message;
+    el.style.color = saved ? 'var(--success)' : 'var(--gray-600)';
   }
 }
-
-async function updateSavedNote(id, updates) {
-  const idx = notesCache.findIndex(n => n.id === id);
-  if (idx >= 0) {
-    notesCache[idx] = { ...notesCache[idx], ...updates };
-    saveCachedNotes(notesCache);
-    try {
-      await cloudSaveNote(notesCache[idx]);
-    } catch (err) {
-      console.error('Cloud update failed:', err);
+function retryNoteSyncLater(delay = noteRetryDelay) {
+  clearTimeout(noteRetryTimer);
+  noteRetryTimer = setTimeout(() => { noteRetryTimer = null; resumeNoteSync(); }, delay);
+}
+function resumeNoteSync() {
+  return flushPendingNotes().catch(() => {
+    showNoteSyncStatus('Could not save on this device. Keep this tab open and copy the note.');
+  });
+}
+async function flushPendingNotes(connection) {
+  connection = connection || await noteSyncContext();
+  if (noteSyncJobs.has(connection.key)) {
+    const synced = await noteSyncJobs.get(connection.key);
+    if (synced && Object.keys(readPendingNotes(connection.key)).length) return flushPendingNotes(connection);
+    return synced;
+  }
+  const task = (async () => {
+    let didSave = false;
+    while (true) {
+      const pending = readPendingNotes(connection.key);
+      const next = Object.values(pending)[0];
+      if (!next) {
+        if (didSave) showNoteSyncStatus('Saved to cloud ✓ — available on your other devices', true);
+        noteRetryDelay = 15000;
+        return true;
+      }
+      showNoteSyncStatus('Saving to cloud…');
+      try {
+        if (!connection.base || !connection.token) throw new Error('Not connected');
+        await cloudSaveNote(next.note, connection);
+      } catch (error) {
+        showNoteSyncStatus('Saved on this device — waiting to sync. Keep VoiceRx open; it will retry automatically.');
+        retryNoteSyncLater();
+        noteRetryDelay = Math.min(noteRetryDelay * 2, 60000);
+        return false;
+      }
+      // An edit may have arrived during the request. Remove only the version
+      // actually accepted, then send the latest version in order.
+      const latest = readPendingNotes(connection.key);
+      if (latest[next.note.id]?.revision === next.revision) delete latest[next.note.id];
+      savePendingNotes(connection.key, latest);
+      didSave = true;
     }
-  } else {
-    // Not in cache — build from current state and save
-    const entry = { ...buildCurrentNoteEntry(), ...updates, id };
+  })();
+  noteSyncJobs.set(connection.key, task);
+  try { return await task; }
+  finally { noteSyncJobs.delete(connection.key); }
+}
+async function queueNoteSave(entry, defer = false) {
+  const revision = ++noteQueueRevision;
+  const connectionPromise = noteSyncContext();
+  try {
+    notesCache = notesCache.filter(n => n.id !== entry.id);
     notesCache.unshift(entry);
     saveCachedNotes(notesCache);
-    try { await cloudSaveNote(entry); } catch (err) { console.error(err); }
+    const connection = await connectionPromise;
+    const pending = readPendingNotes(connection.key);
+    // Keep the most recent edit if hashing completes out of order.
+    const prior = pending[entry.id];
+    if (!prior || prior.session !== noteQueueSession || prior.order < revision) {
+      pending[entry.id] = { note: entry, revision: crypto.randomUUID(), session: noteQueueSession, order: revision };
+      savePendingNotes(connection.key, pending);
+    }
+    showNoteSyncStatus('Saved on this device — saving to cloud…');
+    if (defer) { retryNoteSyncLater(600); return false; }
+    return await flushPendingNotes(connection);
+  } catch (error) {
+    showNoteSyncStatus('Could not save on this device. Keep this tab open and copy the note.');
+    throw error;
   }
 }
-
+const noteQueueSession = crypto.randomUUID();
+async function autoSaveTranscript(defer = false) {
+  if (!currentTranscript && !currentSOAP) return false;
+  currentNoteId = currentNoteId || 'vrx_' + crypto.randomUUID();
+  const existing = notesCache.find(n => n.id === currentNoteId) || {};
+  return queueNoteSave({ ...existing, ...buildCurrentNoteEntry() }, defer);
+}
+async function updateSavedNote(id, updates) {
+  const existing = notesCache.find(n => n.id === id) || loadCachedNotes().find(n => n.id === id);
+  const entry = existing || { ...buildCurrentNoteEntry(), id };
+  return queueNoteSave({ ...entry, ...updates });
+}
 async function saveNote() {
   if (!currentTranscript && !currentSOAP) {
     showToast('Nothing to save', 'error');
     return;
   }
-  await autoSaveTranscript();
-  if (currentSOAP) await updateSavedNote(currentNoteId, { soap: currentSOAP });
-  showToast('Note saved to cloud ✓', 'success');
+  try {
+    const synced = await autoSaveTranscript();
+    showToast(synced ? 'Note saved to cloud ✓' : 'Saved on this device — waiting to sync', synced ? 'success' : 'warning');
+  } catch (error) {
+    showToast('Could not save. Keep this tab open and copy the note.', 'error');
+  }
 }
 
 // kept for compatibility — no longer needed since server doesn't expire
@@ -2207,6 +2270,9 @@ async function renderNotesList() {
   let notes = [];
   try {
     notes = await cloudListNotes();
+    const connection = await noteSyncContext();
+    const pending = Object.values(readPendingNotes(connection.key)).map(item => item.note);
+    notes = [...pending, ...notes.filter(n => !pending.some(p => p.id === n.id))];
     notesCache = notes;
     saveCachedNotes(notes);
   } catch (err) {
@@ -2285,8 +2351,8 @@ async function toggleViewedNoteCharted() {
   note.charted = newCharted;
   saveCachedNotes(notesCache);
   try {
-    await cloudSaveNote(note);
-    showToast(newCharted ? 'Marked as charted ✓' : 'Unmarked charted', 'success');
+    const synced = await updateSavedNote(note.id, { charted: newCharted });
+    showToast(synced ? (newCharted ? 'Marked as charted ✓' : 'Unmarked charted') : 'Saved on this device — waiting to sync', synced ? 'success' : 'warning');
     // Refresh modal display
     viewNote(viewedNoteId);
     // Refresh background list (if on Notes tab)
@@ -2300,6 +2366,7 @@ async function toggleViewedNoteCharted() {
 
 // Loads a saved note back into the active workspace so it can be reformatted, summarized, printed, etc.
 function continueEditingViewedNote() {
+  if(encounterBusy()||hasUntranscribedAudio){showToast('Finish the current recording first.','warning');return;}
   if (!viewedNoteId) return;
   const note = notesCache.find(n => n.id === viewedNoteId) || loadCachedNotes().find(n => n.id === viewedNoteId);
   if (!note) { showToast('Note not found', 'error'); return; }
@@ -2390,7 +2457,7 @@ async function clearAllNotes() {
   if (!confirm('Clear ALL saved notes from the cloud? This cannot be undone.')) return;
   const notes = notesCache.length ? notesCache : loadCachedNotes();
   for (const n of notes) {
-    try { await cloudDeleteNote(n.id); } catch (e) { console.error(e); }
+    try { await cloudDeleteNote(n.id); } catch (e) { showToast('Could not delete all notes — local copies kept', 'error'); return; }
   }
   notesCache = [];
   localStorage.removeItem(NOTES_CACHE_KEY);
@@ -2402,10 +2469,17 @@ async function clearAllNotes() {
 // NEW ENCOUNTER
 // =====================
 function startNewEncounter() {
-  if (isRecording) {
+  if (encounterBusy()) {
     showToast('Stop recording first', 'error');
     return;
   }
+  if(hasUntranscribedAudio && !confirm(lastAudioSaveSucceeded
+    ? 'This recording is not transcribed. Keep its recovery copy on this device and start a new encounter?'
+    : 'This recording is only in this tab. Download it first if needed. Starting a new encounter will discard this audio. Continue?'))return;
+  hasUntranscribedAudio=false;setEncounterLocked(false);
+  audioChunks=[];recordingContext=null;pendingTranscriptId=null;pendingTranscriptBase=null;currentAudioSessionId=null;
+  if(audioObjectUrl){URL.revokeObjectURL(audioObjectUrl);audioObjectUrl=null;}
+  document.getElementById('recordingPlayback').removeAttribute('src');document.getElementById('recordingRecovery').hidden=true;
   currentTranscript = '';
   currentSOAP = '';
   currentTranslationEn = '';

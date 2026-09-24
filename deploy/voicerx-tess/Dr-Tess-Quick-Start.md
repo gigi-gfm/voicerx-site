@@ -1,59 +1,21 @@
-# VoiceRx — Quick Start for Dr. Tess
+# VoiceRx — direct recording for Dr. Tess
 
-Open VoiceRx on the phone: **voicerx-tess.winter-shadow-e82d.workers.dev**
-(Use the home-screen icon if it's saved there.)
+Open https://voicerx-tess.winter-shadow-e82d.workers.dev in your browser.
+These instructions describe the direct-recording update; they take effect after deployment.
 
----
+1. Confirm Dr. Tess's account is connected in Settings.
+2. Enter the patient's name, visit date, complaint, pronouns, language, and note type.
+3. Tap **Record encounter**. Allow microphone access when asked.
+4. Keep VoiceRx open and the screen on during the encounter. The timer and recording indicator show when capture is active.
+5. Tap **Stop recording**. VoiceRx transcribes the audio and prepares a draft note automatically.
+6. Review and correct the transcript and draft before copying the note into the patient chart.
 
-## ⭐ Making a note (the reliable way)
+No separate recording app or manual file upload is required for this workflow.
 
-**1. Record the visit with the phone's Voice Recorder app.**
-   - This is the built-in recorder — it keeps recording even if the screen
-     goes dark or you switch apps. Use this for any real/long visit.
+If transcription fails, use the playback controls to check the recording, then **Retry transcription**. Retry checks an existing transcription job when available. You can also download the captured audio. The page reports whether a recovery copy was saved on this device; if storage fails, keep the tab open.
 
-**2. Open VoiceRx and set up the note.**
-   - Type the **patient's name**
-   - Pick the **pronouns** (she/her, he/him, they/them)
-   - Pick the **note type** (SOAP, etc.)
+After reopening VoiceRx, accept the recovery prompt to restore an unfinished recording. Declining the prompt does not delete it. Choosing **+ New** asks before leaving an untranscribed recording.
 
-**3. Tap "⬆ Upload a recording" and choose the file you just recorded.**
-   - It will upload, transcribe, and write the note. Longer recordings take
-     a few minutes — that's normal.
+A browser or operating system can interrupt microphone access when switching apps, locking the screen, or receiving a call. A screen wake lock is requested when supported, but uninterrupted background recording is not guaranteed. If interrupted, review the captured audio before retrying.
 
-**Quick notes at the desk?** You can also just tap the **🎙 mic button** to
-record right in VoiceRx. Keep the screen on while it records.
-
----
-
-## 📋 Getting the note into the chart (AtlasMD) + onto the desktop
-
-**1. In VoiceRx, tap "Copy" on the finished note.**
-
-**2. Open AtlasMD on the phone** — go to **atlas.md** in Chrome and log in
-   (this is the provider EMR, *not* the patient app).
-   - Open the patient → paste the note into their chart note → **save**.
-
-**3. At the computer, log into atlas.md** → open that patient → the note is
-   there → **edit and finish it on the big screen**.
-
-Because AtlasMD is online, anything you paste on the phone shows up on every
-computer right away.
-
----
-
-## ✅ Tips for it to work every time
-- Use the **Voice Recorder app → Upload** for important visits. The mic
-  button inside VoiceRx can stop if the screen sleeps; an uploaded file always
-  works.
-- Keep the phone **off Battery Saver** (or on a charger) while recording.
-- If a note won't **Copy**, a box pops up with the text — press and hold,
-  Select All, Copy.
-- VoiceRx notes are saved **only on this phone** (for 72 hours). The real home
-  for the note is the AtlasMD chart — always paste it there.
-
----
-
-## ⚠️ Safety
-- The phone must have a **passcode + encryption** on (notes are unencrypted in
-  the browser until charted).
-- Once a note is in AtlasMD, you can clear it from VoiceRx.
+Notes are cached on this device and cloud saving is attempted. A cloud-sync failure is reported; verify the final note is saved in the patient chart.
