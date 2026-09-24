@@ -836,9 +836,9 @@ body {
       <p style="font-size:13px; margin-bottom:10px;"><strong>Access token:</strong></p>
       <code id="newprov_result_token" style="display:block; padding:8px; background:#fff; border:1px solid var(--gray-200); border-radius:6px; font-size:11px; word-break:break-all; margin-bottom:14px;"></code>
       <p style="font-size:12px; color:var(--gray-600); margin-bottom:10px;">
-        Save this token in Bitwarden NOW — it won't be shown again. Share the QR code below with the provider for one-tap setup.
+        Save this token in Bitwarden. On the provider’s device, open VoiceRx Settings and enter the API address and this token privately.
       </p>
-      <div id="newprov_result_qr" style="text-align:center; padding:14px 0;"></div>
+
       <button class="modal-btn confirm" onclick="closeAddProvider()" style="width:100%;">Done</button>
     </div>
   </div>
@@ -1756,6 +1756,7 @@ function openAddProvider() {
   document.getElementById('addProviderModal').classList.add('open');
 }
 function closeAddProvider() {
+  document.getElementById('newprov_result_token').textContent = '';
   document.getElementById('addProviderModal').classList.remove('open');
 }
 async function submitAddProvider() {
@@ -1786,16 +1787,9 @@ async function submitAddProvider() {
       throw new Error(err.error || 'HTTP ' + res.status);
     }
     const data = await res.json();
-    // Show success view with token + QR code
+    // Display credentials locally; never send them to an external QR service.
     document.getElementById('newprov_result_name').textContent = data.display_name;
     document.getElementById('newprov_result_token').textContent = data.token;
-    const frontendUrl = location.origin + location.pathname;
-    const autoLoginUrl = frontendUrl + '#w=' + encodeURIComponent(base) + '&t=' + data.token;
-    const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=' + encodeURIComponent(autoLoginUrl);
-    document.getElementById('newprov_result_qr').innerHTML = `
-      <img src="${qrApi}" alt="Auto-login QR for ${data.display_name}" style="max-width:240px; border:8px solid #fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
-      <div style="font-size:11px; color:var(--gray-600); margin-top:6px;">Scan with phone camera to set up ${data.display_name}'s device</div>
-    `;
     // Hide the form, show the result
     document.querySelectorAll('#addProviderModal .settings-field').forEach(f => f.style.display = 'none');
     document.querySelector('#addProviderModal .modal-actions').style.display = 'none';
