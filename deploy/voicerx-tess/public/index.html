@@ -720,6 +720,7 @@ body {
           <button class="action-btn primary" onclick="saveNote()">Save Note</button>
         </div>
       </div>
+      <div class="settings-note" style="margin-bottom:12px;">Review vitals, examination findings, medications, imaging, assessment, and plan against the dictation before charting.</div>
       <div id="soapContent"></div>
     </div>
 
@@ -903,7 +904,8 @@ body {
     </div>
     <div class="settings-field">
       <label>Voice Style Examples (helps the AI sound like you)</label>
-      <textarea id="prov_style_examples" rows="8" placeholder="Paste 2–5 examples of your actual past SOAP notes here. The AI will match your phrasing, structure, and detail level." style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;background:var(--gray-50);resize:vertical;"></textarea>
+      <textarea id="prov_style_examples" rows="8" placeholder="Describe your note style without patient identifiers. The AI will match your phrasing, structure, and detail level." style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;background:var(--gray-50);resize:vertical;"></textarea>
+      <button type="button" class="action-btn outline" onclick="useDrTessNoteStyle()">Use Dr. Tess's note style</button>
       <div class="settings-note">More examples = better voice match. Paste in real notes from past patients.</div>
     </div>
     <div class="modal-actions">
@@ -1164,6 +1166,17 @@ function applyProviderDefaultsIfFresh() {
 }
 
 // ---- Provider Settings modal ----
+// This describes formatting only. Do not store a real patient's note as a style example.
+const DR_TESS_NOTE_STYLE = `Use Dr. Tess's clinical note style. Begin with Patient: [name] and Date of Service: [date] on separate lines. Use plain headings Subjective, Objective, Assessment, and Plan in that order. Do not add a separate SOAP Note title, Provider line, horizontal rules, Markdown markers, or billing codes. In Subjective, write detailed connected paragraphs that preserve dictated chronology, patient statements, family history, testing, prior treatment, and effects on daily function. After the first identification, use the patient's first name or pronouns naturally instead of repeating the full name in every paragraph. In Objective, use short labels for only the vitals, examination findings, and imaging actually documented. Copy every measurement and unit exactly from the dictation; do not estimate missing vitals, weight, height, BMI, or examination findings. Distinguish a patient's report of imaging from a report the physician reviewed. Use a numbered Assessment with only supported diagnoses and reasoning. Use a separately numbered Plan with only actions, counseling, medication decisions, prescriptions, and follow-up actually dictated. Preserve uncertainty and attribution. Never add unsupported clinical or financial details. Do not reuse any patient facts from a style sample. End after the Plan unless Dr. Tess dictated a signature.`;
+
+function useDrTessNoteStyle() {
+  const field = document.getElementById('prov_style_examples');
+  if (field.value.trim() && field.value.trim() !== DR_TESS_NOTE_STYLE &&
+      !confirm('Replace the current voice style examples with Dr. Tess\'s de-identified note style?')) return;
+  field.value = DR_TESS_NOTE_STYLE;
+  showToast('Dr. Tess note style added. Save Profile to apply it.', 'success');
+}
+
 async function openProviderSettings() {
   const base = (localStorage.getItem('vrx_worker_url') || '').replace(/\/$/, '');
   const token = localStorage.getItem('vrx_token') || '';
@@ -1681,14 +1694,16 @@ async function formatSOAP() {
     const data = await res.json();
     const soapText = data.note || data.text || data.content || '';
 
-    currentSOAP = soapText;
-    renderSOAP(soapText);
+    currentSOAP = selectedNoteType === 'SOAP'
+      ? formatDrTessDocument(soapText, patientName, visitDate)
+      : soapText;
+    renderSOAP(currentSOAP);
     updateReformatButton();
     setStatus((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note ready ✓', 'done');
     showToast((selectedNoteType === 'H&P' ? 'H&P' : 'SOAP') + ' note formatted!', 'success');
 
     // Update saved note with SOAP
-    if (currentNoteId) updateSavedNote(currentNoteId, { soap: soapText });
+    if (currentNoteId) updateSavedNote(currentNoteId, { soap: currentSOAP });
 
   } catch (err) {
     console.error(err);
@@ -1700,6 +1715,29 @@ async function formatSOAP() {
   }
 }
 
+function formatDrTessDocument(text, patientName, visitDate) {
+  // Keep the model's clinical narrative intact; only normalize document presentation.
+  const sections = ['Subjective', 'Objective', 'Assessment', 'Plan'];
+  const source = String(text || '').replace(/\r\n?/g, '\n');
+  const matches = [...source.matchAll(/^\s*(?:#{1,3}\s*)?(?:\*\*)?(Subjective|Objective|Assessment|Plan)(?:\*\*)?\s*:?\s*$/gim)];
+  if (matches.length !== 4 || matches.map(m => m[1].toLowerCase()).join(',') !== sections.map(s => s.toLowerCase()).join(',')) {
+    // An unexpected model response is preserved for clinical review, not silently rewritten.
+    return source.trim();
+  }
+  const pieces = sections.map((label, i) => {
+    const start = matches[i].index + matches[i][0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : source.length;
+    let body = source.slice(start, end).replace(/^\s*#{1,3}\s*Suggested Billing Codes[\s\S]*$/im, '');
+    body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/^\s*---+\s*$/gm, '')
+      .replace(/^\s*[-*]\s+/gm, '')
+      .trim();
+    return `${label}\n${body || 'Not documented'}`;
+  });
+  const header = `Patient: ${patientName || 'Patient'}\nDate of Service: ${visitDate || 'Not documented'}`;
+  return `${header}\n\n${pieces.join('\n\n')}`;
+}
+
 function renderSOAP(text) {
   const card = document.getElementById('soapCard');
   const content = document.getElementById('soapContent');
@@ -1708,6 +1746,8 @@ function renderSOAP(text) {
   // Try to parse SOAP sections
   const sections = ['Subjective', 'Objective', 'Assessment', 'Plan'];
   let html = '';
+  const header = text.match(/^Patient:\s*[^\n]+\nDate of Service:\s*[^\n]+/i);
+  if (header) html += `<div class="soap-section"><div class="soap-content">${escHtml(header[0])}</div></div>`;
   let remaining = text;
 
   sections.forEach((section, i) => {
@@ -1773,7 +1813,10 @@ function showManualCopy(text) {
 }
 
 function copySOAP() {
-  copyText(currentSOAP, 'Note copied');
+  const body = selectedNoteType === 'SOAP'
+    ? formatDrTessDocument(currentSOAP, document.getElementById('patientName').value.trim(), document.getElementById('visitDate').value)
+    : currentSOAP;
+  copyText(body, 'Note copied');
 }
 
 // ---- Admin: Add New Provider (gigi only) ----
@@ -1951,12 +1994,15 @@ function printCurrentSOAP() {
   if (!currentSOAP) { showToast('Nothing to print', 'error'); return; }
   const patientName = document.getElementById('patientName').value || 'Patient';
   const visitDate = document.getElementById('visitDate').value || '';
-  const providerName = (currentProviderProfile && currentProviderProfile.display_name) || '';
+  const body = selectedNoteType === 'SOAP'
+    ? formatDrTessDocument(currentSOAP, patientName, visitDate)
+    : currentSOAP;
   openPrintWindow({
     title: `SOAP — ${patientName}`,
-    heading: `${patientName} — ${visitDate}`,
-    subheading: providerName ? `Provider: ${providerName}` : '',
-    body: currentSOAP,
+    heading: '',
+    subheading: '',
+    body,
+    clinicalNote: selectedNoteType === 'SOAP',
   });
 }
 
@@ -1972,29 +2018,30 @@ function printPatientSummary() {
   });
 }
 
-function openPrintWindow({ title, heading, subheading, body }) {
+function openPrintWindow({ title, heading, subheading, body, clinicalNote = false }) {
   const w = window.open('', '_blank', 'width=800,height=900');
   if (!w) { showToast('Pop-up blocked — allow pop-ups for printing', 'error'); return; }
   const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   w.document.write(`<!DOCTYPE html><html><head><title>${esc(title)}</title>
     <style>
-      body { font-family: Georgia, 'Times New Roman', serif; max-width: 7in; margin: 0.5in auto; padding: 0 0.5in; color: #111; line-height: 1.6; }
+      body { font-family: Arial, Helvetica, sans-serif; max-width: 6.5in; margin: 0.5in auto; padding: 0; color: #111; line-height: 1.35; }
       h1 { font-size: 22px; margin: 0 0 4px 0; }
       h2 { font-size: 16px; color: #555; margin: 0 0 24px 0; font-weight: normal; }
-      pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 13px; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: 11pt; line-height: 1.35; margin: 0; }
       @media print {
-        body { margin: 0; padding: 0.5in; }
+        @page { size: letter; margin: 0.8in 0.9in; }
+        body { margin: 0; padding: 0; max-width: none; }
         .no-print { display: none !important; }
       }
       .header { border-bottom: 2px solid #1a2e5a; padding-bottom: 12px; margin-bottom: 18px; }
       .footer { margin-top: 36px; font-size: 11px; color: #888; }
     </style></head><body>
-    <div class="header">
+    ${clinicalNote ? '' : `<div class="header">
       <h1>${esc(heading)}</h1>
       ${subheading ? `<h2>${esc(subheading)}</h2>` : ''}
-    </div>
+    </div>`}
     <pre>${esc(body)}</pre>
-    <div class="footer">Generated by VoiceRx · ${new Date().toLocaleString()}</div>
+    ${clinicalNote ? '' : `<div class="footer">Generated by VoiceRx · ${new Date().toLocaleString()}</div>`}
     <script>setTimeout(() => window.print(), 300);<\/script>
     </body></html>`);
   w.document.close();
