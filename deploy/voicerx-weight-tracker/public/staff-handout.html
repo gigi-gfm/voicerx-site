@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weight Tracker — Staff Quick Reference · Garcia Family Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--orange:#f97316;--orange2:#fb923c;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d8e0ec;--bg:#f2f4f8;--white:#fff;--text:#1a2535;--red:#c53030;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding:18px}
+.sheet{max-width:760px;margin:0 auto;background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(15,28,48,.08)}
+
+.hdr{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-bottom:3px solid var(--orange);color:#fff;padding:18px 26px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand img{width:34px;height:34px;border-radius:8px}
+.brand .t{font-size:20px;font-weight:600}
+.brand .t span{color:var(--orange2)}
+.brand .s{font-size:9.5px;color:rgba(255,255,255,.55);letter-spacing:.09em;text-transform:uppercase;margin-top:1px}
+.tag{text-align:right;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.6)}
+.tag b{color:rgba(255,255,255,.92);font-weight:500;font-size:11.5px}
+.title{font-size:23px;font-weight:600;margin-top:15px}
+.subtitle{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px}
+
+.scan{display:flex;align-items:center;gap:24px;padding:22px 26px;border-bottom:1px dashed var(--border)}
+.qr{flex-shrink:0;text-align:center}
+.qr img{width:170px;height:170px;display:block;border:1px solid var(--border);border-radius:12px;padding:8px;background:#fff}
+.qr .cap{font-size:10px;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.06em}
+.scan-txt{flex:1}
+.scan-txt h2{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.scan-txt p{font-size:12.5px;color:var(--slate);margin-bottom:9px}
+.url{display:inline-block;font-family:'DM Mono',monospace;font-size:13.5px;color:var(--navy);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-weight:500}
+.staffnote{font-size:11px;color:var(--muted);margin-top:9px}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.col{padding:18px 26px}
+.col:first-child{border-right:1px dashed var(--border)}
+.col h3{font-size:12px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.step{display:flex;gap:11px;margin-bottom:12px}
+.step:last-child{margin-bottom:0}
+.num{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .stxt{font-size:12px;color:var(--slate);padding-top:2px}
+.step .stxt b{color:var(--text);font-weight:600}
+
+.flow{list-style:none;font-size:12px;color:var(--slate)}
+.flow li{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px}
+.flow li:last-child{margin-bottom:0}
+.flow .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.flow b{color:var(--text);font-weight:600}
+
+.alert{margin:0 26px 18px;background:#fff6f6;border:1px solid #f1cccc;border-radius:11px;padding:11px 14px;font-size:11.5px;color:#7a2a2a;line-height:1.55}
+.alert b{color:var(--red)}
+
+.foot{background:var(--bg);border-top:1px solid var(--border);padding:13px 26px;font-size:10.5px;color:var(--muted);line-height:1.6;text-align:center}
+.foot .clinic{font-size:12px;color:var(--navy);font-weight:600;margin-bottom:3px}
+
+.printbar{max-width:760px;margin:0 auto 14px;text-align:center}
+.printbar button{font-family:inherit;font-size:13px;font-weight:500;background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;border:none;border-radius:9px;padding:10px 20px;cursor:pointer}
+
+@media print{
+  @page{margin:12mm}
+  body{background:#fff;padding:0}
+  .printbar{display:none}
+  .sheet{border:none;box-shadow:none;border-radius:0;max-width:none}
+  .hdr,.num{background:#1e3a8a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .foot{background:#f2f4f8 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .alert{background:#fff6f6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:600px){.scan{flex-direction:column;text-align:center}.cols{grid-template-columns:1fr}.col:first-child{border-right:none;border-bottom:1px dashed var(--border)}}
+</style>
+</head>
+<body>
+<div class="printbar"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
+
+<div class="sheet">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="brand">
+        <img src="icon.svg" alt="">
+        <div>
+          <div class="t">Voice<span>Rx</span> Weight Tracker</div>
+          <div class="s">Garcia Family Medicine</div>
+        </div>
+      </div>
+      <div class="tag">
+        <b>Staff Quick Reference</b><br>
+        Clinician tool — keep on the office device<br>
+        Blue Springs, Missouri
+      </div>
+    </div>
+    <div class="title">Weight Tracker — Staff Guide</div>
+    <div class="subtitle">Track patients' meals, sleep &amp; movement, and pull in what patients send you.</div>
+  </div>
+
+  <div class="scan">
+    <div class="qr">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAAklEQVR4AewaftIAAAoVSURBVO3BAY0cOhIFwHet5WEgxmUUxmUgRvIvFNxSRqNNVf3vvz8CAI8qANBQAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANBQAYCGCgA0VACg4ScNY+7wGfesfMKYOy/uWfmEMXde3bPyrcbceXXPyieMufO33bPyaswdPuOelRcVAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQ8JMPuWflXzfmzre6Z+XFmDu/yZg7n3DPyqsxdz7hnpXf4p6Vf92YO39bBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANPzki425863uWflWY+68umflX3bPyieMufPqnpVXY+78bWPuvLpn5VuNufOt7ln5RhUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANDwE/hjzJ1vdM/KqzF3PuGelVf3rLwac+fVPSvwt1UAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEDDT+CPe1ZejLnz6p6VV2PuvLpn5Te5Z+XVmDvwt1UAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEDDT77YPSv8HmPuvLpn5RPG3PlW96x8wj0r/7J7VnhTAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADT/5kDF3+Lfds/JqzJ1X96x8wj0rr8bc+S3G3Hl1z8onjLnD31cBgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANP2m4Z4V/2z0rn3DPym9yz8on3LPyW9yzwneqAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhp80jLnz6p6VV2Pu/OvuWXl1z8pvMebOtxpz51vds/JbjLnzr7tn5RtVAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANFQBoqABAw//++yMfMObOb3LPCr/HmDuv7ll5NebOq3tWXo25w993z8q3GnPn1T0rLyoA0FABgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADT8778/8mjMnVf3rHyrMXe+1T0rvBlzh3f3rPwWY+68umeFNxUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANDwv//+yJcac+fVPSu/yZg7n3DPyosxdz7hnpVvNebOJ9yzwt835s4n3LPyasydV/es/G0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQ8JOGMXde3bPyrcbceXXPyqsxdz7hnpVXY+68uGflE8bceXXPyre6Z+XVmDuv7ll5NebOi3tWfpN7Vl6NufNqzJ1X96x8owoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGj4339/5B835s4n3LPyCWPuvLpn5W8bc+db3bPyCWPu/MvuWXk15s63umflW4258+qelRcVAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQ8L///sgHjLnz6p6VTxhzhzf3rLwac4fvdc/KizF3PuGelVdj7vwm96x8owoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGj4yYfcs/JqzJ1X96x8q3tWXo258wn3rLwYc+fVPSuvxtz5hHtWPmHMnVf3rHzCmDvfaMydV/es/CZj7ry6Z+VvqwBAQwUAGioA0FABgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIafNIy5w7sxd17ds/JqzJ1vNObOJ9yz8mrMnU+4Z+XVmDuv7ll5dc8Kb8bc+YR7Vr5RBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANPzkQ+5Z+U3uWfmX3bPym9yz8glj7ry6Z+XVmDvf6J6VV2PufKt7Vl6NufMJY+68umflRQUAGioA0FABgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADT85IuNufPqnpVvNebOtxpz57e4Z+UTxtz5Vves/G1j7rwac+db3bPym9yz8rdVAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANFQBoqABAw0++2D0rr8bceXXPyqsxd17ds/JbjLnz6p6VbzXmzifcs/Jb3LPyasydV/esvBpz51vds/JqzJ1X96z8bRUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADRUAaKgAQEMFABr+998feTTmzqt7Vl6NucN3umfl1Zg7n3DPyieMufPqnpVXY+68umfl1Zg7vLln5dWYO9/qnpUXFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANFQBoqABAQwUAGioA0PC///4Iv8qYO6/uWXkx5s6re1Zejbnzre5ZeTXmzqt7Vr7RmDuv7ln5VmPu/OvuWXlRAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADT9pGHOHz7hn5dU9K3/bPSv/ujF3Xt2z8mrMnX/ZmDuv7ln5Te5Z+UYVAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQ8JMPuWflXzfmzieMufO33bPyCfesvBpz59U9K6/G3PmEe1ZejbnzW9yz8q3uWflWY+68umflRQUAGioA0FABgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADT85IuNufOt7ln5Te5Z+dvG3Hl1z8qre1ZejbnzCWPufKt7Vl6MufNqzJ1/3Zg7r+5ZeXXPyt9WAYCGCgA0VACgoQIADRUAaKgAQEMFABoqANBQAYCGCgA0VACgoQIADT+BP8bc+Zfds/IJY+68umflE8bceXHPyr9uzJ1PGHPnE+5ZeVEBgIYKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANP4GGe1ZejbnzCWPufKt7Vj5hzJ3fYswd3t2z8rdVAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANFQBoqABAw0++2D0rvLtn5W8bc+c3uWflE8bceXXPyqt7Vv62MXde3bPy6p6VbzXmzqt7Vl6NufONKgDQUAGAhgoANFQAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoOEnHzLmDp8x5g7f6Z6VV2PufKN7Vj5hzJ3fZMydV/esfKMKADRUAKChAgANFQBoqABAQwUAGioA0FABgIYKADRUAKChAgANFQBo+N9/fwQAHlUAoKECAA0VAGioAEBDBQAaKgDQUAGAhgoANFQAoKECAA0VAGj4P4uqFSTUrCWAAAAAAElFTkSuQmCC" alt="QR code to open the Weight Tracker app">
+      <div class="cap">Scan to open</div>
+    </div>
+    <div class="scan-txt">
+      <h2>Open it on the office device</h2>
+      <p>Scan the code or type the address. Tap <b>Add to Home Screen</b> so it opens like an app and works offline.</p>
+      <span class="url">voicerxweighttracker1.pages.dev</span>
+      <div class="staffnote">For staff/clinician use only — not for handing to patients. (Patients get the separate <b>Weight Diary</b> app.)</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <h3>🚀 Set up &amp; daily use</h3>
+      <div class="step"><div class="num">1</div><div class="stxt"><b>Add a patient:</b> tap <b>＋</b>, enter name (DOB/MRN optional), starting weight, and weekly goals.</div></div>
+      <div class="step"><div class="num">2</div><div class="stxt"><b>Log a week:</b> open the patient → <b>Diary</b> tab → fill meals, water, sleep, movement. Use <b>‹ ›</b> to change weeks.</div></div>
+      <div class="step"><div class="num">3</div><div class="stxt"><b>Review:</b> the <b>Summary</b> tab shows the weekly tally, goal hits, and weight/movement trends.</div></div>
+      <div class="step"><div class="num">4</div><div class="stxt"><b>Chart it:</b> tap <b>🖨</b> to print/PDF the week into AtlasMD.</div></div>
+    </div>
+    <div class="col">
+      <h3>📥 Patient logs &amp; backups</h3>
+      <ul class="flow">
+        <li><span class="ic">📤</span><div>Patient taps <b>Send my diary to the clinic</b> in their app → emails/sends you a file.</div></li>
+        <li><span class="ic">⬇</span><div>In the Tracker, tap <b>Import a patient's shared week</b> and pick that file — it merges into their record (no duplicates).</div></li>
+        <li><span class="ic">💾</span><div><b>Back up all data</b> after each clinic day — keep the file somewhere safe.</div></li>
+        <li><span class="ic">↺</span><div><b>Restore from a backup</b> to move to a new device or recover.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert">
+    <b>Patient data lives only on this device.</b> There is no cloud copy and no login — keep the device passcode-locked,
+    don't hand it to patients, and back up regularly. This tool supports care; it is not the medical record (AtlasMD is).
+  </div>
+
+  <div class="foot">
+    <div class="clinic">Garcia Family Medicine · Blue Springs, MO</div>
+    Dr. Theresa "Tess" Garcia, MD, FAAFP, DABOM · Board-Certified in Obesity Medicine
+  </div>
+</div>
+</body>
+</html>

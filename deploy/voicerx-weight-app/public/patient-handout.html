@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Weight-Management Diary — Garcia Family Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--orange:#f97316;--orange2:#fb923c;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d8e0ec;--bg:#f2f4f8;--white:#fff;--text:#1a2535;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding:18px}
+.sheet{max-width:760px;margin:0 auto;background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(15,28,48,.08)}
+
+/* header */
+.hdr{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-bottom:3px solid var(--orange);color:#fff;padding:18px 26px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand img{width:34px;height:34px;border-radius:8px}
+.brand .t{font-size:20px;font-weight:600}
+.brand .t span{color:var(--orange2)}
+.brand .s{font-size:9.5px;color:rgba(255,255,255,.55);letter-spacing:.09em;text-transform:uppercase;margin-top:1px}
+.phys{text-align:right;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.6)}
+.phys b{color:rgba(255,255,255,.92);font-weight:500;font-size:11.5px}
+.title{font-size:23px;font-weight:600;margin-top:15px}
+.subtitle{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px}
+
+/* scan band */
+.scan{display:flex;align-items:center;gap:24px;padding:24px 26px;border-bottom:1px dashed var(--border)}
+.qr{flex-shrink:0;text-align:center}
+.qr img{width:188px;height:188px;display:block;border:1px solid var(--border);border-radius:12px;padding:8px;background:#fff}
+.qr .cap{font-size:10px;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.06em}
+.scan-txt{flex:1}
+.scan-txt h2{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:7px}
+.scan-txt p{font-size:13px;color:var(--slate);margin-bottom:9px}
+.url{display:inline-block;font-family:'DM Mono',monospace;font-size:14px;color:var(--navy);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 13px;font-weight:500}
+
+/* body columns */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.col{padding:20px 26px}
+.col:first-child{border-right:1px dashed var(--border)}
+.col h3{font-size:12px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.step{display:flex;gap:11px;margin-bottom:13px}
+.step:last-child{margin-bottom:0}
+.num{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .stxt{font-size:12.5px;color:var(--slate);padding-top:2px}
+.step .stxt b{color:var(--text);font-weight:600}
+.track{list-style:none;font-size:12.5px;color:var(--slate)}
+.track li{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.track li:last-child{margin-bottom:0}
+.track .ic{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.track b{color:var(--text);font-weight:600}
+
+/* footer */
+.foot{background:var(--bg);border-top:1px solid var(--border);padding:14px 26px;font-size:10.5px;color:var(--muted);line-height:1.6;text-align:center}
+.foot b{color:var(--slate)}
+.foot .clinic{font-size:12px;color:var(--navy);font-weight:600;margin-bottom:3px}
+
+.printbar{max-width:760px;margin:0 auto 14px;text-align:center}
+.printbar button{font-family:inherit;font-size:13px;font-weight:500;background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;border:none;border-radius:9px;padding:10px 20px;cursor:pointer}
+
+@media print{
+  @page{margin:12mm}
+  body{background:#fff;padding:0}
+  .printbar{display:none}
+  .sheet{border:none;box-shadow:none;border-radius:0;max-width:none}
+  .hdr{background:#1e3a8a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .num{background:#1e3a8a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .foot{background:#f2f4f8 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:600px){.scan{flex-direction:column;text-align:center}.cols{grid-template-columns:1fr}.col:first-child{border-right:none;border-bottom:1px dashed var(--border)}}
+</style>
+</head>
+<body>
+<div class="printbar"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
+
+<div class="sheet">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="brand">
+        <img src="icon.svg" alt="">
+        <div>
+          <div class="t">Voice<span>Rx</span> Diary</div>
+          <div class="s">Garcia Family Medicine</div>
+        </div>
+      </div>
+      <div class="phys">
+        <b>Dr. Theresa "Tess" Garcia, MD, FAAFP, DABOM</b><br>
+        Board-Certified in Obesity Medicine<br>
+        Blue Springs, Missouri
+      </div>
+    </div>
+    <div class="title">Your Weight-Management Diary</div>
+    <div class="subtitle">A simple app to track your meals, sleep, and movement — right on your phone.</div>
+  </div>
+
+  <div class="scan">
+    <div class="qr">
+      <img src="data:image/png;base64,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" alt="QR code to open the Weight Diary app">
+      <div class="cap">Scan with your camera</div>
+    </div>
+    <div class="scan-txt">
+      <h2>Get started in seconds</h2>
+      <p>Point your phone's camera at the code, or type the address below into your browser. Then add it to your home screen so it opens like an app — and works even without signal.</p>
+      <span class="url">voicerxweightapp1.pages.dev</span>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <h3>📲 Install it</h3>
+      <div class="step"><div class="num">1</div><div class="stxt"><b>Scan the code</b> (or open the link) in <b>Safari</b> on iPhone or <b>Chrome</b> on Android.</div></div>
+      <div class="step"><div class="num">2</div><div class="stxt"><b>Add to Home Screen:</b><br>iPhone — tap <b>Share</b> → <b>Add to Home Screen</b>.<br>Android — tap the <b>Add to home screen</b> prompt (or menu ⋮).</div></div>
+      <div class="step"><div class="num">3</div><div class="stxt">Open it from the new <b>icon</b>. Enter your name and the goals you set with Dr. Garcia on the <b>Me</b> tab.</div></div>
+    </div>
+    <div class="col">
+      <h3>📖 Use it every day</h3>
+      <ul class="track">
+        <li><span class="ic">🍽️</span><div><b>Meals</b> — jot down breakfast, lunch, dinner, snacks &amp; water.</div></li>
+        <li><span class="ic">😴</span><div><b>Sleep</b> — hours and how rested you felt.</div></li>
+        <li><span class="ic">🏃</span><div><b>Movement</b> — what you did and for how long.</div></li>
+        <li><span class="ic">📊</span><div><b>Check your week</b> on the Summary tab for your tally &amp; progress.</div></li>
+        <li><span class="ic">📤</span><div><b>Send it to us</b> — tap <b>Send my diary to the clinic</b> before your visit.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="clinic">Garcia Family Medicine · Blue Springs, MO</div>
+    <b>Private to your phone.</b> What you type stays on your device — nothing is uploaded until you choose to send it.
+    This diary supports your care; it isn't a substitute for talking with Dr. Garcia. Bring your questions to every visit.
+  </div>
+</div>
+</body>
+</html>
