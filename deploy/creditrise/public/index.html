@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b2b21">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CreditRise">
+<title>CreditRise · DIY Credit Repair</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#0b2b21;--green2:#12463a;--emerald:#0f9d6b;--emerald2:#12b981;
+  --gold:#e0a83b;--gold2:#f4c15e;--goldlt:#fbf3e0;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d9e1dc;--bg:#f2f6f3;--white:#fff;
+  --red:#c53030;--redlt:#fdecec;--amber:#b7620a;--amberlt:#fef3e2;
+  --grn:#1a7a52;--grnlt:#e5f5ee;--text:#16241d;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#0b2b21,#12463a);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
+.shell{display:flex;flex-direction:column;min-height:100dvh;max-width:520px;margin:0 auto;background:var(--bg)}
+
+/* ── HEADER ─────────────────────────────────────────────────── */
+.hdr{background:linear-gradient(135deg,#0b2b21,#12463a);border-bottom:2px solid var(--gold);padding:12px 16px 11px;position:sticky;top:0;z-index:20}
+.hdr-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.logo{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.01em}
+.logo span{color:var(--gold2)}
+.logo-sub{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:0.11em;text-transform:uppercase;margin-top:1px}
+.gear-btn{background:rgba(255,255,255,0.09);border:none;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.75);font-size:16px}
+.gear-btn:hover{background:rgba(255,255,255,0.16)}
+.you-bar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 11px;cursor:pointer}
+.you-bar:hover{background:rgba(255,255,255,0.1)}
+.you-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--green);font-size:12px;flex-shrink:0}
+.you-name{font-size:13px;font-weight:600;color:rgba(255,255,255,0.9)}
+.you-hint{font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px}
+.you-edit{margin-left:auto;font-size:11px;color:var(--gold2)}
+
+/* ── TABS ───────────────────────────────────────────────────── */
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;overflow-x:auto}
+.tab{flex:1;min-width:70px;padding:11px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.15s;white-space:nowrap}
+.tab.active{color:var(--green2);border-bottom-color:var(--gold)}
+.tab .ti{display:block;font-size:16px;margin-bottom:2px}
+
+/* ── PANES ──────────────────────────────────────────────────── */
+.pane{display:none;flex-direction:column;padding:16px 14px 90px}
+.pane.active{display:flex}
+.sec-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;color:var(--slate);text-transform:uppercase;letter-spacing:0.05em;margin:4px 2px 10px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:13px;box-shadow:0 1px 3px rgba(11,43,33,0.04)}
+
+/* Dashboard score cards */
+.score-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.score-card{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:12px 8px;text-align:center;position:relative;overflow:hidden}
+.score-card .bureau{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.score-card .val{font-family:'Poppins',sans-serif;font-size:27px;font-weight:700;line-height:1.1;margin:3px 0 1px}
+.score-card .delta{font-size:10px;font-weight:600}
+.delta.up{color:var(--grn)}.delta.down{color:var(--red)}.delta.flat{color:var(--muted)}
+.score-card.editing input{width:100%;text-align:center;font-family:'Poppins',sans-serif;font-size:24px;font-weight:700;border:1.5px solid var(--emerald);border-radius:7px;padding:2px}
+
+.grade-bar{height:6px;border-radius:4px;background:var(--border);margin-top:8px;overflow:hidden}
+.grade-fill{height:100%;border-radius:4px;transition:width 0.5s}
+
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:13px 14px}
+.stat .n{font-family:'Poppins',sans-serif;font-size:24px;font-weight:700;color:var(--green2)}
+.stat .l{font-size:11px;color:var(--muted);margin-top:1px}
+.stat.accent{background:linear-gradient(135deg,#0f9d6b,#12b981);border:none;color:#fff}
+.stat.accent .n{color:#fff}.stat.accent .l{color:rgba(255,255,255,0.85)}
+
+.progress-wrap{margin-top:4px}
+.progress-track{height:11px;border-radius:7px;background:var(--border);overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--emerald),var(--gold));border-radius:7px;transition:width 0.5s}
+.progress-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:11px 16px;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:linear-gradient(135deg,var(--emerald),var(--emerald2));color:#fff}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--green)}
+.btn-ghost{background:var(--bg);color:var(--slate);border:1px solid var(--border)}
+.btn-block{width:100%}
+.btn-sm{padding:7px 12px;font-size:12.5px;border-radius:8px}
+.btn-danger{background:var(--redlt);color:var(--red)}
+
+/* Items list */
+.item{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:13px 14px;margin-bottom:11px}
+.item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.item-name{font-size:15px;font-weight:600;color:var(--text)}
+.item-meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+.item-amt{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--red);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:0.03em}
+.chip.todo{background:var(--amberlt);color:var(--amber)}
+.chip.disputing{background:#e8eefc;color:#2647c0}
+.chip.verify{background:var(--goldlt);color:var(--amber)}
+.chip.removed{background:var(--grnlt);color:var(--grn)}
+.chip.neg{background:var(--redlt);color:var(--red)}
+.item-row2{display:flex;align-items:center;gap:7px;margin-top:11px;flex-wrap:wrap}
+.item-bureaus{display:flex;gap:4px}
+.b-dot{width:19px;height:19px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;opacity:0.28}
+.b-dot.on{opacity:1}
+.b-eq{background:#8b1a2b}.b-ex{background:#1a4d8b}.b-tu{background:#1a7a52}
+
+/* Empty state */
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty .ico{font-size:40px;margin-bottom:10px;opacity:0.4}
+.empty p{font-size:13px;line-height:1.5}
+
+/* Roadmap */
+.step{display:flex;gap:13px;margin-bottom:4px}
+.step-rail{display:flex;flex-direction:column;align-items:center}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--white);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--muted);flex-shrink:0;cursor:pointer;transition:all 0.2s}
+.step.done .step-num{background:linear-gradient(135deg,var(--emerald),var(--emerald2));border-color:var(--emerald);color:#fff}
+.step-line{width:2px;flex:1;background:var(--border);margin:3px 0}
+.step.done .step-line{background:var(--emerald)}
+.step-body{flex:1;padding-bottom:20px}
+.step-title{font-size:15px;font-weight:600;color:var(--text)}
+.step.done .step-title{color:var(--muted);text-decoration:line-through}
+.step-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+
+/* Letters */
+.letter-type{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:11px;cursor:pointer;transition:all 0.15s}
+.letter-type:hover{border-color:var(--emerald);box-shadow:0 2px 8px rgba(15,157,107,0.1)}
+.lt-ico{width:42px;height:42px;border-radius:11px;background:var(--goldlt);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.lt-body{flex:1}
+.lt-title{font-size:14.5px;font-weight:600;color:var(--text)}
+.lt-desc{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+.lt-arrow{color:var(--muted);font-size:18px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(11,24,19,0.55);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--bg);width:100%;max-width:520px;max-height:92dvh;border-radius:20px 20px 0 0;overflow-y:auto;animation:slideup 0.22s ease}
+@keyframes slideup{from{transform:translateY(30px);opacity:0.5}to{transform:translateY(0);opacity:1}}
+.modal-hdr{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border);z-index:5}
+.modal-title{font-family:'Poppins',sans-serif;font-size:17px;font-weight:600}
+.modal-close{background:var(--border);border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--slate)}
+.modal-body{padding:16px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--slate);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--white);color:var(--text)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--emerald)}
+.field textarea{resize:vertical;min-height:70px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bureau-pick{display:flex;gap:8px}
+.bp{flex:1;text-align:center;padding:10px 4px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted)}
+.bp.on{border-color:var(--emerald);background:var(--grnlt);color:var(--grn)}
+.status-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sp{padding:9px;border:1.5px solid var(--border);border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;color:var(--muted)}
+.sp.on{border-color:var(--emerald);background:var(--grnlt);color:var(--grn)}
+
+/* Letter output */
+.letter-out{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:16px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--text);max-height:340px;overflow-y:auto}
+.tip{background:var(--goldlt);border:1px solid #efd9a3;border-radius:11px;padding:12px 13px;font-size:12.5px;color:#7a5a10;line-height:1.5;margin-bottom:13px}
+.tip b{color:#5c4408}
+
+/* Education */
+.edu{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:15px;margin-bottom:11px}
+.edu-q{font-size:14px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:10px}
+.edu-a{font-size:13px;color:var(--slate);line-height:1.6;margin-top:9px;display:none}
+.edu.open .edu-a{display:block}
+.edu-q .caret{transition:transform 0.2s;color:var(--muted)}
+.edu.open .edu-q .caret{transform:rotate(90deg)}
+
+/* Mail clock on item cards */
+.clock{font-size:11.5px;font-weight:600;margin-top:9px;padding:6px 10px;border-radius:8px}
+.clock.ok{background:var(--grnlt);color:var(--grn)}
+.clock.soon{background:var(--goldlt);color:var(--amber)}
+.clock.overdue{background:var(--redlt);color:var(--red)}
+.rounds{font-size:11px;font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:3px 9px;border-radius:20px;cursor:pointer}
+
+/* Utilization */
+.ucard-list{border-top:1px solid var(--border);margin-top:4px}
+.ucard-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.ucard-name{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ucard-nums{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.ucard-pct{font-weight:700;min-width:34px;text-align:right}
+.ucard-del{color:var(--muted);cursor:pointer;padding:0 2px;font-size:13px}
+
+/* Score Journey */
+.sj-list{margin-top:11px;border-top:1px solid var(--border)}
+.sj-ms{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;opacity:.5}
+.sj-ms.done{opacity:1}
+.sj-ms.next{opacity:1;background:var(--goldlt);margin:0 -7px;padding:9px 7px;border-radius:9px;border-bottom:none}
+.sj-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.sj-ms.done .sj-dot{background:var(--emerald);border-color:var(--emerald)}
+.sj-score{font-weight:700;width:34px;flex-shrink:0}
+.sj-unlock{color:var(--slate);font-size:12.5px}
+
+/* Payment Planner */
+.pc-card{border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:9px}
+.pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pc-name{font-weight:600;font-size:13.5px}
+.pc-util{font-size:11.5px;font-weight:700}
+.pc-good{font-size:12px;color:var(--grn);background:var(--grnlt);border-radius:8px;padding:7px 9px}
+.pc-rows{display:flex;flex-direction:column;gap:6px}
+.pc-row{display:flex;align-items:center;gap:9px;font-size:12px}
+.pc-row .pc-d{flex-shrink:0;width:34px;height:26px;border-radius:7px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--slate)}
+.pc-row.hot .pc-d{background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;color:#fff}
+.pc-row .pc-a{flex:1;color:var(--text)}
+.pc-row .pc-w{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.pc-memo{text-align:center;font-size:12px;color:var(--slate);background:var(--goldlt);border-radius:8px;padding:8px;margin-top:4px}
+
+/* Dispute history */
+.hist-list{display:flex;flex-direction:column;gap:9px}
+.hist{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:11px 12px}
+.hist-top{display:flex;align-items:baseline;gap:7px}
+.hist-type{font-size:13px;font-weight:600;color:var(--text)}
+.hist-to{font-size:11px;color:var(--muted)}
+.hist-meta{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.hist-status{margin-top:7px}
+.hist-badge{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px}
+.hist-badge.pend{background:#e8eefc;color:#2647c0}
+.hist-badge.over{background:var(--redlt);color:var(--red)}
+.hist-badge.del{background:var(--grnlt);color:var(--grn)}
+.hist-badge.ver{background:var(--goldlt);color:var(--amber)}
+.hist-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.hist-actions .btn-sm{padding:5px 9px;font-size:11.5px}
+
+.disclaimer{font-size:10.5px;color:var(--muted);line-height:1.5;text-align:center;padding:14px 20px 4px}
+.fab{position:fixed;bottom:20px;right:calc(50% - 250px);z-index:30}
+@media(max-width:520px){.fab{right:18px}}
+.fab-btn{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;color:#fff;font-size:26px;box-shadow:0 6px 18px rgba(15,157,107,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:11px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity 0.25s;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-row1">
+      <div>
+        <div class="logo">Credit<span>Rise</span></div>
+        <div class="logo-sub">DIY Credit Repair · Your Rights, Your Way</div>
+      </div>
+      <button class="gear-btn" onclick="openProfile()">⚙</button>
+    </div>
+    <div class="you-bar" onclick="openProfile()">
+      <div class="you-av" id="youAv">?</div>
+      <div>
+        <div class="you-name" id="youName">Set up your profile</div>
+        <div class="you-hint" id="youHint">Tap to add your name &amp; mailing address</div>
+      </div>
+      <div class="you-edit">Edit ›</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" data-pane="dash"><span class="ti">📊</span>Scores</div>
+    <div class="tab" data-pane="items"><span class="ti">🧾</span>Items</div>
+    <div class="tab" data-pane="letters"><span class="ti">✉️</span>Letters</div>
+    <div class="tab" data-pane="plan"><span class="ti">🗺️</span>Plan</div>
+    <div class="tab" data-pane="learn"><span class="ti">🎓</span>Learn</div>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div class="pane active" id="dash">
+    <div class="sec-title">Your 3 Bureau Scores</div>
+    <div class="score-row" id="scoreRow"></div>
+    <div style="text-align:center;margin:-4px 0 14px"><button class="btn btn-ghost btn-sm" onclick="editScores()">✎ Update scores</button></div>
+
+    <div class="summary" id="summary"></div>
+
+    <div id="scoreJourney"></div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Poppins';font-weight:600;font-size:14px">Repair Progress</div>
+        <div style="font-size:12px;color:var(--muted)" id="progPct">0%</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-bar" id="progBar" style="width:0%"></div></div>
+        <div class="progress-lbl"><span id="progItems">0 items removed</span><span id="progSteps">Plan 0/7</span></div>
+      </div>
+    </div>
+
+    <div id="utilCard"></div>
+    <div id="payChart"></div>
+
+    <div class="card" style="padding:14px 15px">
+      <div style="font-family:'Poppins';font-weight:600;font-size:14px;margin-bottom:3px">Get your reports &amp; scores</div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:11px">Bureaus don't offer a direct app login — you pull your own reports free from the official sources below, then log the items here.</div>
+      <a class="btn btn-gold btn-block btn-sm" style="margin-bottom:7px" href="https://www.annualcreditreport.com" target="_blank" rel="noopener">📄 AnnualCreditReport.com — all 3, free</a>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <a class="btn btn-ghost btn-sm" href="https://www.equifax.com/personal/credit-report-services/" target="_blank" rel="noopener">Equifax</a>
+        <a class="btn btn-ghost btn-sm" href="https://www.experian.com/help/" target="_blank" rel="noopener">Experian</a>
+        <a class="btn btn-ghost btn-sm" href="https://www.transunion.com/credit-disputes/dispute-your-credit" target="_blank" rel="noopener">TransUnion</a>
+      </div>
+    </div>
+
+    <div class="tip"><b>💡 This week:</b> <span id="nextAction">Pull your free reports at AnnualCreditReport.com, then add every negative item under the Items tab.</span></div>
+
+    <button class="btn btn-primary btn-block" onclick="switchTab('items')">+ Add a negative item to dispute</button>
+  </div>
+
+  <!-- ── ITEMS ── -->
+  <div class="pane" id="items">
+    <div class="sec-title">Negative Items</div>
+    <div class="tip"><b>Tip:</b> Add every collection, late payment, charge-off, or inquiry you want to challenge. You dispute inaccurate, outdated, or unverifiable items with each bureau reporting them.</div>
+    <div id="itemsList"></div>
+    <button class="btn btn-primary btn-block" onclick="openItem()">+ Add negative item</button>
+  </div>
+
+  <!-- ── LETTERS ── -->
+  <div class="pane" id="letters">
+    <div class="sec-title">Dispute Letter Generator</div>
+    <div class="tip"><b>How it works:</b> Pick a letter type, choose the item &amp; bureau, and CreditRise fills in your info and the bureau's mailing address. Copy it, send by <b>certified mail</b>, and log it under Items.</div>
+    <div id="letterTypes"></div>
+  </div>
+
+  <!-- ── PLAN ── -->
+  <div class="pane" id="plan">
+    <div class="sec-title">Your Repair Roadmap</div>
+    <div id="roadmap"></div>
+  </div>
+
+  <!-- ── LEARN ── -->
+  <div class="pane" id="learn">
+    <div class="sec-title">Know Your Rights</div>
+    <div id="eduList"></div>
+    <div class="disclaimer" id="disclaimer"></div>
+  </div>
+
+</div>
+
+<button class="fab" id="fab" style="display:none" onclick="fabAction()"><span class="fab-btn">+</span></button>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modalTitle">Add Item</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─────────────  STATE  ───────────── */
+const BUREAUS = {
+  EQ:{name:'Equifax',cls:'b-eq',addr:'Equifax Information Services LLC\nP.O. Box 740256\nAtlanta, GA 30374-0256'},
+  EX:{name:'Experian',cls:'b-ex',addr:'Experian\nP.O. Box 4500\nAllen, TX 75013'},
+  TU:{name:'TransUnion',cls:'b-tu',addr:'TransUnion Consumer Solutions\nP.O. Box 2000\nChester, PA 19016-2000'}
+};
+const STATUSES = {
+  todo:{label:'To dispute',chip:'todo'},
+  disputing:{label:'Disputing',chip:'disputing'},
+  verify:{label:'Awaiting reply',chip:'verify'},
+  removed:{label:'Removed ✓',chip:'removed'}
+};
+const ITEM_TYPES = ['Collection','Charge-off','Late payment','Hard inquiry','Repossession','Medical bill','Bankruptcy','Student loan','Other'];
+
+const defaultState = {
+  profile:{name:'',addr:'',city:'',state:'',zip:'',ssnLast4:'',dob:''},
+  scores:{EQ:null,EX:null,TU:null,prev:{EQ:null,EX:null,TU:null}},
+  items:[],
+  cards:[],
+  plan:[false,false,false,false,false,false,false]
+};
+let S = load();
+
+function load(){
+  try{const raw=localStorage.getItem('creditrise');if(raw){return Object.assign(JSON.parse(JSON.stringify(defaultState)),JSON.parse(raw));}}catch(e){}
+  return JSON.parse(JSON.stringify(defaultState));
+}
+function save(){localStorage.setItem('creditrise',JSON.stringify(S));}
+
+/* ─────────────  TABS  ───────────── */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.pane)));
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.pane===id));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id===id));
+  window.scrollTo(0,0);
+  render();
+}
+
+/* ─────────────  RENDER  ───────────── */
+function scoreGrade(v){
+  if(v==null) return {txt:'—',col:'var(--muted)',pct:0};
+  if(v>=800) return {txt:'Exceptional',col:'var(--grn)',pct:100};
+  if(v>=740) return {txt:'Very good',col:'var(--emerald)',pct:82};
+  if(v>=670) return {txt:'Good',col:'#6f9c1a',pct:64};
+  if(v>=580) return {txt:'Fair',col:'var(--amber)',pct:44};
+  return {txt:'Poor',col:'var(--red)',pct:24};
+}
+function render(){
+  // profile
+  const p=S.profile;
+  if(p.name){
+    document.getElementById('youName').textContent=p.name;
+    document.getElementById('youAv').textContent=p.name.trim()[0].toUpperCase();
+    document.getElementById('youHint').textContent=(p.city&&p.state)?`${p.city}, ${p.state}`:'Address saved · ready for letters';
+  }
+  // scores
+  const sr=document.getElementById('scoreRow');
+  sr.innerHTML=Object.keys(BUREAUS).map(k=>{
+    const v=S.scores[k], prev=S.scores.prev[k], g=scoreGrade(v);
+    let delta='';
+    if(v!=null&&prev!=null){const d=v-prev;delta=`<div class="delta ${d>0?'up':d<0?'down':'flat'}">${d>0?'▲ +'+d:d<0?'▼ '+d:'— 0'}</div>`;}
+    else delta=`<div class="delta flat" style="color:${g.col}">${g.txt}</div>`;
+    return `<div class="score-card">
+      <div class="bureau">${BUREAUS[k].name}</div>
+      <div class="val" style="color:${g.col}">${v==null?'—':v}</div>
+      ${delta}
+      <div class="grade-bar"><div class="grade-fill" style="width:${g.pct}%;background:${g.col}"></div></div>
+    </div>`;
+  }).join('');
+  // summary
+  const total=S.items.length;
+  const removed=S.items.filter(i=>i.status==='removed').length;
+  const active=S.items.filter(i=>i.status==='disputing'||i.status==='verify').length;
+  const debt=S.items.filter(i=>i.status!=='removed').reduce((a,i)=>a+(parseFloat(i.amount)||0),0);
+  document.getElementById('summary').innerHTML=`
+    <div class="stat accent"><div class="n">${removed}</div><div class="l">Items removed</div></div>
+    <div class="stat"><div class="n">${active}</div><div class="l">Active disputes</div></div>
+    <div class="stat"><div class="n">${total}</div><div class="l">Total flagged</div></div>
+    <div class="stat"><div class="n">$${debt.toLocaleString(undefined,{maximumFractionDigits:0})}</div><div class="l">Disputed balance</div></div>`;
+  // progress
+  const stepsDone=S.plan.filter(Boolean).length;
+  const pct=total>0?Math.round((removed/total)*70)+Math.round((stepsDone/7)*30):Math.round((stepsDone/7)*30);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progItems').textContent=`${removed} of ${total} items removed`;
+  document.getElementById('progSteps').textContent=`Plan ${stepsDone}/7`;
+  document.getElementById('nextAction').textContent=nextAction();
+
+  renderItems(); renderLetters(); renderPlan(); renderEdu(); renderUtil(); renderPayChart(); renderJourney();
+
+  // FAB
+  const pane=document.querySelector('.pane.active').id;
+  const fab=document.getElementById('fab');
+  if(pane==='items'){fab.style.display='block';fab.dataset.act='item';}
+  else{fab.style.display='none';}
+  save();
+}
+function nextAction(){
+  if(!S.profile.name) return 'Set up your profile (name + mailing address) so your dispute letters fill in automatically.';
+  if(S.items.length===0) return 'Pull your free reports at AnnualCreditReport.com, then add every negative item under the Items tab.';
+  // overdue deadlines take priority
+  const pend=allPending();
+  const overdue=pend.filter(h=>daysLeft(h.due)<0);
+  if(overdue.length){const o=overdue.sort((a,b)=>new Date(a.due)-new Date(b.due))[0];return `⚠ The 30-day deadline passed on "${o.itemName}" (${o.bureauLabel}). If it wasn't verified, it must be deleted — send a Method of Verification letter and re-dispute.`;}
+  const todo=S.items.filter(i=>i.status==='todo');
+  if(todo.length) return `You have ${todo.length} item${todo.length>1?'s':''} not yet disputed. Open the Letters tab and generate a Round 1 dispute for "${todo[0].name}".`;
+  if(pend.length){const n=pend.sort((a,b)=>new Date(a.due)-new Date(b.due))[0];const dl=daysLeft(n.due);return `Waiting on the bureaus: "${n.itemName}" (${n.bureauLabel}) is due in ${dl} day${dl===1?'':'s'} (by ${fmtDate(n.due)}). No reply by then = must be deleted.`;}
+  const wait=S.items.filter(i=>i.status==='verify'||i.status==='disputing');
+  if(wait.length) return `Bureaus have 30 days to respond. If they don't verify "${wait[0].name}", it must be deleted. Follow up with a Method of Verification letter.`;
+  return 'Great work — keep your scores updated monthly and re-check reports for anything new.';
+}
+// ── mail-tracking helpers ──
+function daysLeft(iso){if(!iso)return null;return Math.ceil((new Date(iso)-new Date())/86400000);}
+function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return '';}}
+function bureauLabel(code){return code==='creditor'?'creditor':(BUREAUS[code]?BUREAUS[code].name:code);}
+function allPending(){
+  const out=[];
+  S.items.forEach(it=>(it.history||[]).forEach(h=>{if(h.outcome==='pending')out.push(Object.assign({itemName:it.name,bureauLabel:bureauLabel(h.bureau)},h));}));
+  return out;
+}
+
+function renderItems(){
+  const el=document.getElementById('itemsList');
+  if(S.items.length===0){el.innerHTML=`<div class="empty"><div class="ico">🧾</div><p>No items yet.<br>Add negative accounts from your credit report to start disputing.</p></div>`;return;}
+  el.innerHTML=S.items.map((it,idx)=>{
+    const st=STATUSES[it.status]||STATUSES.todo;
+    const dots=Object.keys(BUREAUS).map(k=>`<div class="b-dot ${BUREAUS[k].cls} ${(it.bureaus||[]).includes(k)?'on':''}">${k[0]}${k[1].toUpperCase()==k[1]?'':''}</div>`).join('');
+    const pend=(it.history||[]).filter(h=>h.outcome==='pending').sort((a,b)=>new Date(a.due)-new Date(b.due))[0];
+    let clock='';
+    if(pend){const dl=daysLeft(pend.due);
+      if(dl<0) clock=`<div class="clock overdue">⚠ ${bureauLabel(pend.bureau)} deadline passed ${-dl}d ago — must delete or escalate</div>`;
+      else if(dl<=7) clock=`<div class="clock soon">⏱ ${bureauLabel(pend.bureau)} reply due in ${dl}d (by ${fmtDate(pend.due)})</div>`;
+      else clock=`<div class="clock ok">⏱ ${bureauLabel(pend.bureau)} reply due in ${dl}d (by ${fmtDate(pend.due)})</div>`;
+    }
+    const rounds=(it.history||[]).length;
+    return `<div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-name">${esc(it.name)}</div>
+          <div class="item-meta">${esc(it.type)}${it.creditor?' · '+esc(it.creditor):''}${it.opened?' · '+esc(it.opened):''}</div>
+        </div>
+        ${it.amount?`<div class="item-amt">$${(parseFloat(it.amount)||0).toLocaleString()}</div>`:''}
+      </div>
+      ${clock}
+      <div class="item-row2">
+        <span class="chip ${st.chip}">${st.label}</span>
+        <div class="item-bureaus" title="Bureaus reporting">${dots}</div>
+        ${rounds?`<span class="rounds" onclick="openItem(${idx})">📮 ${rounds} sent</span>`:''}
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="genForItem(${idx})">✉️ Letter</button>
+          <button class="btn btn-ghost btn-sm" onclick="openItem(${idx})">Edit</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const LETTER_TYPES=[
+  {id:'dispute',ico:'⚖️',title:'Round 1 Dispute (FCRA §611)',desc:'Challenge an inaccurate or unverifiable item. The bureau must investigate within 30 days.'},
+  {id:'validation',ico:'🔍',title:'Debt Validation (FDCPA §809)',desc:'Force a collector to prove the debt is yours before they can keep collecting or reporting.'},
+  {id:'609',ico:'📄',title:'609 Information Request',desc:'Request the original documentation the bureau used to verify an account.'},
+  {id:'mov',ico:'🔁',title:'Method of Verification',desc:'After a bureau "verifies" an item, demand how they verified it. Weak proof = deletion.'},
+  {id:'goodwill',ico:'🤝',title:'Goodwill Letter',desc:'Ask a creditor to remove a late payment as a courtesy on an account you now pay on time.'}
+];
+function renderLetters(){
+  document.getElementById('letterTypes').innerHTML=LETTER_TYPES.map(lt=>`
+    <div class="letter-type" onclick="openLetter('${lt.id}')">
+      <div class="lt-ico">${lt.ico}</div>
+      <div class="lt-body"><div class="lt-title">${lt.title}</div><div class="lt-desc">${lt.desc}</div></div>
+      <div class="lt-arrow">›</div>
+    </div>`).join('');
+}
+
+const PLAN=[
+  {t:'Pull all 3 credit reports',d:'Get your free reports at AnnualCreditReport.com (Equifax, Experian, TransUnion). Also grab scores from a free monitor.'},
+  {t:'Audit every line',d:'List each negative item. Look for wrong balances, dates, duplicate accounts, accounts that aren\'t yours, and anything past the 7-year reporting limit.'},
+  {t:'Add items to CreditRise',d:'Log each negative item and mark which bureaus report it. This drives your letters and progress.'},
+  {t:'Send Round 1 disputes',d:'Generate dispute letters, mail them certified with return receipt. Keep copies. The bureau has 30 days to investigate.'},
+  {t:'Validate collections',d:'For any collection, send a debt-validation letter to the collector. Unvalidated debt should not stay on your report.'},
+  {t:'Follow up (MOV)',d:'If an item is "verified," send a Method of Verification letter. Escalate weak verifications and re-dispute.'},
+  {t:'Build positive credit',d:'Keep utilization under 30% (ideally under 10%), pay on time, and consider a secured card or credit-builder loan to add positive history.'}
+];
+function renderPlan(){
+  document.getElementById('roadmap').innerHTML=PLAN.map((s,i)=>`
+    <div class="step ${S.plan[i]?'done':''}">
+      <div class="step-rail">
+        <div class="step-num" onclick="togglePlan(${i})">${S.plan[i]?'✓':i+1}</div>
+        ${i<PLAN.length-1?'<div class="step-line"></div>':''}
+      </div>
+      <div class="step-body"><div class="step-title">${s.t}</div><div class="step-desc">${s.d}</div></div>
+    </div>`).join('');
+}
+function togglePlan(i){S.plan[i]=!S.plan[i];render();toast(S.plan[i]?'Step complete ✓':'Step reopened');}
+
+const EDU=[
+  {q:'Is DIY credit repair legal?',a:'Yes. The Fair Credit Reporting Act (FCRA) gives you the right to dispute any item you believe is inaccurate, incomplete, or unverifiable — for free, directly with the bureaus. You never have to pay a company to exercise your own rights.'},
+  {q:'What can actually be removed?',a:'Items that are inaccurate, outdated (most negatives fall off after 7 years; Chapter 7 bankruptcy after 10), duplicated, or that a creditor/collector cannot verify. Accurate, verifiable debts generally stay — the goal is removing what\'s wrong or unprovable.'},
+  {q:'How long does it take?',a:'Each dispute round is ~30–45 days (bureaus must investigate within 30 days). A full cleanup often takes 3–6 months across several rounds. Patience and records win.'},
+  {q:'Why certified mail?',a:'Certified mail with return receipt proves the bureau or collector received your letter and starts the legal 30-day clock. Email and online portals can limit your rights — mail is your paper trail.'},
+  {q:'What is the 30-day rule?',a:'Once a bureau receives your dispute, it has 30 days (sometimes 45) to investigate. If it can\'t verify the item in that window, the FCRA requires it to be deleted or corrected.'},
+  {q:'Should I dispute everything at once?',a:'Dispute strategically. Challenge genuinely inaccurate items with clear reasons. Blasting identical "not mine" disputes on obviously valid accounts can get flagged as frivolous. Quality reasons beat volume.'},
+  {q:'Does checking my score hurt it?',a:'No. Checking your own score is a soft inquiry and never lowers it. Only hard inquiries from new credit applications can ding your score, and only slightly.'},
+  {q:'What about "pay for delete"?',a:'You can offer a collector payment in exchange for deleting the tradeline. Get any agreement in writing before paying — verbal promises aren\'t enforceable.'},
+  {q:'Can this app log into the bureaus for me?',a:'No — and be cautious of any app that claims to. The three bureaus don\'t offer a consumer API to pull your report into a third-party app, and no app should ask for your full SSN and bureau passwords. CreditRise instead links you to the official free sources (AnnualCreditReport.com and each bureau\'s own site) where YOU pull your report, then you log the items here. Your data never leaves your device.'}
+];
+function renderEdu(){
+  document.getElementById('eduList').innerHTML=EDU.map((e,i)=>`
+    <div class="edu" id="edu${i}">
+      <div class="edu-q" onclick="document.getElementById('edu${i}').classList.toggle('open')">
+        <span>${e.q}</span><span class="caret">›</span>
+      </div>
+      <div class="edu-a">${e.a}</div>
+    </div>`).join('');
+  document.getElementById('disclaimer').innerHTML='CreditRise is an educational self-help tool, not a credit-repair organization, law firm, or financial advisor. It does not guarantee any score change or item removal. You are always entitled to dispute items yourself for free. Verify addresses and your rights for your state before mailing.';
+}
+
+/* ─────────────  MODALS  ───────────── */
+const mBg=document.getElementById('modalBg'),mTitle=document.getElementById('modalTitle'),mBody=document.getElementById('modalBody');
+function openModal(){mBg.classList.add('show');document.body.style.overflow='hidden';}
+function closeModal(){mBg.classList.remove('show');document.body.style.overflow='';}
+
+/* Profile */
+function openProfile(){
+  const p=S.profile;
+  mTitle.textContent='Your Profile';
+  mBody.innerHTML=`
+    <div class="tip">This stays on <b>your device only</b> and auto-fills your dispute letters. Never shared.</div>
+    <div class="field"><label>Full legal name</label><input id="f_name" value="${esc(p.name)}" placeholder="Jane A. Smith"></div>
+    <div class="field"><label>Mailing address</label><input id="f_addr" value="${esc(p.addr)}" placeholder="123 Main St"></div>
+    <div class="field-row">
+      <div class="field"><label>City</label><input id="f_city" value="${esc(p.city)}"></div>
+      <div class="field"><label>State</label><input id="f_state" value="${esc(p.state)}" placeholder="CA"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>ZIP</label><input id="f_zip" value="${esc(p.zip)}"></div>
+      <div class="field"><label>Last 4 of SSN</label><input id="f_ssn" value="${esc(p.ssnLast4)}" maxlength="4" inputmode="numeric" placeholder="1234"></div>
+    </div>
+    <div class="field"><label>Date of birth</label><input id="f_dob" value="${esc(p.dob)}" placeholder="MM/DD/YYYY"></div>
+    <button class="btn btn-primary btn-block" onclick="saveProfile()">Save profile</button>`;
+  openModal();
+}
+function saveProfile(){
+  S.profile={name:val('f_name'),addr:val('f_addr'),city:val('f_city'),state:val('f_state'),zip:val('f_zip'),ssnLast4:val('f_ssn'),dob:val('f_dob')};
+  closeModal();render();toast('Profile saved');
+}
+
+/* Scores */
+function editScores(){
+  mTitle.textContent='Update Your Scores';
+  mBody.innerHTML=`
+    <div class="tip">Enter your latest scores from any free monitor. We'll track the change from last time.</div>
+    ${Object.keys(BUREAUS).map(k=>`<div class="field"><label>${BUREAUS[k].name}</label><input id="sc_${k}" type="number" inputmode="numeric" value="${S.scores[k]??''}" placeholder="300–850"></div>`).join('')}
+    <button class="btn btn-primary btn-block" onclick="saveScores()">Save scores</button>`;
+  openModal();
+}
+function saveScores(){
+  Object.keys(BUREAUS).forEach(k=>{
+    const nv=val('sc_'+k);const n=nv===''?null:Math.max(300,Math.min(850,parseInt(nv)||0));
+    if(n!=null&&S.scores[k]!=null&&S.scores[k]!==n){S.scores.prev[k]=S.scores[k];}
+    S.scores[k]=n;
+  });
+  closeModal();render();toast('Scores updated');
+}
+
+/* Items */
+function openItem(idx){
+  const editing=idx!=null;
+  const it=editing?S.items[idx]:{name:'',type:'Collection',creditor:'',amount:'',opened:'',account:'',status:'todo',bureaus:['EQ','EX','TU'],reason:''};
+  mTitle.textContent=editing?'Edit Item':'Add Negative Item';
+  mBody.innerHTML=`
+    <div class="field"><label>Item name / label</label><input id="i_name" value="${esc(it.name)}" placeholder="e.g. Midland Funding collection"></div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><select id="i_type">${ITEM_TYPES.map(t=>`<option ${t===it.type?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount ($)</label><input id="i_amount" type="number" inputmode="decimal" value="${it.amount}" placeholder="0"></div>
+    </div>
+    <div class="field"><label>Original creditor / furnisher</label><input id="i_creditor" value="${esc(it.creditor)}" placeholder="Capital One"></div>
+    <div class="field-row">
+      <div class="field"><label>Date opened/reported</label><input id="i_opened" value="${esc(it.opened)}" placeholder="03/2021"></div>
+      <div class="field"><label>Account # (partial)</label><input id="i_account" value="${esc(it.account)}" placeholder="****1234"></div>
+    </div>
+    <div class="field"><label>Reporting on</label>
+      <div class="bureau-pick" id="i_bureaus">${Object.keys(BUREAUS).map(k=>`<div class="bp ${it.bureaus.includes(k)?'on':''}" data-b="${k}" onclick="this.classList.toggle('on')">${BUREAUS[k].name}</div>`).join('')}</div>
+    </div>
+    <div class="field"><label>Dispute reason</label>
+      <select id="i_reason">
+        <option value="">— choose the strongest reason —</option>
+        <option ${it.reason==='This account does not belong to me'?'selected':''}>This account does not belong to me</option>
+        <option ${it.reason==='I have no knowledge of this account'?'selected':''}>I have no knowledge of this account</option>
+        <option ${it.reason==='The balance/amount reported is inaccurate'?'selected':''}>The balance/amount reported is inaccurate</option>
+        <option ${it.reason==='The account status/payment history is inaccurate'?'selected':''}>The account status/payment history is inaccurate</option>
+        <option ${it.reason==='The dates reported are inaccurate'?'selected':''}>The dates reported are inaccurate</option>
+        <option ${it.reason==='This debt was never validated'?'selected':''}>This debt was never validated</option>
+        <option ${it.reason==='This item is past the 7-year reporting limit'?'selected':''}>This item is past the 7-year reporting limit</option>
+        <option ${it.reason==='This is a duplicate of another account'?'selected':''}>This is a duplicate of another account</option>
+      </select>
+    </div>
+    <div class="field"><label>Status</label>
+      <div class="status-pick" id="i_status">${Object.keys(STATUSES).map(k=>`<div class="sp ${it.status===k?'on':''}" data-s="${k}" onclick="pickStatus(this)">${STATUSES[k].label}</div>`).join('')}</div>
+    </div>
+    ${editing?historyHtml(it,idx):''}
+    <button class="btn btn-primary btn-block" onclick="saveItem(${editing?idx:'null'})">${editing?'Save changes':'Add item'}</button>
+    ${editing?`<button class="btn btn-danger btn-block" style="margin-top:9px" onclick="deleteItem(${idx})">Delete item</button>`:''}`;
+  openModal();
+}
+function historyHtml(it,idx){
+  const h=it.history||[];
+  let inner;
+  if(!h.length){
+    inner=`<div style="font-size:12px;color:var(--muted);padding:2px 0 4px">No letters logged yet. Generate one on the Letters tab and tap "Log as mailed" to start tracking rounds &amp; deadlines here.</div>`;
+  }else{
+    inner=h.map((e,hi)=>{
+      const dl=daysLeft(e.due);
+      let status;
+      if(e.outcome==='deleted') status=`<span class="hist-badge del">Deleted ✓</span>`;
+      else if(e.outcome==='verified') status=`<span class="hist-badge ver">Verified — escalate</span>`;
+      else if(e.outcome==='noresponse') status=`<span class="hist-badge del">No response → delete</span>`;
+      else status=dl<0?`<span class="hist-badge over">Overdue ${-dl}d — must delete</span>`:`<span class="hist-badge pend">Reply due in ${dl}d · ${fmtDate(e.due)}</span>`;
+      return `<div class="hist">
+        <div class="hist-top"><span class="hist-type">${esc(e.typeLabel||e.type)}</span><span class="hist-to">→ ${bureauLabel(e.bureau)}</span></div>
+        <div class="hist-meta">Mailed ${fmtDate(e.date)}${e.green?` · #${esc(e.green)}`:''}</div>
+        <div class="hist-status">${status}</div>
+        ${e.outcome==='pending'?`<div class="hist-actions">
+          <button class="btn btn-ghost btn-sm" onclick="logOutcome(${idx},${hi},'deleted')">✓ Deleted</button>
+          <button class="btn btn-ghost btn-sm" onclick="logOutcome(${idx},${hi},'verified')">Verified</button>
+          <button class="btn btn-ghost btn-sm" onclick="logOutcome(${idx},${hi},'noresponse')">No reply</button>
+          <button class="btn btn-ghost btn-sm" onclick="delHistory(${idx},${hi})" style="color:var(--red)">✕</button>
+        </div>`:`<div class="hist-actions"><button class="btn btn-ghost btn-sm" onclick="delHistory(${idx},${hi})" style="color:var(--red)">Remove round</button></div>`}
+      </div>`;
+    }).join('');
+  }
+  return `<div class="field"><label>Dispute history &amp; deadlines</label><div class="hist-list">${inner}</div></div>`;
+}
+function pickStatus(el){document.querySelectorAll('#i_status .sp').forEach(s=>s.classList.remove('on'));el.classList.add('on');}
+function saveItem(idx){
+  const name=val('i_name').trim();
+  if(!name){toast('Give the item a name');return;}
+  const bureaus=[...document.querySelectorAll('#i_bureaus .bp.on')].map(e=>e.dataset.b);
+  const statusEl=document.querySelector('#i_status .sp.on');
+  const it={
+    name, type:val('i_type'), creditor:val('i_creditor'), amount:val('i_amount'),
+    opened:val('i_opened'), account:val('i_account'),
+    bureaus:bureaus.length?bureaus:['EQ','EX','TU'],
+    reason:val('i_reason'), status:statusEl?statusEl.dataset.s:'todo'
+  };
+  if(idx===null||idx===undefined) S.items.push(it); else S.items[idx]=it;
+  closeModal();render();toast(idx==null?'Item added':'Item saved');
+}
+function deleteItem(idx){S.items.splice(idx,1);closeModal();render();toast('Item deleted');}
+
+/* ─────────────  LETTER GENERATION  ───────────── */
+let letterCtx={type:null,itemIdx:null,bureau:null};
+function genForItem(idx){letterCtx.itemIdx=idx;openLetter('dispute',idx);}
+function openLetter(typeId,presetItem){
+  if(!S.profile.name){toast('Add your profile first');openProfile();return;}
+  letterCtx.type=typeId;
+  const lt=LETTER_TYPES.find(l=>l.id===typeId);
+  const goesToCreditor=(typeId==='validation'||typeId==='goodwill');
+  mTitle.textContent=lt.title;
+  const itemsOpts=S.items.map((it,i)=>`<option value="${i}" ${presetItem===i?'selected':''}>${esc(it.name)}</option>`).join('');
+  mBody.innerHTML=`
+    <div class="field"><label>Which item?</label>
+      <select id="l_item" onchange="buildLetter()">
+        ${S.items.length?itemsOpts:'<option value="">— add an item first —</option>'}
+      </select>
+    </div>
+    ${goesToCreditor?
+      `<div class="field"><label>Send to (collector/creditor address)</label><textarea id="l_creditorAddr" placeholder="Collector name&#10;PO Box / Street&#10;City, ST ZIP" onblur="buildLetter()"></textarea></div>`
+      :
+      `<div class="field"><label>To which bureau?</label>
+        <div class="bureau-pick" id="l_bureau">${Object.keys(BUREAUS).map((k,i)=>`<div class="bp ${i===0?'on':''}" data-b="${k}" onclick="pickBureau(this)">${BUREAUS[k].name}</div>`).join('')}</div>
+      </div>`}
+    <div class="field" style="margin-bottom:8px"><label>Certified-mail / green-card # (optional)</label><input id="l_green" placeholder="7020 1234 5678 9012 3456"></div>
+    <div style="display:flex;gap:8px;margin:6px 0 12px">
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="copyLetter()">📋 Copy letter</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="markSent()">📮 Log as mailed</button>
+    </div>
+    <div class="letter-out" id="l_out">Select an item to generate your letter…</div>
+    <div class="tip" style="margin-top:12px"><b>Before you mail:</b> print, sign, attach a copy of your ID and a utility bill, and send by <b>certified mail with return receipt</b>. Then tap <b>Log as mailed</b> — CreditRise starts the 30-day clock and saves the tracking #.</div>`;
+  openModal();
+  buildLetter();
+}
+function pickBureau(el){document.querySelectorAll('#l_bureau .bp').forEach(s=>s.classList.remove('on'));el.classList.add('on');buildLetter();}
+function currentBureau(){const el=document.querySelector('#l_bureau .bp.on');return el?el.dataset.b:'EQ';}
+
+function today(){
+  const d=new Date();
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+function buildLetter(){
+  const out=document.getElementById('l_out');if(!out)return;
+  const sel=document.getElementById('l_item');
+  if(!S.items.length){out.textContent='Add a negative item under the Items tab first, then come back to generate a letter.';return;}
+  const it=S.items[parseInt(sel.value)||0];
+  const p=S.profile;
+  const from=`${p.name}\n${p.addr}\n${p.city}, ${p.state} ${p.zip}`;
+  const goesToCreditor=(letterCtx.type==='validation'||letterCtx.type==='goodwill');
+  let to, body;
+  if(goesToCreditor){
+    const ca=document.getElementById('l_creditorAddr');
+    to=(ca&&ca.value.trim())?ca.value.trim():`${it.creditor||'[Creditor / Collector name]'}\n[Address]\n[City, State ZIP]`;
+  }else{
+    to=BUREAUS[currentBureau()].addr;
+  }
+  const acct=it.account?`Account #: ${it.account}`:'';
+  const idBlock=`SSN (last 4): ${p.ssnLast4||'____'}    DOB: ${p.dob||'__/__/____'}`;
+
+  const T=letterCtx.type;
+  if(T==='dispute'){
+    body=`To Whom It May Concern:
+
+I am writing to dispute the following information in my credit file. I have circled/listed the item(s) I dispute on the attached copy of my report.
+
+Item: ${it.name}${it.creditor?`\nOriginal creditor: ${it.creditor}`:''}${acct?`\n${acct}`:''}
+
+This item is inaccurate because: ${it.reason||'the information reported is inaccurate and/or cannot be verified.'}
+
+Under the Fair Credit Reporting Act (15 U.S.C. § 1681i), you are required to conduct a reasonable investigation of this disputed item within 30 days and to delete any information that cannot be verified. Please investigate this matter and correct or remove the disputed item, and send me an updated copy of my credit report when the investigation is complete.`;
+  }else if(T==='validation'){
+    body=`To Whom It May Concern:
+
+I am writing in response to your reporting/collection of the following alleged debt. This is not a refusal to pay, but a notice that I dispute the validity of this debt and request validation under the Fair Debt Collection Practices Act (15 U.S.C. § 1692g).
+
+Alleged account: ${it.name}${it.creditor?`\nOriginal creditor: ${it.creditor}`:''}${acct?`\n${acct}`:''}${it.amount?`\nAmount claimed: $${it.amount}`:''}
+
+Please provide the following:
+  • Verification and the amount of the debt
+  • The name and address of the original creditor
+  • Proof that you own or are authorized to collect this debt
+  • A copy of the original signed agreement
+
+Until this debt is validated, please cease all collection activity and any reporting of this account to the credit bureaus. If you cannot validate it, please delete it and confirm in writing.`;
+  }else if(T==='609'){
+    body=`To Whom It May Concern:
+
+Pursuant to my rights under Section 609 of the Fair Credit Reporting Act, I am requesting the documentation you relied on to add and verify the following account in my credit file:
+
+Item: ${it.name}${it.creditor?`\nOriginal creditor: ${it.creditor}`:''}${acct?`\n${acct}`:''}
+
+Please provide copies of any original documents — including any signed contract or application bearing my signature — that you used to verify this account. If you cannot produce such documentation, this item is not properly verified and must be deleted from my credit report under the FCRA.`;
+  }else if(T==='mov'){
+    body=`To Whom It May Concern:
+
+You recently completed an investigation of the item below and reported that it was "verified." Under the Fair Credit Reporting Act (15 U.S.C. § 1681i(a)(7)), I am requesting the method of verification you used.
+
+Item: ${it.name}${it.creditor?`\nOriginal creditor: ${it.creditor}`:''}${acct?`\n${acct}`:''}
+
+Please provide:
+  • The name of the person/business who verified this item
+  • Their business name, address, and telephone number
+  • A description of exactly how this item was verified
+  • Copies of any documents used in the verification
+
+A verification that consists only of an automated data match is not a reasonable investigation. If you cannot describe a legitimate method of verification, please delete this item.`;
+  }else if(T==='goodwill'){
+    body=`Dear ${it.creditor||'Sir or Madam'},
+
+I am writing regarding my account referenced below. I have valued our relationship and have worked hard to keep this account in good standing.
+
+Account: ${it.name}${acct?`\n${acct}`:''}
+
+I am respectfully requesting, as a goodwill gesture, that you remove the late payment(s) reported on this account. The circumstances that led to the late payment(s) are behind me, and my payment history since has been on time. Removing this notation would greatly help me reach my financial goals, and I would be sincerely grateful for your consideration.
+
+Thank you for your time and for any goodwill adjustment you are able to make.`;
+  }
+  const letter=`${today()}\n\n${from}\n${idBlock}\n\n${to}\n\nRe: ${T==='goodwill'?'Goodwill adjustment request':T==='validation'?'Debt validation request':'Dispute of inaccurate credit information'}\n\n${body}\n\nSincerely,\n\n\n${p.name}\n\nEnclosures: copy of government-issued ID, proof of address${T!=='goodwill'&&T!=='validation'?', copy of credit report with item marked':''}`;
+  out.textContent=letter;
+}
+function copyLetter(){
+  const txt=document.getElementById('l_out').innerText;
+  navigator.clipboard.writeText(txt).then(()=>toast('Letter copied ✓')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('Letter copied ✓');}catch(e){toast('Copy failed — select manually');}
+    document.body.removeChild(ta);
+  });
+}
+function markSent(){
+  const sel=document.getElementById('l_item');const it=S.items[parseInt(sel.value)||0];
+  if(!it){toast('Select an item first');return;}
+  const goesToCreditor=(letterCtx.type==='validation'||letterCtx.type==='goodwill');
+  const bureau=goesToCreditor?'creditor':currentBureau();
+  const sent=new Date();
+  const due=new Date(sent.getTime()+30*86400000);
+  it.history=it.history||[];
+  it.history.push({
+    date:sent.toISOString(), type:letterCtx.type,
+    typeLabel:(LETTER_TYPES.find(l=>l.id===letterCtx.type)||{}).title||letterCtx.type,
+    bureau, green:val('l_green'), due:due.toISOString(), outcome:'pending'
+  });
+  it.status='disputing';
+  render(); closeModal();
+  toast(`📮 Logged — 30-day clock started (due ${fmtDate(due.toISOString())})`);
+}
+
+/* ── Dispute history / outcomes ── */
+function logOutcome(itemIdx,histIdx,outcome){
+  const it=S.items[itemIdx];if(!it||!it.history[histIdx])return;
+  it.history[histIdx].outcome=outcome;
+  if(outcome==='deleted'){it.status='removed';}
+  else if(outcome==='verified'){it.status='verify';}
+  else if(outcome==='noresponse'){it.status='verify';}
+  render();openItem(itemIdx);
+  toast(outcome==='deleted'?'Removed ✓ — nice win!':outcome==='verified'?'Marked verified — escalate with an MOV letter':'Logged no response — by law it must be deleted');
+}
+function delHistory(itemIdx,histIdx){
+  const it=S.items[itemIdx];if(!it)return;
+  it.history.splice(histIdx,1);render();openItem(itemIdx);toast('Round deleted');
+}
+
+/* ── Utilization calculator ── */
+function renderUtil(){
+  const el=document.getElementById('utilCard');if(!el)return;
+  const cards=S.cards||[];
+  const bal=cards.reduce((a,c)=>a+(parseFloat(c.balance)||0),0);
+  const lim=cards.reduce((a,c)=>a+(parseFloat(c.limit)||0),0);
+  const util=lim>0?(bal/lim*100):0;
+  const col=util<10?'var(--grn)':util<30?'var(--emerald)':util<50?'var(--amber)':'var(--red)';
+  const verdict=lim===0?'Add a card to see your ratio':util<10?'Excellent — under 10% is ideal for your score':util<30?'Good — keep it under 30%':util<50?'High — paying this down will lift your score':'Very high — this is likely dragging your score down';
+  const rows=cards.map((c,i)=>{const cu=(parseFloat(c.limit)||0)>0?((parseFloat(c.balance)||0)/(parseFloat(c.limit))*100):0;
+    return `<div class="ucard-row" onclick="openCard(${i})"><span class="ucard-name">${esc(c.name||'Card')}</span><span class="ucard-nums">$${(parseFloat(c.balance)||0).toLocaleString()} / $${(parseFloat(c.limit)||0).toLocaleString()}</span><span class="ucard-pct" style="color:${cu<30?'var(--grn)':'var(--red)'}">${cu.toFixed(0)}%</span><span class="ucard-del" onclick="event.stopPropagation();delCard(${i})">✕</span></div>`;}).join('');
+  el.innerHTML=`<div class="card" style="padding:15px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+      <div style="font-family:'Poppins';font-weight:600;font-size:14px">Credit Utilization</div>
+      <div style="font-family:'Poppins';font-weight:700;font-size:22px;color:${col}">${lim>0?util.toFixed(0)+'%':'—'}</div>
+    </div>
+    <div class="progress-track" style="height:9px"><div style="height:100%;border-radius:7px;width:${Math.min(util,100)}%;background:${col};transition:width .4s"></div></div>
+    <div style="font-size:11.5px;color:var(--muted);margin:7px 0 10px">${verdict}${lim>0?` · $${bal.toLocaleString()} of $${lim.toLocaleString()} used`:''}</div>
+    ${rows?`<div class="ucard-list">${rows}</div>`:''}
+    <button class="btn btn-ghost btn-sm btn-block" style="margin-top:9px" onclick="openCard()">+ Add a credit card</button>
+  </div>`;
+}
+function openCard(idx){
+  const editing=idx!=null;
+  const c=editing?S.cards[idx]:{name:'',balance:'',limit:'',closeDay:'',dueDay:''};
+  mTitle.textContent=editing?'Edit Card':'Add Credit Card';
+  mBody.innerHTML=`<div class="tip">Balance ÷ limit = utilization, one of the fastest levers on your score. Add your statement <b>closing</b> &amp; <b>due</b> days and CreditRise builds your pay-by chart.</div>
+    <div class="field"><label>Card name</label><input id="c_name" value="${esc(c.name)}" placeholder="Capital One"></div>
+    <div class="field-row">
+      <div class="field"><label>Current balance ($)</label><input id="c_balance" type="number" inputmode="decimal" value="${c.balance}" placeholder="0"></div>
+      <div class="field"><label>Credit limit ($)</label><input id="c_limit" type="number" inputmode="decimal" value="${c.limit}" placeholder="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Closing day (1–31)</label><input id="c_close" type="number" inputmode="numeric" min="1" max="31" value="${c.closeDay||''}" placeholder="18"></div>
+      <div class="field"><label>Due day (1–31)</label><input id="c_due" type="number" inputmode="numeric" min="1" max="31" value="${c.dueDay||''}" placeholder="12"></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="saveCard(${editing?idx:'null'})">${editing?'Save card':'Add card'}</button>
+    ${editing?`<button class="btn btn-danger btn-block" style="margin-top:9px" onclick="delCard(${idx})">Remove card</button>`:''}`;
+  openModal();
+}
+function saveCard(idx){
+  const name=val('c_name'),balance=val('c_balance'),limit=val('c_limit');
+  if(!limit||parseFloat(limit)<=0){toast('Enter the credit limit');return;}
+  const clampDay=v=>{const n=parseInt(v);return(n>=1&&n<=31)?n:'';};
+  const c={name:name||'Card',balance:balance||'0',limit,closeDay:clampDay(val('c_close')),dueDay:clampDay(val('c_due'))};
+  S.cards=S.cards||[];
+  if(idx===null||idx===undefined)S.cards.push(c);else S.cards[idx]=c;
+  closeModal();render();toast(idx==null?'Card added':'Card saved');
+}
+function delCard(i){S.cards.splice(i,1);closeModal();render();toast('Card removed');}
+
+/* ── Payment Planner (pay-by chart) ── */
+function ord(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+function nextDate(day){
+  // next occurrence of `day` (1-31) on/after today
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth(), d=now.getDate();
+  let mm=m, yy=y;
+  if(day<d){mm=m+1;if(mm>11){mm=0;yy++;}}
+  const dim=new Date(yy,mm+1,0).getDate();
+  return new Date(yy,mm,Math.min(day,dim));
+}
+function renderPayChart(){
+  const el=document.getElementById('payChart');if(!el)return;
+  const planCards=(S.cards||[]).map((c,i)=>({c,i})).filter(x=>x.c.closeDay);
+  if(!planCards.length){el.innerHTML='';return;}
+  const blocks=planCards.map(({c,i})=>{
+    const lim=parseFloat(c.limit)||0, bal=parseFloat(c.balance)||0;
+    const target=Math.max(0,Math.round(lim*0.09));
+    const payDown=Math.max(0,Math.round(bal-target));
+    const close=parseInt(c.closeDay), due=c.dueDay?parseInt(c.dueDay):null;
+    let payByDay=close-3; if(payByDay<1)payByDay+=30;
+    const closeDt=nextDate(close), payByDt=nextDate(payByDay);
+    const daysToPayBy=Math.ceil((payByDt-new Date())/86400000);
+    const cu=lim>0?(bal/lim*100):0;
+    const done=cu<10;
+    return `<div class="pc-card">
+      <div class="pc-head"><span class="pc-name">${esc(c.name||'Card')}</span><span class="pc-util" style="color:${cu<10?'var(--grn)':cu<30?'var(--amber)':'var(--red)'}">${cu.toFixed(0)}% now</span></div>
+      ${done?`<div class="pc-good">✅ Already under 10% — just keep it there before the ${ord(close)}.</div>`:`
+      <div class="pc-rows">
+        <div class="pc-row hot"><span class="pc-d">${ord(payByDay)}</span><span class="pc-a"><b>Pay ~$${payDown.toLocaleString()}</b> → down to $${target.toLocaleString()}</span><span class="pc-w">hit 9%${daysToPayBy>=0?` · in ${daysToPayBy}d`:''}</span></div>
+        <div class="pc-row"><span class="pc-d">${ord(close)}</span><span class="pc-a">Statement closes 📸</span><span class="pc-w">reports low</span></div>
+        ${due?`<div class="pc-row"><span class="pc-d">${ord(due)}</span><span class="pc-a">Pay remainder in full 💵</span><span class="pc-w">no interest</span></div>`:''}
+      </div>`}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="card" style="padding:15px">
+    <div style="font-family:'Poppins';font-weight:600;font-size:14px;margin-bottom:3px">📅 Payment Planner</div>
+    <div style="font-size:11.5px;color:var(--muted);margin-bottom:11px">Pay <b>down</b> before the closing day (for your score), pay <b>off</b> by the due day (for zero interest).</div>
+    ${blocks}
+    <div class="pc-memo">🧠 <b>Down before closing · Off by due date</b></div>
+  </div>`;
+}
+
+/* ── Score Journey (milestone tracker) ── */
+const MILESTONES=[
+  {s:580,u:'Out of "Poor" → Fair'},
+  {s:620,u:'Better auto-loan rates 🚗'},
+  {s:660,u:'Good auto & consolidation rates'},
+  {s:700,u:'Prime rates begin'},
+  {s:740,u:'Best rates available'}
+];
+function renderJourney(){
+  const el=document.getElementById('scoreJourney');if(!el)return;
+  const vals=Object.keys(BUREAUS).map(k=>S.scores[k]).filter(v=>v!=null);
+  if(!vals.length){el.innerHTML='';return;}
+  const cur=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  const g=scoreGrade(cur);
+  const passed=MILESTONES.filter(m=>cur>=m.s);
+  const next=MILESTONES.find(m=>cur<m.s);
+  let bar;
+  if(next){
+    const lower=passed.length?passed[passed.length-1].s:500;
+    const pct=Math.max(4,Math.min(100,(cur-lower)/(next.s-lower)*100));
+    bar=`<div style="margin:11px 0 3px">
+      <div class="progress-track" style="height:9px"><div style="height:100%;border-radius:7px;width:${pct}%;background:linear-gradient(90deg,var(--emerald),var(--gold));transition:width .5s"></div></div>
+      <div style="font-size:12.5px;color:var(--slate);margin-top:8px"><b>${next.s-cur} points</b> to <b>${next.s}</b> — ${next.u}</div>
+    </div>`;
+  } else {
+    bar=`<div style="font-size:12.5px;color:var(--grn);margin-top:9px">🎉 You've reached every milestone — outstanding!</div>`;
+  }
+  const list=MILESTONES.map(m=>{const done=cur>=m.s;const isNext=next&&m.s===next.s;
+    return `<div class="sj-ms ${done?'done':''} ${isNext?'next':''}">
+      <span class="sj-dot">${done?'✓':''}</span>
+      <span class="sj-score">${m.s}</span>
+      <span class="sj-unlock">${m.u}</span>
+    </div>`;}).join('');
+  el.innerHTML=`<div class="card" style="padding:15px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div style="font-family:'Poppins';font-weight:600;font-size:14px">Score Journey</div>
+      <div style="font-size:12px;color:${g.col};font-weight:600">${g.txt}</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:3px">
+      <div style="font-family:'Poppins';font-weight:700;font-size:30px;color:${g.col};line-height:1">${cur}</div>
+      <div style="font-size:11px;color:var(--muted)">avg of your ${vals.length} score${vals.length>1?'s':''}</div>
+    </div>
+    ${bar}
+    <div class="sj-list">${list}</div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:9px;line-height:1.4">Estimates only — update your scores monthly to watch the climb.</div>
+  </div>`;
+}
+
+/* FAB */
+function fabAction(){const act=document.getElementById('fab').dataset.act;if(act==='item')openItem();}
+
+/* helpers */
+function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000);}
+
+render();
+</script>
+</body>
+</html>
