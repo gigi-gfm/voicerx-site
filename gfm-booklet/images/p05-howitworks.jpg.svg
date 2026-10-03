@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-label="Dictating naturally placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#1e40af"/>
+    </linearGradient>
+    <pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect width="1600" height="1000" fill="url(#dots)"/>
+  <rect x="14" y="14" width="1572" height="972" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="10 8" rx="14"/>
+  <g transform="translate(800,460)" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-78" y="-46" width="156" height="104" rx="14" stroke-opacity="0.9"/>
+    <circle cx="0" cy="10" r="30" stroke-opacity="0.9"/>
+    <path d="M -52 -46 l 16 -22 l 40 0 l 16 22" stroke-opacity="0.9"/>
+  </g>
+  <text x="50%" y="570" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="40" font-weight="600" fill="#ffffff" opacity="0.95">Dictating naturally</text>
+  <text x="50%" y="618" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" opacity="0.55">Tap, speak, done</text>
+  <text x="50%" y="964" text-anchor="middle" font-family="monospace" font-size="20" fill="#ffffff" opacity="0.40">1600 × 1000px · replace with photo</text>
+</svg>

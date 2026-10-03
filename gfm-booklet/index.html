@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceRx · Garcia Family Medicine — Booklet</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e3a8a;--navy2:#1e40af;--orange:#f97316;--orange2:#fb923c;--orangelt:#fff7ed;
+  --slate:#3a4a5c;--muted:#6b7a8d;--border:#d0d8e4;--bg:#eef1f6;--white:#fff;
+  --green:#276749;--greenlt:#e8f5ee;--amber:#b7620a;--amberlt:#fef3e2;--text:#1a2535;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* Screen scaffolding (hidden in print) */
+.toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:10px 18px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.toolbar .brand{font-family:'Playfair Display',serif;font-weight:600;font-size:16px}
+.toolbar .brand span{color:var(--orange)}
+.toolbar .hint{font-size:12px;color:rgba(255,255,255,.6)}
+.toolbar button{font-family:inherit;font-size:13px;font-weight:500;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border-radius:8px;padding:8px 16px}
+.deck{max-width:840px;margin:0 auto;padding:24px 16px 60px}
+
+/* One booklet page = a print page. A5-ish landscape ratio on screen. */
+.page{position:relative;background:var(--white);border-radius:14px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(20,40,80,.14);margin:0 auto 26px;
+  width:100%;aspect-ratio:1/1.414;display:flex;flex-direction:column}
+.page .pad{flex:1;display:flex;flex-direction:column;padding:46px 50px}
+.pagenum{position:absolute;bottom:18px;right:26px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.05em}
+.pagenum.light{color:rgba(255,255,255,.55)}
+.kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:10px}
+.kicker.light{color:var(--orange2)}
+h1,h2{font-family:'Playfair Display',serif;font-weight:600;line-height:1.18;color:var(--navy)}
+h1{font-size:40px}
+h2{font-size:29px;margin-bottom:14px}
+.lead{font-size:16px;color:var(--slate)}
+p{margin-bottom:12px;font-size:14.5px;color:var(--slate)}
+p.small{font-size:13px}
+.fig{width:100%;border-radius:12px;overflow:hidden;background:var(--navy);box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.cap{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin-top:7px}
+.rule{height:3px;width:54px;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;margin:0 0 18px}
+
+/* Dark / hero pages */
+.page.dark{color:#fff;background:linear-gradient(135deg,var(--navy),var(--navy2))}
+.page.dark h1,.page.dark h2{color:#fff}
+.page.dark .lead,.page.dark p{color:rgba(255,255,255,.82)}
+.dotgrid{position:absolute;inset:0;opacity:.5;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1.4px,transparent 1.4px);background-size:26px 26px}
+
+/* Cover */
+.cover-logo{font-family:'Playfair Display',serif;font-size:30px;font-weight:600}
+.cover-logo span{color:var(--orange)}
+.cover-sub{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:4px}
+.cover-spacer{flex:1}
+.cover-title{font-family:'Playfair Display',serif;font-size:52px;line-height:1.05;font-weight:600}
+.cover-tag{font-size:18px;color:var(--orange2);margin-top:14px;font-weight:300}
+
+/* Layout helpers */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;flex:1}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;flex:1;align-items:center}
+.stack{display:flex;flex-direction:column;justify-content:center}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step .n{flex:0 0 34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--orange),var(--orange2))}
+.step h3{font-size:15px;color:var(--navy);margin-bottom:1px}
+.step p{font-size:13px;margin:0}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.card{background:var(--orangelt);border:1px solid #fde6cf;border-radius:11px;padding:15px 16px}
+.card h3{font-size:14px;color:var(--navy);margin-bottom:4px}
+.card p{font-size:12.5px;margin:0}
+.card.tint{background:#eef3fb;border-color:#d7e2f5}
+.quote{font-family:'Playfair Display',serif;font-style:italic;font-size:21px;line-height:1.4;color:var(--navy)}
+.quote.light{color:#fff}
+.byline{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.05em;color:var(--muted);margin-top:14px}
+.byline.light{color:rgba(255,255,255,.6)}
+ul.checks{list-style:none;margin:6px 0 0}
+ul.checks li{position:relative;padding-left:26px;margin-bottom:9px;font-size:14px;color:var(--slate)}
+ul.checks li::before{content:"";position:absolute;left:0;top:6px;width:14px;height:14px;border-radius:4px;
+  background:linear-gradient(135deg,var(--orange),var(--orange2))}
+ul.checks li::after{content:"";position:absolute;left:4.5px;top:9px;width:4px;height:7px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}
+.flag{font-family:'DM Mono',monospace;font-size:12px;background:var(--amberlt);color:var(--amber);border-radius:3px;padding:1px 5px}
+.contact{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.contact .row{display:flex;gap:10px;align-items:baseline}
+.contact .k{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.05em;color:rgba(255,255,255,.45);min-width:70px;text-transform:uppercase}
+
+@media (max-width:640px){
+  .page .pad{padding:30px 26px}
+  h1{font-size:30px}.cover-title{font-size:38px}h2{font-size:23px}
+  .grid2,.split{grid-template-columns:1fr;gap:18px}
+  .cards{grid-template-columns:1fr}
+}
+
+/* ── PRINT ─────────────────────────────────────────────────────── */
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}
+  .toolbar{display:none}
+  .deck{max-width:none;margin:0;padding:0}
+  .page{width:100%;height:100vh;margin:0;border-radius:0;box-shadow:none;
+    break-after:page;page-break-after:always;break-inside:avoid}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .page .pad{padding:13mm 15mm}
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;
+}
+.page,.page.dark{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div>
+    <div class="brand">Voice<span>Rx</span> · GFM</div>
+  </div>
+  <div class="hint">10-page booklet — use “Print / Save as PDF” for a print-ready file</div>
+  <button onclick="window.print()">Print / Save&nbsp;PDF</button>
+</div>
+
+<div class="deck">
+
+  <!-- ── PAGE 1 · COVER ─────────────────────────────────────────── -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div>
+        <div class="cover-logo">Voice<span>Rx</span></div>
+        <div class="cover-sub">Garcia Family Medicine</div>
+      </div>
+      <div class="fig" style="aspect-ratio:16/10;margin:26px 0">
+        <img src="images/p01-cover.jpg.svg" alt="Dr. Tess Garcia using VoiceRx at the bedside">
+      </div>
+      <div class="cover-spacer"></div>
+      <div class="cover-title">Your voice.<br>Your note.<br>Done.</div>
+      <div class="cover-tag">VoiceRx listens. Every word is yours.</div>
+    </div>
+    <div class="pagenum light">01</div>
+  </section>
+
+  <!-- ── PAGE 2 · DR. TESS / WELCOME ────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">A note from your physician</div>
+      <div class="split">
+        <div class="stack">
+          <h2>Built at the bedside, not in a boardroom.</h2>
+          <div class="rule"></div>
+          <p>I’m Dr. Tess Garcia. Like most family physicians, I used to spend my
+            evenings finishing charts long after the last patient went home.
+            VoiceRx is the tool I wished I’d had — it listens while I talk
+            <em>to my patients</em>, and turns that conversation into a clean note
+            I review and sign.</p>
+          <p>This booklet walks you through what VoiceRx is, how it protects
+            patient privacy, and the simple three-step routine that gets a visit
+            from spoken words into the chart.</p>
+          <div class="quote" style="font-size:18px;margin-top:6px">“The technology should do the typing.
+            The doctor should do the doctoring.”</div>
+          <div class="byline">— Dr. Theresa “Tess” Garcia, MD, FAAFP, DABOM</div>
+        </div>
+        <div>
+          <div class="fig" style="aspect-ratio:6/7">
+            <img src="images/p02-dr-tess.jpg.svg" alt="Portrait of Dr. Tess Garcia">
+          </div>
+          <div class="cap">Dr. Tess Garcia · Garcia Family Medicine, Blue Springs MO</div>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">02</div>
+  </section>
+
+  <!-- ── PAGE 3 · THE PROBLEM ───────────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">The problem</div>
+      <h2>The note shouldn’t cost you your evening.</h2>
+      <div class="rule"></div>
+      <div class="fig" style="aspect-ratio:16/9;margin-bottom:18px">
+        <img src="images/p03-burnout.jpg.svg" alt="A clinician charting late at night">
+      </div>
+      <div class="grid2" style="align-items:start">
+        <div>
+          <p>For every hour a physician spends with patients, studies have found
+            they spend nearly two more on paperwork and the EHR. Much of it
+            spills into the evening — the “pajama time” that quietly drives
+            burnout.</p>
+        </div>
+        <div>
+          <p>Dictating into a recorder helps, but then someone still has to
+            transcribe, format, and clean it up. VoiceRx closes that gap: you
+            speak naturally, and a structured, review-ready note comes back in
+            seconds.</p>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">03</div>
+  </section>
+
+  <!-- ── PAGE 4 · WHAT IS VOICERX ───────────────────────────────── -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div class="kicker light">What it is</div>
+      <div class="split">
+        <div>
+          <div class="fig" style="aspect-ratio:9/14">
+            <img src="images/p04-product.jpg.svg" alt="VoiceRx running on a phone in the exam room">
+          </div>
+        </div>
+        <div class="stack">
+          <h2>A dictation assistant that speaks medicine.</h2>
+          <div class="rule"></div>
+          <p>VoiceRx is a private, browser-based dictation app made for the
+            clinic. Tap the microphone, talk through the visit the way you
+            normally would, and it cleans the transcript and formats it into the
+            note type you choose.</p>
+          <ul class="checks">
+            <li>Runs on your phone — nothing to install</li>
+            <li>Cleans filler words and formats automatically</li>
+            <li>Flags anything uncertain for you to confirm</li>
+            <li>Nothing is final until <em>you</em> approve it</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum light">04</div>
+  </section>
+
+  <!-- ── PAGE 5 · HOW IT WORKS ──────────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">How it works</div>
+      <h2>Three taps from spoken to structured.</h2>
+      <div class="rule"></div>
+      <div class="split" style="align-items:start">
+        <div>
+          <div class="fig" style="aspect-ratio:4/5">
+            <img src="images/p05-howitworks.jpg.svg" alt="Dictating naturally into the app">
+          </div>
+        </div>
+        <div class="stack">
+          <div class="steps">
+            <div class="step"><div class="n">1</div><div>
+              <h3>Dictate</h3>
+              <p>Tap the mic and talk through the encounter naturally. The screen
+                stays awake; there’s no time limit on a long visit.</p></div></div>
+            <div class="step"><div class="n">2</div><div>
+              <h3>Clean &amp; Format</h3>
+              <p>One tap turns the raw transcript into a tidy, organized note in
+                the format you picked.</p></div></div>
+            <div class="step"><div class="n">3</div><div>
+              <h3>Review &amp; Approve</h3>
+              <p>Confirm any flagged items, make edits, and approve. Only then is
+                it ready for the chart.</p></div></div>
+          </div>
+          <p class="small" style="margin-top:14px">Long visit, or stepping away?
+            Record on your phone and <strong>upload the audio</strong> later —
+            VoiceRx handles recordings of any length.</p>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">05</div>
+  </section>
+
+  <!-- ── PAGE 6 · PRIVACY ───────────────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Privacy &amp; trust</div>
+      <h2>Patient privacy is the default, not a setting.</h2>
+      <div class="rule"></div>
+      <div class="fig" style="aspect-ratio:16/9;margin-bottom:16px">
+        <img src="images/p06-privacy.jpg.svg" alt="Locked devices and signed agreements representing privacy">
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>Signed BAA</h3>
+          <p>VoiceRx operates under a Business Associate Agreement, so protected
+            health information is handled the way HIPAA requires.</p>
+        </div>
+        <div class="card tint">
+          <h3>You hold the keys</h3>
+          <p>Access is gated by a provider login and token. The app runs on your
+            device, under your account.</p>
+        </div>
+        <div class="card tint">
+          <h3>Nothing auto-files</h3>
+          <p>A note is marked <em>pending review</em> until the physician
+            approves it. It is never a finalized record on its own.</p>
+        </div>
+        <div class="card">
+          <h3>Separate identities</h3>
+          <p>Documented biological sex, gender identity, and stated pronouns are
+            tracked distinctly and respectfully.</p>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">06</div>
+  </section>
+
+  <!-- ── PAGE 7 · REVIEW WORKFLOW ───────────────────────────────── -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div class="kicker light">The safeguard</div>
+      <div class="split">
+        <div class="stack">
+          <h2>The physician is always the final word.</h2>
+          <div class="rule"></div>
+          <p>VoiceRx never pretends to be the doctor. When the AI is unsure of a
+            term, a dose, or a name, it doesn’t guess — it marks it.</p>
+          <p>Anything uncertain comes back as a
+            <span class="flag">[verify:…]</span> flag. Every flag must be
+            confirmed before a note can be approved, so nothing ambiguous slips
+            into the record.</p>
+          <div class="quote light" style="font-size:18px">“Pending Dr. Garcia review —
+            not a finalized record.”</div>
+          <div class="byline light">The banner every draft carries until it’s signed.</div>
+        </div>
+        <div>
+          <div class="fig" style="aspect-ratio:4/5">
+            <img src="images/p07-review.jpg.svg" alt="Physician reviewing and approving a note">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum light">07</div>
+  </section>
+
+  <!-- ── PAGE 8 · INTO THE CHART ────────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Into the chart</div>
+      <h2>From your voice to AtlasMD.</h2>
+      <div class="rule"></div>
+      <div class="split" style="align-items:start">
+        <div class="stack">
+          <p>Once you approve a note, getting it into the EHR is a copy-and-paste
+            away. VoiceRx copies the full, formatted note — including the
+            identification header — reliably to your clipboard.</p>
+          <ul class="checks">
+            <li>Approve the note on your phone</li>
+            <li>Copy the formatted note in one tap</li>
+            <li>Paste into the patient’s chart in AtlasMD</li>
+          </ul>
+          <p class="small" style="margin-top:12px">An optional Encounter ID keeps
+            multiple visits for the same patient cleanly separated in AtlasMD.</p>
+        </div>
+        <div>
+          <div class="fig" style="aspect-ratio:4/5">
+            <img src="images/p08-atlasmd.jpg.svg" alt="Pasting a note into AtlasMD on a desktop">
+          </div>
+          <div class="cap">The note lands in AtlasMD exactly as approved.</div>
+        </div>
+      </div>
+    </div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- ── PAGE 9 · QUICK START ───────────────────────────────────── -->
+  <section class="page">
+    <div class="pad">
+      <div class="kicker">Quick start for Dr. Tess</div>
+      <h2>Your everyday routine.</h2>
+      <div class="rule"></div>
+      <div class="fig" style="aspect-ratio:16/9;margin-bottom:16px">
+        <img src="images/p09-quickstart.jpg.svg" alt="Record, upload, paste workflow">
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div>
+          <h3>Record the visit</h3>
+          <p>Open VoiceRx, add the patient, and tap the mic — or record on your
+            phone for a longer encounter.</p></div></div>
+        <div class="step"><div class="n">2</div><div>
+          <h3>Upload &amp; clean</h3>
+          <p>If you recorded separately, tap <em>Upload a recording</em>, then
+            <em>Clean &amp; Format</em>.</p></div></div>
+        <div class="step"><div class="n">3</div><div>
+          <h3>Review, copy, paste</h3>
+          <p>Clear the flags, approve, copy, and paste into AtlasMD on your
+            desktop. Done before you leave the room.</p></div></div>
+      </div>
+    </div>
+    <div class="pagenum">09</div>
+  </section>
+
+  <!-- ── PAGE 10 · BACK COVER ───────────────────────────────────── -->
+  <section class="page dark">
+    <div class="dotgrid"></div>
+    <div class="pad" style="position:relative">
+      <div class="kicker light">Garcia Family Medicine</div>
+      <div class="fig" style="aspect-ratio:16/10;margin-bottom:auto">
+        <img src="images/p10-clinic.jpg.svg" alt="Garcia Family Medicine, Blue Springs Missouri">
+      </div>
+      <div class="cover-spacer"></div>
+      <h2 style="font-size:30px;margin-top:22px">Every word is yours.</h2>
+      <p>VoiceRx gives clinicians back the part of medicine that drew them to it —
+        the patient in front of them — and the part of the evening that belongs
+        to their families.</p>
+      <div class="contact" style="margin-top:18px">
+        <div class="row"><span class="k">Practice</span><span>Garcia Family Medicine</span></div>
+        <div class="row"><span class="k">Location</span><span>Blue Springs, Missouri</span></div>
+        <div class="row"><span class="k">Physician</span><span>Dr. Theresa “Tess” Garcia, MD, FAAFP, DABOM</span></div>
+      </div>
+      <div class="cover-logo" style="margin-top:24px">Voice<span>Rx</span></div>
+    </div>
+    <div class="pagenum light">10</div>
+  </section>
+
+</div>
+</body>
+</html>
