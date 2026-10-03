@@ -1,0 +1,9 @@
+name = "trim"
+compatibility_date = "2026-05-29"
+
+# trim is a static-assets Worker: it serves the weight & nutrition manager
+# (public/index.html) at https://trim.winter-shadow-e82d.workers.dev
+# There is no server code — just the HTML asset. All patient data stays in
+# the browser (localStorage); nothing is uploaded.
+[assets]
+directory = "./public"

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<title>Trim Clinic · Patient tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1220; --panel:#111c31; --panel2:#16233c; --line:#243450;
+  --text:#eaf0fb; --muted:#8ea2c2; --faint:#5b6f92;
+  --accent:#22d3a7; --accent2:#0ea5e9; --accentDim:#0f3a34;
+  --warn:#f59e0b; --danger:#f87171; --good:#34d399;
+  --c1:#22d3a7; --c2:#38bdf8; --c3:#a78bfa; --c4:#fbbf24; --c5:#fb7185;
+  --radius:16px; --shadow:0 8px 30px rgba(0,0,0,0.35);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:radial-gradient(1200px 700px at 80% -10%,#13203a 0%,var(--bg) 55%);color:var(--text);line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+.app{max-width:1200px;margin:0 auto;padding:20px 18px 80px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:800;color:#04121a;font-size:19px}
+.brand h1{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.brand .sub{font-size:11px;color:var(--muted);font-weight:500}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border:none;border-radius:11px;padding:11px 16px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:var(--panel);color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:13px}
+.btn.danger{background:var(--panel2);color:var(--danger);border:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:500}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,167,.14)}
+.field{margin-bottom:12px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar .search{flex:1;min-width:200px}
+.toolbar select{width:auto}
+
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s;position:relative}
+.pcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pcard .pc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:12px}
+.pcard .pc-name{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.pcard .pc-sub{font-size:11.5px;color:var(--muted)}
+.pcard .pc-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.pcard .pc-row span:first-child{color:var(--muted)}
+.pcard .pc-row b{font-weight:700}
+.mini-bar{height:7px;border-radius:5px;background:var(--panel2);overflow:hidden;margin-top:10px;border:1px solid var(--line)}
+.mini-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--accentDim);color:var(--accent);white-space:nowrap}
+.pill.warn{background:#3a2c0e;color:var(--warn)}.pill.danger{background:#3a1414;color:var(--danger)}
+.pill.muted{background:var(--panel2);color:var(--muted)}.pill.good{background:var(--accentDim);color:var(--good)}
+.delta{font-size:12.5px;font-weight:700}.delta.down{color:var(--good)}.delta.up{color:var(--danger)}.delta.flat{color:var(--muted)}
+
+.empty{text-align:center;color:var(--faint);padding:48px 20px;font-size:14px}
+.empty b{color:var(--text);display:block;font-size:16px;margin-bottom:6px;font-weight:700}
+
+/* detail */
+.detail-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.detail-head .back{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}
+.detail-head h2{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.grid{display:grid;gap:16px}
+.grid.stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.grid.two{grid-template-columns:1fr 1fr}
+@media(max-width:800px){.grid.two{grid-template-columns:1fr}}
+.stat .label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.stat .value{font-size:27px;font-weight:800;letter-spacing:-.03em;margin-top:5px;line-height:1}
+.stat .value .unit{font-size:13px;color:var(--muted);font-weight:600;margin-left:3px}
+.card h3{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.card h3 .hint{font-size:11px;color:var(--faint);font-weight:500}
+svg.chart{width:100%;height:auto;display:block;font-family:inherit}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.log-list{display:flex;flex-direction:column;gap:1px;max-height:360px;overflow-y:auto}
+.log-item{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-radius:9px}
+.log-item:hover{background:var(--panel2)}
+.li-date{font-size:13px;font-weight:600}.li-sub{font-size:11px;color:var(--muted)}.li-val{font-size:14px;font-weight:700}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(4,10,20,.7);display:none;align-items:center;justify-content:center;padding:18px;z-index:40}
+.overlay.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:440px;width:100%;box-shadow:var(--shadow)}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:14px}
+.modal .actions{display:flex;gap:10px;margin-top:16px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--accent);color:var(--text);padding:11px 18px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.notice{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.notice b{color:var(--text)}
+.view{display:none}.view.active{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">✚</div>
+      <div><h1>Trim Clinic</h1><div class="sub">Patient weight &amp; nutrition tracker</div></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="importPatientBtn">Import patient file</button>
+      <button class="btn ghost" id="addPatientBtn">Add patient</button>
+      <button class="btn ghost sm" id="exportRosterBtn">Back up</button>
+      <button class="btn ghost sm" id="importRosterBtn">Restore</button>
+      <input type="file" id="patientFile" accept="application/json" hidden>
+      <input type="file" id="rosterFile" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <!-- ROSTER -->
+  <section class="view active" id="view-roster">
+    <div class="notice">
+      <b>How this works:</b> patients use the Trim app, tap <b>Export</b> to download their data file, and send it to you.
+      Use <b>Import patient file</b> to add or update a patient here. All data stays on <b>this device only</b> (browser storage) — use <b>Back up</b> to save or move your roster.
+    </div>
+    <div class="toolbar">
+      <input class="search" id="search" placeholder="Search patients…">
+      <select id="sort">
+        <option value="name">Sort: Name</option>
+        <option value="updated">Sort: Recently updated</option>
+        <option value="stale">Sort: Needs attention</option>
+        <option value="progress">Sort: Goal progress</option>
+      </select>
+    </div>
+    <div class="roster" id="roster"></div>
+  </section>
+
+  <!-- DETAIL -->
+  <section class="view" id="view-detail"></section>
+</div>
+
+<!-- Add / edit patient modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add patient</h3>
+    <div class="field"><label>Full name</label><input type="text" id="mName" placeholder="e.g. Jane Doe"></div>
+    <div class="field"><label>Date of birth (optional)</label><input type="date" id="mDob"></div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="mNote" placeholder="e.g. MRN, plan, reminders"></div>
+    <div class="actions">
+      <button class="btn ghost" id="mCancel" style="flex:1">Cancel</button>
+      <button class="btn" id="mSave" style="flex:1">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import-match modal -->
+<div class="overlay" id="matchOverlay">
+  <div class="modal">
+    <h3>Import patient file</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px" id="matchInfo"></p>
+    <div class="field"><label>Attach to</label>
+      <select id="matchSelect"></select>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="matchCancel" style="flex:1">Cancel</button>
+      <button class="btn" id="matchConfirm" style="flex:1">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const KEY="trim_clinic_v1";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+const todayISO=()=>new Date().toISOString().slice(0,10);
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* roster = [{id,name,dob,note,data:{settings,weights,foods},importedAt}] */
+let R=load();
+function load(){ try{const r=localStorage.getItem(KEY); if(r) return JSON.parse(r);}catch(e){} return []; }
+function save(){ localStorage.setItem(KEY,JSON.stringify(R)); }
+
+/* ---- units per-patient (data stored canonical kg/cm, like the patient app) ---- */
+const KGLB=2.2046226218;
+const wUnitOf=d=>(d.settings&&d.settings.unitWeight)||"kg";
+const dispW=(d,kg)=>kg==null?null:(wUnitOf(d)==="lb"?kg*KGLB:kg);
+const fmtW=(d,kg)=>kg==null?"—":(Math.round(dispW(d,kg)*10)/10).toString();
+
+/* ---- date helpers ---- */
+function niceDate(iso){ if(!iso) return "—"; const d=new Date(iso+"T00:00:00"); return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:d.getFullYear()!==new Date().getFullYear()?"numeric":undefined}); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+const sortByDate=arr=>arr.slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+
+/* ---- derived metrics from a patient data object ---- */
+function metrics(p){
+  const d=p.data||{settings:{},weights:[],foods:[]};
+  const w=sortByDate(d.weights||[]);
+  const first=w[0]||null, last=w[w.length-1]||null;
+  const goal=d.settings? d.settings.goalWeight : null;
+  const start=d.settings? d.settings.startWeight : null;
+  const height=d.settings? d.settings.height : null;
+  const bmiVal = (last&&height)? last.val/((height/100)*(height/100)) : null;
+  let progress=null;
+  if(start!=null&&goal!=null&&last){ const tot=start-goal, done=start-last.val; progress = tot===0?100:Math.max(0,Math.min(100,(done/tot)*100)); }
+  // weekly trend from all points
+  let weekly=null;
+  if(w.length>=2){ const days=daysBetween(first.date,last.date)||1; weekly=((last.val-first.val)/days)*7; }
+  const daysSince = last? daysBetween(last.date, todayISO()) : null;
+  // status
+  let status={t:"No data",c:"muted"};
+  if(last){
+    if(daysSince>21) status={t:daysSince+"d since weigh-in",c:"warn"};
+    else if(goal!=null&&last.val<=goal) status={t:"Goal reached",c:"good"};
+    else if(weekly!=null&&goal!=null){
+      const towardGoal = (last.val>goal&&weekly<0)||(last.val<goal&&weekly>0);
+      status = Math.abs(weekly)<0.05 ? {t:"Stalled",c:"warn"} : towardGoal? {t:"On track",c:"good"} : {t:"Off track",c:"danger"};
+    } else status={t:"Tracking",c:""};
+  }
+  return {d,w,first,last,goal,start,height,bmiVal,progress,weekly,daysSince,status};
+}
+function bmiCat(v){ if(v==null) return {t:"—",c:"muted"}; if(v<18.5) return {t:"Underweight",c:"warn"}; if(v<25) return {t:"Healthy",c:"good"}; if(v<30) return {t:"Overweight",c:"warn"}; return {t:"Obese",c:"danger"}; }
+
+/* ================= ROSTER ================= */
+function renderRoster(){
+  const q=$("#search").value.trim().toLowerCase();
+  const sort=$("#sort").value;
+  let list=R.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.note||"").toLowerCase().includes(q));
+  const m=p=>metrics(p);
+  if(sort==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==="updated") list.sort((a,b)=>(b.importedAt||"").localeCompare(a.importedAt||""));
+  else if(sort==="stale") list.sort((a,b)=>((m(b).daysSince??-1)-(m(a).daysSince??-1)));
+  else if(sort==="progress") list.sort((a,b)=>((m(b).progress??-1)-(m(a).progress??-1)));
+  const el=$("#roster");
+  if(!R.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1"><b>No patients yet</b>Import a patient's exported Trim file, or add a patient manually to get started.</div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1">No patients match "${escapeHtml(q)}".</div>`; return; }
+  el.innerHTML=list.map(p=>{
+    const x=metrics(p);
+    const delta = (x.first&&x.last&&x.first!==x.last)? dispW(x.d,x.last.val)-dispW(x.d,x.first.val) : null;
+    const dCls=delta==null?"flat":delta<0?"down":delta>0?"up":"flat";
+    const dTxt=delta==null?"":`${delta<0?"▼":delta>0?"▲":"■"} ${Math.abs(Math.round(delta*10)/10)} ${wUnitOf(x.d)}`;
+    return `<div class="pcard" data-id="${p.id}">
+      <div class="pc-head">
+        <div><div class="pc-name">${escapeHtml(p.name)}</div><div class="pc-sub">${p.dob?"DOB "+niceDate(p.dob)+" · ":""}${x.w.length} weigh-ins</div></div>
+        <span class="pill ${x.status.c}">${x.status.t}</span>
+      </div>
+      <div class="pc-row"><span>Current</span><b>${fmtW(x.d,x.last?x.last.val:null)} ${x.last?wUnitOf(x.d):""}</b></div>
+      <div class="pc-row"><span>Goal</span><b>${fmtW(x.d,x.goal)} ${x.goal!=null?wUnitOf(x.d):""}</b></div>
+      <div class="pc-row"><span>Change</span><span class="delta ${dCls}">${dTxt||"—"}</span></div>
+      <div class="pc-row"><span>Last weigh-in</span><b>${x.last?niceDate(x.last.date):"—"}</b></div>
+      ${x.progress!=null?`<div class="mini-bar"><span style="width:${x.progress}%"></span></div>`:""}
+    </div>`;
+  }).join("");
+}
+$("#roster").addEventListener("click",e=>{ const c=e.target.closest(".pcard"); if(c) openDetail(c.dataset.id); });
+$("#search").addEventListener("input",renderRoster);
+$("#sort").addEventListener("change",renderRoster);
+
+/* ================= DETAIL ================= */
+function lineChart(points, opts){
+  opts=opts||{}; const W=580,H=250,pad={t:16,r:14,b:26,l:44};
+  const vals=points.map(p=>p.val).concat(opts.extra||[]).filter(v=>v!=null);
+  if(!vals.length) return `<div class="empty">No weight data.</div>`;
+  const n=Math.max(points.length,2); let min=Math.min(...vals),max=Math.max(...vals);
+  const span=(max-min)||1; min-=span*0.12; max+=span*0.12;
+  const x=i=>pad.l+(i/(n-1))*(W-pad.l-pad.r), y=v=>pad.t+(1-(v-min)/(max-min))*(H-pad.t-pad.b);
+  let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weight over time">`;
+  [0,.25,.5,.75,1].forEach(f=>{const v=min+f*(max-min);svg+=`<line x1="${pad.l}" x2="${W-pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pad.l-6}" y="${y(v)+3.5}" text-anchor="end" font-size="10" fill="var(--faint)">${Math.round(v*10)/10}</text>`;});
+  if(opts.goal!=null&&opts.goal>=min&&opts.goal<=max){svg+=`<line x1="${pad.l}" x2="${W-pad.r}" y1="${y(opts.goal)}" y2="${y(opts.goal)}" stroke="var(--c3)" stroke-width="1.5" stroke-dasharray="5 4"/>`;}
+  const path=points.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.val).toFixed(1)}`).join(" ");
+  const area=path+` L${x(n-1).toFixed(1)},${y(min)} L${x(0).toFixed(1)},${y(min)} Z`;
+  svg+=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--c1)" stop-opacity=".28"/><stop offset="1" stop-color="var(--c1)" stop-opacity="0"/></linearGradient></defs>`;
+  svg+=`<path d="${area}" fill="url(#g)"/><path d="${path}" fill="none" stroke="var(--c1)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if(points.length<=40) points.forEach((p,i)=>svg+=`<circle cx="${x(i)}" cy="${y(p.val)}" r="3" fill="var(--bg)" stroke="var(--c1)" stroke-width="2"/>`);
+  [0,Math.floor((n-1)/2),n-1].forEach(i=>{if(points[i])svg+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--faint)">${niceDate(points[i].date)}</text>`;});
+  return svg+`</svg>`;
+}
+function barChart(bars,opts){
+  opts=opts||{}; const W=580,H=250,pad={t:14,r:12,b:26,l:40};
+  if(!bars.length) return `<div class="empty">No food data.</div>`;
+  const max=Math.max(opts.target||0,...bars.map(b=>b.val),1);
+  const x=i=>pad.l+i*((W-pad.l-pad.r)/bars.length), bw=((W-pad.l-pad.r)/bars.length)*0.62, y=v=>pad.t+(1-v/max)*(H-pad.t-pad.b);
+  let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Calories per day">`;
+  [0,.5,1].forEach(f=>{const v=f*max;svg+=`<line x1="${pad.l}" x2="${W-pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pad.l-6}" y="${y(v)+3.5}" text-anchor="end" font-size="10" fill="var(--faint)">${Math.round(v)}</text>`;});
+  bars.forEach((b,i)=>{const h=(H-pad.t-pad.b)-(y(b.val)-pad.t);const over=opts.target&&b.val>opts.target;svg+=`<rect x="${x(i)+((W-pad.l-pad.r)/bars.length-bw)/2}" y="${y(b.val)}" width="${bw}" height="${Math.max(0,h)}" rx="3" fill="${over?'var(--c5)':'var(--c2)'}" opacity="${b.val?0.92:0.25}"/>`;});
+  if(opts.target){svg+=`<line x1="${pad.l}" x2="${W-pad.r}" y1="${y(opts.target)}" y2="${y(opts.target)}" stroke="var(--c4)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${W-pad.r}" y="${y(opts.target)-4}" text-anchor="end" font-size="10" fill="var(--c4)">target ${opts.target}</text>`;}
+  [0,bars.length-1].forEach(i=>{if(bars[i])svg+=`<text x="${x(i)+((W-pad.l-pad.r)/bars.length)/2}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--faint)">${niceDate(bars[i].date)}</text>`;});
+  return svg+`</svg>`;
+}
+let currentId=null;
+function openDetail(id){
+  const p=R.find(x=>x.id===id); if(!p) return; currentId=id;
+  const x=metrics(p); const u=wUnitOf(x.d);
+  const bc=bmiCat(x.bmiVal);
+  const wpts=x.w.map(w=>({date:w.date,val:dispW(x.d,w.val)}));
+  const goalDisp=x.goal!=null?dispW(x.d,x.goal):null;
+  // calories last 14d
+  const days=[]; const base=new Date(todayISO());
+  const foods=x.d.foods||[];
+  for(let i=13;i>=0;i--){const dd=new Date(base.getTime()-i*86400000).toISOString().slice(0,10);const cal=foods.filter(f=>f.date===dd).reduce((a,f)=>a+(+f.cal||0),0);days.push({date:dd,val:cal});}
+  const calTarget=x.d.settings?x.d.settings.calTarget:0;
+  const delta=(x.first&&x.last&&x.first!==x.last)?dispW(x.d,x.last.val)-dispW(x.d,x.first.val):null;
+  const weeklyDisp=x.weekly!=null?Math.round(dispW(x.d,Math.abs(x.weekly))*100)/100:null;
+  const stats=[
+    {l:"Current",v:fmtW(x.d,x.last?x.last.val:null),u},
+    {l:"Start",v:fmtW(x.d,x.start),u},
+    {l:"Goal",v:fmtW(x.d,x.goal),u},
+    {l:"BMI",v:x.bmiVal?Math.round(x.bmiVal*10)/10:"—",u:"",extra:`<span class="pill ${bc.c}">${bc.t}</span>`},
+    {l:"Weekly trend",v:weeklyDisp!=null?(x.weekly<0?"−":x.weekly>0?"+":"")+weeklyDisp:"—",u:weeklyDisp!=null?u+"/wk":""},
+  ];
+  $("#view-detail").innerHTML=`
+    <div class="detail-head">
+      <button class="back" id="backBtn">← Roster</button>
+      <div><h2>${escapeHtml(p.name)}</h2><div class="pc-sub" style="color:var(--muted);font-size:12.5px">${p.dob?"DOB "+niceDate(p.dob)+" · ":""}Last file imported ${niceDate(p.importedAt)} · <span class="pill ${x.status.c}">${x.status.t}</span></div></div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn ghost sm" id="editBtn">Edit</button>
+        <button class="btn ghost sm" id="updateBtn">Update from file</button>
+        <button class="btn danger sm" id="delBtn">Delete</button>
+      </div>
+    </div>
+    ${p.note?`<div class="notice" style="border-left-color:var(--c4)"><b>Note:</b> ${escapeHtml(p.note)}</div>`:""}
+    <div class="grid stats">${stats.map(s=>`<div class="card stat"><div class="label">${s.l}</div><div class="value">${s.v}<span class="unit">${s.u}</span></div>${s.extra?`<div style="margin-top:8px">${s.extra}</div>`:""}</div>`).join("")}</div>
+    <div class="grid two" style="margin-top:16px">
+      <div class="card"><h3>Weight trend <span class="hint">${x.w.length} entries</span></h3>${lineChart(wpts,{goal:goalDisp,extra:goalDisp!=null?[goalDisp]:[]})}
+        <div class="legend"><span><span class="dot" style="background:var(--c1)"></span>Weight</span><span><span class="dot" style="background:var(--c3)"></span>Goal</span></div>
+        ${delta!=null?`<p style="font-size:12.5px;color:var(--muted);margin-top:10px">Net change since first weigh-in: <b class="delta ${delta<0?'down':delta>0?'up':'flat'}">${delta<0?"▼":delta>0?"▲":""} ${Math.abs(Math.round(delta*10)/10)} ${u}</b></p>`:""}
+      </div>
+      <div class="card"><h3>Calories · last 14 days <span class="hint">${calTarget?"target "+calTarget:""}</span></h3>${barChart(days,{target:calTarget})}</div>
+    </div>
+    <div class="grid two" style="margin-top:16px">
+      <div class="card"><h3>Weigh-in history</h3><div class="log-list">${
+        x.w.length? x.w.slice().reverse().map((w,idx,arr)=>{const prev=arr[idx+1];let dd="";if(prev){const df=dispW(x.d,w.val)-dispW(x.d,prev.val);dd=`<span class="delta ${df<0?'down':df>0?'up':'flat'}" style="font-size:11.5px">${df<0?"▼":df>0?"▲":"■"} ${Math.abs(Math.round(df*10)/10)}</span>`;}
+          return `<div class="log-item"><div><div class="li-date">${niceDate(w.date)}</div>${w.note?`<div class="li-sub">${escapeHtml(w.note)}</div>`:""}</div><div style="display:flex;gap:10px;align-items:center">${dd}<span class="li-val">${fmtW(x.d,w.val)} ${u}</span></div></div>`;}).join("")
+        : `<div class="empty">No weigh-ins in this file.</div>`}</div></div>
+      <div class="card"><h3>Recent food log</h3><div class="log-list">${
+        foods.length? sortByDate(foods).slice().reverse().slice(0,40).map(f=>`<div class="log-item"><div><div class="li-date">${escapeHtml(f.name)}</div><div class="li-sub">${niceDate(f.date)} · ${[f.pro?f.pro+"p":"",f.carb?f.carb+"c":"",f.fat?f.fat+"f":""].filter(Boolean).join(" ")||"—"}</div></div><span class="li-val">${f.cal||0} kcal</span></div>`).join("")
+        : `<div class="empty">No food logged in this file.</div>`}</div></div>
+    </div>`;
+  showView("detail");
+  $("#backBtn").onclick=()=>{showView("roster");renderRoster();};
+  $("#delBtn").onclick=()=>{ if(confirm("Delete "+p.name+" from this device? This cannot be undone.")){ R=R.filter(r=>r.id!==id); save(); showView("roster"); renderRoster(); toast("Patient deleted"); } };
+  $("#editBtn").onclick=()=>openModal(p);
+  $("#updateBtn").onclick=()=>{ pendingUpdateId=id; $("#patientFile").click(); };
+}
+function showView(v){ $$(".view").forEach(x=>x.classList.remove("active")); $("#view-"+v).classList.add("active"); window.scrollTo(0,0); }
+
+/* ================= ADD / EDIT PATIENT ================= */
+let editingId=null;
+function openModal(p){
+  editingId=p?p.id:null;
+  $("#modalTitle").textContent=p?"Edit patient":"Add patient";
+  $("#mName").value=p?p.name:""; $("#mDob").value=p&&p.dob?p.dob:""; $("#mNote").value=p&&p.note?p.note:"";
+  $("#overlay").classList.add("show"); $("#mName").focus();
+}
+$("#addPatientBtn").onclick=()=>openModal(null);
+$("#mCancel").onclick=()=>$("#overlay").classList.remove("show");
+$("#overlay").onclick=e=>{ if(e.target.id==="overlay") $("#overlay").classList.remove("show"); };
+$("#mSave").onclick=()=>{
+  const name=$("#mName").value.trim(); if(!name){ toast("Enter a name"); return; }
+  const dob=$("#mDob").value||null, note=$("#mNote").value.trim();
+  if(editingId){ const p=R.find(r=>r.id===editingId); p.name=name; p.dob=dob; p.note=note; }
+  else R.push({id:uid(),name,dob,note,data:{settings:{},weights:[],foods:[]},importedAt:todayISO()});
+  save(); $("#overlay").classList.remove("show");
+  if(editingId&&currentId===editingId) openDetail(editingId); else { showView("roster"); renderRoster(); }
+  toast(editingId?"Patient updated":"Patient added");
+};
+
+/* ================= IMPORT PATIENT FILE ================= */
+let pendingUpdateId=null, pendingData=null, pendingName="";
+$("#importPatientBtn").onclick=()=>{ pendingUpdateId=null; $("#patientFile").click(); };
+$("#patientFile").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const data=JSON.parse(r.result);
+      if(!data.settings||!Array.isArray(data.weights)) throw new Error("not a Trim file");
+      const clean={settings:data.settings||{},weights:data.weights||[],foods:Array.isArray(data.foods)?data.foods:[]};
+      pendingData=clean; pendingName=(data.settings&&data.settings.name)?data.settings.name.trim():"";
+      // direct update path (from a patient's detail page)
+      if(pendingUpdateId){ applyImport(pendingUpdateId); }
+      else {
+        // try auto-match by name
+        const match = pendingName? R.find(p=>p.name.toLowerCase()===pendingName.toLowerCase()) : null;
+        if(match){ applyImport(match.id); }
+        else openMatchModal();
+      }
+    }catch(err){ toast("That doesn't look like a Trim export file"); }
+    e.target.value="";
+  };
+  r.readAsText(file);
+});
+function applyImport(id){
+  const p=R.find(r=>r.id===id); if(!p){ return; }
+  p.data=pendingData; p.importedAt=todayISO();
+  if(!p.name && pendingName) p.name=pendingName;
+  if((!p.dob) && pendingData.settings && pendingData.settings.dob) p.dob=pendingData.settings.dob;
+  save();
+  toast("Imported data for "+p.name);
+  if($("#view-detail").classList.contains("active")&&currentId===id) openDetail(id);
+  else { showView("roster"); renderRoster(); }
+  pendingData=null; pendingUpdateId=null;
+}
+function openMatchModal(){
+  $("#matchInfo").textContent = pendingName
+    ? `File is for "${pendingName}" — no matching patient found. Create a new patient, or attach to an existing one.`
+    : `This file has no name saved. Create a new patient, or attach it to an existing one.`;
+  const sel=$("#matchSelect");
+  sel.innerHTML=`<option value="__new__">➕ New patient${pendingName?' ("'+escapeHtml(pendingName)+'")':""}</option>`+
+    R.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  $("#matchOverlay").classList.add("show");
+}
+$("#matchCancel").onclick=()=>{ $("#matchOverlay").classList.remove("show"); pendingData=null; };
+$("#matchOverlay").onclick=e=>{ if(e.target.id==="matchOverlay"){ $("#matchOverlay").classList.remove("show"); pendingData=null; } };
+$("#matchConfirm").onclick=()=>{
+  const v=$("#matchSelect").value; $("#matchOverlay").classList.remove("show");
+  if(v==="__new__"){ const id=uid(); R.push({id,name:pendingName||"Unnamed patient",dob:(pendingData.settings&&pendingData.settings.dob)||null,note:"",data:pendingData,importedAt:todayISO()}); save(); toast("Added "+(pendingName||"new patient")); showView("roster"); renderRoster(); pendingData=null; }
+  else applyImport(v);
+};
+
+/* ================= ROSTER BACKUP / RESTORE ================= */
+$("#exportRosterBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify({_type:"trim-clinic-roster",_version:1,exportedAt:todayISO(),patients:R},null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="trim-clinic-roster-"+todayISO()+".json"; a.click(); URL.revokeObjectURL(a.href); toast("Roster backed up");
+};
+$("#importRosterBtn").onclick=()=>$("#rosterFile").click();
+$("#rosterFile").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const data=JSON.parse(r.result); const pts=Array.isArray(data)?data:data.patients; if(!Array.isArray(pts)) throw new Error("bad");
+      if(R.length && !confirm("Replace the current roster ("+R.length+" patients) with this backup ("+pts.length+" patients)?")) { e.target.value=""; return; }
+      R=pts; save(); showView("roster"); renderRoster(); toast("Roster restored ("+pts.length+" patients)");
+    }catch(err){ toast("Invalid roster backup file"); } e.target.value=""; };
+  r.readAsText(file);
+});
+
+/* ================= INIT ================= */
+renderRoster();
+</script>
+</body>
+</html>
